@@ -1,12 +1,196 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Sun, Moon } from 'lucide-react';
+import Navigation from '../components/Navigation';
+import DailyVerse from '../components/DailyVerse';
+import PrayerReminder from '../components/PrayerReminder';
+import BibleReader from '../components/BibleReader';
+import NotesJournal from '../components/NotesJournal';
+import UserProfile from '../components/UserProfile';
+import { useUserProfile, useNotes, useFavoriteVerses } from '../hooks/useLocalStorage';
+import { getDailyVerse, getRandomEncouragement } from '../data/bibleVerses';
+import { BibleVerse, Note } from '../types';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('home');
+  const [profile, setProfile] = useUserProfile();
+  const [notes, setNotes] = useNotes();
+  const [favoriteVerses, setFavoriteVerses] = useFavoriteVerses();
+  const [dailyVerse, setDailyVerse] = useState<BibleVerse>(getDailyVerse());
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting('Bonjour');
+    } else if (hour < 18) {
+      setGreeting('Bon après-midi');
+    } else {
+      setGreeting('Bonsoir');
+    }
+
+    // Mettre à jour les statistiques
+    setProfile(prev => ({
+      ...prev,
+      stats: {
+        ...prev.stats,
+        lastActivity: new Date(),
+      },
+    }));
+  }, [setProfile]);
+
+  const handleAddToFavorites = (verse: BibleVerse) => {
+    const isFavorite = favoriteVerses.includes(verse.id);
+    if (isFavorite) {
+      setFavoriteVerses(prev => prev.filter(id => id !== verse.id));
+      setProfile(prev => ({
+        ...prev,
+        favoriteVerses: prev.favoriteVerses.filter(id => id !== verse.id),
+      }));
+      toast({
+        description: "Verset retiré des favoris",
+      });
+    } else {
+      setFavoriteVerses(prev => [...prev, verse.id]);
+      setProfile(prev => ({
+        ...prev,
+        favoriteVerses: [...prev.favoriteVerses, verse.id],
+        stats: {
+          ...prev.stats,
+          versesRead: prev.stats.versesRead + 1,
+        },
+      }));
+      toast({
+        description: "Verset ajouté aux favoris ❤️",
+      });
+    }
+  };
+
+  const handleAddNote = (noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newNote: Note = {
+      ...noteData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setNotes(prev => [newNote, ...prev]);
+    setProfile(prev => ({
+      ...prev,
+      stats: {
+        ...prev.stats,
+        notesWritten: prev.stats.notesWritten + 1,
+      },
+    }));
+    toast({
+      description: "Note sauvegardée avec succès ✨",
+    });
+  };
+
+  const handleDeleteNote = (id: string) => {
+    setNotes(prev => prev.filter(note => note.id !== id));
+    toast({
+      description: "Note supprimée",
+    });
+  };
+
+  const handlePrayerCompleted = () => {
+    toast({
+      description: "Que Dieu bénisse ce moment de prière 🙏",
+    });
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'home':
+        return (
+          <div className="space-y-6 pb-20">
+            <div className="glass rounded-2xl p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                {new Date().getHours() < 18 ? <Sun className="text-yellow-500" size={24} /> : <Moon className="text-blue-500" size={24} />}
+                <h1 className="text-2xl font-bold glow-text">
+                  {greeting}, {profile.name} !
+                </h1>
+              </div>
+              <p className="text-gray-600 mb-4">{getRandomEncouragement()}</p>
+              <div className="flex items-center justify-center gap-2">
+                <Sparkles className="text-spiritual-500" size={16} />
+                <span className="text-sm text-spiritual-600 font-medium">
+                  Jour {profile.stats.daysActive} de votre parcours spirituel
+                </span>
+              </div>
+            </div>
+
+            <DailyVerse
+              verse={dailyVerse}
+              onAddToFavorites={handleAddToFavorites}
+              isFavorite={favoriteVerses.includes(dailyVerse.id)}
+            />
+
+            <PrayerReminder
+              reminderTimes={profile.preferences.reminderTimes.prayer}
+              onPrayerCompleted={handlePrayerCompleted}
+            />
+
+            <div className="glass rounded-2xl p-6">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Sparkles className="text-spiritual-500" size={18} />
+                Statistiques du jour
+              </h3>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-spiritual-600">{profile.stats.versesRead}</div>
+                  <div className="text-xs text-gray-600">Versets</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">{profile.favoriteVerses.length}</div>
+                  <div className="text-xs text-gray-600">Favoris</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{notes.length}</div>
+                  <div className="text-xs text-gray-600">Notes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'bible':
+        return (
+          <BibleReader
+            onAddToFavorites={handleAddToFavorites}
+            favoriteVerses={favoriteVerses}
+          />
+        );
+
+      case 'notes':
+        return (
+          <NotesJournal
+            notes={notes}
+            onAddNote={handleAddNote}
+            onDeleteNote={handleDeleteNote}
+          />
+        );
+
+      case 'profile':
+        return (
+          <UserProfile
+            profile={profile}
+            onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen">
+      <div className="max-w-md mx-auto pt-6 px-4">
+        {renderContent()}
       </div>
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };

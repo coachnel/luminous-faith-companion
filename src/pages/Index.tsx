@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Sun, Moon } from 'lucide-react';
 import Navigation from '../components/Navigation';
@@ -109,18 +108,16 @@ const Index = () => {
       case 'home':
         return (
           <div className="space-y-4 pb-20">
-            {/* Header avec hauteur fixe */}
-            <div className="glass rounded-2xl p-6 text-center h-auto">
-              <div className="flex items-center justify-center gap-2 mb-4 h-8">
+            {/* Header avec conteneur fixe */}
+            <div className="glass rounded-2xl p-6 text-center h-[120px] flex flex-col justify-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 {new Date().getHours() < 18 ? <Sun className="text-yellow-500" size={24} /> : <Moon className="text-blue-500" size={24} />}
                 <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-spiritual-600 to-heavenly-600">
                   {greeting}, {profile.name} !
                 </h1>
               </div>
-              <div className="h-12 flex items-center justify-center">
-                <p className="text-gray-600">{encouragement}</p>
-              </div>
-              <div className="flex items-center justify-center gap-2 h-6">
+              <p className="text-gray-600 my-2">{encouragement}</p>
+              <div className="flex items-center justify-center gap-2">
                 <Sparkles className="text-spiritual-500" size={16} />
                 <span className="text-sm text-spiritual-600 font-medium">
                   Jour {profile.stats.daysActive} de votre parcours spirituel
@@ -128,8 +125,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Verset du jour avec hauteur minimale fixe */}
-            <div className="w-full min-h-[180px]">
+            {/* Verset du jour avec hauteur fixe */}
+            <div className="w-full h-[220px]">
               <DailyVerse
                 verse={dailyVerse}
                 onAddToFavorites={handleAddToFavorites}
@@ -146,12 +143,12 @@ const Index = () => {
             </div>
 
             {/* Statistiques avec hauteur fixe */}
-            <div className="glass rounded-2xl p-6 h-auto">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 h-6">
+            <div className="glass rounded-2xl p-6 h-[120px]">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Sparkles className="text-spiritual-500" size={18} />
                 Statistiques du jour
               </h3>
-              <div className="grid grid-cols-3 gap-4 text-center h-16">
+              <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <div className="text-2xl font-bold text-spiritual-600">{profile.stats.versesRead}</div>
                   <div className="text-xs text-gray-600">Versets</div>

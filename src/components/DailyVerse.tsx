@@ -23,20 +23,20 @@ const DailyVerse: React.FC<DailyVerseProps> = ({ verse, onAddToFavorites, isFavo
   };
 
   return (
-    <div className="glass rounded-2xl p-6 relative overflow-hidden h-auto">
+    <div className="glass rounded-2xl p-6 relative overflow-hidden h-full min-h-[200px]">
       <div className="absolute inset-0 bg-gradient-to-r from-spiritual-500/10 to-heavenly-500/10"></div>
-      <div className="relative z-10">
-        <h3 className="text-lg font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-spiritual-600 to-heavenly-600 h-7">
-          Verset du jour ✨
-        </h3>
-        
-        <div className="min-h-[60px] flex items-center">
-          <blockquote className="text-lg italic text-gray-700 leading-relaxed">
+      <div className="relative z-10 flex flex-col justify-between h-full">
+        <div>
+          <h3 className="text-lg font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-spiritual-600 to-heavenly-600">
+            Verset du jour ✨
+          </h3>
+          
+          <blockquote className="text-lg italic text-gray-700 leading-relaxed min-h-[60px]">
             "{verse.text}"
           </blockquote>
         </div>
         
-        <div className="flex items-center justify-between mt-4 h-10">
+        <div className="flex items-center justify-between mt-4">
           <cite className="text-sm font-medium text-spiritual-600">
             {verse.book} {verse.chapter}:{verse.verse}
           </cite>

@@ -19,6 +19,7 @@ const Index = () => {
   const [favoriteVerses, setFavoriteVerses] = useFavoriteVerses();
   const [dailyVerse, setDailyVerse] = useState<BibleVerse>(getDailyVerse());
   const [greeting, setGreeting] = useState('');
+  const [encouragement, setEncouragement] = useState('');
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -29,6 +30,9 @@ const Index = () => {
     } else {
       setGreeting('Bonsoir');
     }
+
+    // Fixer le message d'encouragement une seule fois
+    setEncouragement(getRandomEncouragement());
 
     // Mettre à jour les statistiques
     setProfile(prev => ({
@@ -105,16 +109,18 @@ const Index = () => {
       case 'home':
         return (
           <div className="space-y-4 pb-20">
-            {/* Header stable sans animations flottantes */}
-            <div className="glass rounded-2xl p-6 text-center">
-              <div className="flex items-center justify-center gap-2 mb-4">
+            {/* Header avec hauteur fixe */}
+            <div className="glass rounded-2xl p-6 text-center h-auto">
+              <div className="flex items-center justify-center gap-2 mb-4 h-8">
                 {new Date().getHours() < 18 ? <Sun className="text-yellow-500" size={24} /> : <Moon className="text-blue-500" size={24} />}
                 <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-spiritual-600 to-heavenly-600">
                   {greeting}, {profile.name} !
                 </h1>
               </div>
-              <p className="text-gray-600 mb-4">{getRandomEncouragement()}</p>
-              <div className="flex items-center justify-center gap-2">
+              <div className="h-12 flex items-center justify-center">
+                <p className="text-gray-600">{encouragement}</p>
+              </div>
+              <div className="flex items-center justify-center gap-2 h-6">
                 <Sparkles className="text-spiritual-500" size={16} />
                 <span className="text-sm text-spiritual-600 font-medium">
                   Jour {profile.stats.daysActive} de votre parcours spirituel
@@ -122,8 +128,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Verset du jour avec layout stable */}
-            <div className="w-full">
+            {/* Verset du jour avec hauteur minimale fixe */}
+            <div className="w-full min-h-[180px]">
               <DailyVerse
                 verse={dailyVerse}
                 onAddToFavorites={handleAddToFavorites}
@@ -139,23 +145,23 @@ const Index = () => {
               />
             </div>
 
-            {/* Statistiques avec layout fixe */}
-            <div className="glass rounded-2xl p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
+            {/* Statistiques avec hauteur fixe */}
+            <div className="glass rounded-2xl p-6 h-auto">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 h-6">
                 <Sparkles className="text-spiritual-500" size={18} />
                 Statistiques du jour
               </h3>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="flex flex-col items-center">
-                  <div className="text-2xl font-bold text-spiritual-600 h-8 flex items-center">{profile.stats.versesRead}</div>
+              <div className="grid grid-cols-3 gap-4 text-center h-16">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="text-2xl font-bold text-spiritual-600">{profile.stats.versesRead}</div>
                   <div className="text-xs text-gray-600">Versets</div>
                 </div>
-                <div className="flex flex-col items-center">
-                  <div className="text-2xl font-bold text-green-600 h-8 flex items-center">{profile.favoriteVerses.length}</div>
+                <div className="flex flex-col items-center justify-center">
+                  <div className="text-2xl font-bold text-green-600">{profile.favoriteVerses.length}</div>
                   <div className="text-xs text-gray-600">Favoris</div>
                 </div>
-                <div className="flex flex-col items-center">
-                  <div className="text-2xl font-bold text-blue-600 h-8 flex items-center">{notes.length}</div>
+                <div className="flex flex-col items-center justify-center">
+                  <div className="text-2xl font-bold text-blue-600">{notes.length}</div>
                   <div className="text-xs text-gray-600">Notes</div>
                 </div>
               </div>

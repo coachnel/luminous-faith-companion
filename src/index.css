@@ -113,16 +113,13 @@
     @apply bg-gradient-to-r from-spiritual-500 to-heavenly-500;
   }
 
+  /* Suppression des animations problématiques et stabilisation du layout */
   .verse-card {
-    @apply glass rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:bg-white/30;
+    @apply glass rounded-2xl p-6 transition-colors duration-300;
   }
 
   .floating-button {
-    @apply glass rounded-full p-4 transition-all duration-300 hover:shadow-xl hover:scale-110 animate-float;
-  }
-
-  .glow-text {
-    @apply bg-gradient-to-r from-spiritual-600 to-heavenly-600 bg-clip-text text-transparent animate-glow;
+    @apply glass rounded-full p-4 transition-transform duration-200 hover:scale-105;
   }
 }
 
@@ -143,16 +140,17 @@
   @apply bg-spiritual-400/70;
 }
 
-/* Animations fluides */
+/* Scroll fluide uniquement */
 * {
   scroll-behavior: smooth;
 }
 
+/* Animation simple pour l'apparition des éléments */
 .fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

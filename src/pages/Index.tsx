@@ -104,11 +104,12 @@ const Index = () => {
     switch (activeTab) {
       case 'home':
         return (
-          <div className="space-y-6 pb-20">
+          <div className="space-y-4 pb-20">
+            {/* Header stable sans animations flottantes */}
             <div className="glass rounded-2xl p-6 text-center">
               <div className="flex items-center justify-center gap-2 mb-4">
                 {new Date().getHours() < 18 ? <Sun className="text-yellow-500" size={24} /> : <Moon className="text-blue-500" size={24} />}
-                <h1 className="text-2xl font-bold glow-text">
+                <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-spiritual-600 to-heavenly-600">
                   {greeting}, {profile.name} !
                 </h1>
               </div>
@@ -121,33 +122,40 @@ const Index = () => {
               </div>
             </div>
 
-            <DailyVerse
-              verse={dailyVerse}
-              onAddToFavorites={handleAddToFavorites}
-              isFavorite={favoriteVerses.includes(dailyVerse.id)}
-            />
+            {/* Verset du jour avec layout stable */}
+            <div className="w-full">
+              <DailyVerse
+                verse={dailyVerse}
+                onAddToFavorites={handleAddToFavorites}
+                isFavorite={favoriteVerses.includes(dailyVerse.id)}
+              />
+            </div>
 
-            <PrayerReminder
-              reminderTimes={profile.preferences.reminderTimes.prayer}
-              onPrayerCompleted={handlePrayerCompleted}
-            />
+            {/* Rappels de prière */}
+            <div className="w-full">
+              <PrayerReminder
+                reminderTimes={profile.preferences.reminderTimes.prayer}
+                onPrayerCompleted={handlePrayerCompleted}
+              />
+            </div>
 
+            {/* Statistiques avec layout fixe */}
             <div className="glass rounded-2xl p-6">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Sparkles className="text-spiritual-500" size={18} />
                 Statistiques du jour
               </h3>
               <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-spiritual-600">{profile.stats.versesRead}</div>
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-spiritual-600 h-8 flex items-center">{profile.stats.versesRead}</div>
                   <div className="text-xs text-gray-600">Versets</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-600">{profile.favoriteVerses.length}</div>
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-green-600 h-8 flex items-center">{profile.favoriteVerses.length}</div>
                   <div className="text-xs text-gray-600">Favoris</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">{notes.length}</div>
+                <div className="flex flex-col items-center">
+                  <div className="text-2xl font-bold text-blue-600 h-8 flex items-center">{notes.length}</div>
                   <div className="text-xs text-gray-600">Notes</div>
                 </div>
               </div>
@@ -186,7 +194,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50">
       <div className="max-w-md mx-auto pt-6 px-4">
         {renderContent()}
       </div>

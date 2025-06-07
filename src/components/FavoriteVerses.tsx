@@ -3,7 +3,7 @@ import { Trash2, Book } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useBible } from '@/hooks/useBible';
+import useBible from '@/hooks/useBible';
 import { toast } from '@/hooks/use-toast';
 
 const FavoriteVerses = () => {

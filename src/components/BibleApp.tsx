@@ -4,25 +4,18 @@
    =================================================================== */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Book, Star, StarOff } from 'lucide-react';
+import { Search, Book, Star, StarOff, Share2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
 import { getBooks, getChapters, getVerses, loadBibleData } from '@/lib/bibleDataLoader';
 import type { BibleVerse } from '@/types';
 
-const BIBLE_VERSIONS = [
-  { id: 'LSG', name: 'Louis Segond (LSG)' },
-  { id: 'KJV', name: 'King James Version (KJV)' },
-  { id: 'NIV', name: 'New International Version (NIV)' },
-  { id: 'ESV', name: 'English Standard Version (ESV)' },
-];
+const LSG_VERSION = 'LSG';
 
 const BibleApp: React.FC = () => {
-  const [version, setVersion] = useState<string>('LSG');
   const [books, setBooks] = useState<string[]>([]);
   const [selectedBook, setSelectedBook] = useState<string>('');
   const [chapters, setChapters] = useState<string[]>([]);
@@ -34,7 +27,7 @@ const BibleApp: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<BibleVerse[]>([]);
 
-  // Load books when version changes
+  // Chargement des livres au montage
   useEffect(() => {
     setError(null);
     setSearchResults([]);
@@ -42,13 +35,12 @@ const BibleApp: React.FC = () => {
     setChapters([]);
     setSelectedChapter('');
     setBooks([]);
-
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const list = await getBooks(version);
+        const list = await getBooks(LSG_VERSION);
         setBooks(list);
-        setSelectedBook(list[0] || '');
+        setSelectedBook('');
       } catch {
         setError('Erreur lors du chargement des livres');
       } finally {
@@ -56,9 +48,9 @@ const BibleApp: React.FC = () => {
       }
     };
     fetchBooks();
-  }, [version]);
+  }, []);
 
-  // Load chapters when selectedBook changes
+  // Chargement des chapitres quand un livre est sélectionné
   useEffect(() => {
     if (!selectedBook) return;
     setError(null);
@@ -66,13 +58,12 @@ const BibleApp: React.FC = () => {
     setVerses([]);
     setChapters([]);
     setSelectedChapter('');
-
     const fetchChapters = async () => {
       setLoading(true);
       try {
-        const list = await getChapters(version, selectedBook);
+        const list = await getChapters(LSG_VERSION, selectedBook);
         setChapters(list);
-        setSelectedChapter(list[0] || '');
+        setSelectedChapter('');
       } catch {
         setError('Erreur lors du chargement des chapitres');
       } finally {
@@ -80,19 +71,18 @@ const BibleApp: React.FC = () => {
       }
     };
     fetchChapters();
-  }, [version, selectedBook]);
+  }, [selectedBook]);
 
-  // Load verses when selectedChapter changes
+  // Chargement des versets quand un chapitre est sélectionné
   useEffect(() => {
     if (!selectedBook || !selectedChapter) return;
     setError(null);
     setSearchResults([]);
     setVerses([]);
-
     const fetchVerses = async () => {
       setLoading(true);
       try {
-        const data = await getVerses(version, selectedBook, selectedChapter);
+        const data = await getVerses(LSG_VERSION, selectedBook, selectedChapter);
         setVerses(data);
       } catch {
         setError('Erreur lors du chargement des versets');
@@ -101,16 +91,16 @@ const BibleApp: React.FC = () => {
       }
     };
     fetchVerses();
-  }, [version, selectedBook, selectedChapter]);
+  }, [selectedBook, selectedChapter]);
 
-  // Search within local data
+  // Recherche locale dans la LSG
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
     setError(null);
     setSearchResults([]);
     setLoading(true);
     try {
-      const data = await loadBibleData(version);
+      const data = await loadBibleData(LSG_VERSION);
       const results: BibleVerse[] = [];
       const q = searchQuery.toLowerCase();
       Object.entries(data).forEach(([bk, bkData]) => {
@@ -123,8 +113,8 @@ const BibleApp: React.FC = () => {
                 chapter: parseInt(ch, 10),
                 verse: parseInt(vr, 10),
                 text: txt as string,
-                version,
-                language: version === 'LSG' ? 'fr' : 'en',
+                version: LSG_VERSION,
+                language: 'fr',
               });
             }
           });
@@ -140,7 +130,7 @@ const BibleApp: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, version]);
+  }, [searchQuery]);
 
   const isVerseFavorite = (verse: BibleVerse) =>
     favoriteVerses.some(fav => fav.verse_id === verse.id);
@@ -165,36 +155,33 @@ const BibleApp: React.FC = () => {
     }
   };
 
+  const handleShare = (verse: BibleVerse) => {
+    const text = `"${verse.text}" - ${verse.book} ${verse.chapter}:${verse.verse}`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Verset biblique',
+        text,
+      }).catch(() => {
+        navigator.clipboard.writeText(text);
+        toast({ description: 'Verset copié dans le presse-papier' });
+      });
+    } else {
+      navigator.clipboard.writeText(text);
+      toast({ description: 'Verset copié dans le presse-papier' });
+    }
+  };
+
   return (
     <div className="p-4 space-y-6 max-w-6xl mx-auto">
-      {/* Header and Search */}
+      {/* Barre de recherche */}
       <Card className="glass border-white/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Book size={24} className="text-spiritual-600" />
-            Bible - Lecture & Recherche
+            Bible Louis Segond (LSG)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4 items-center">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-1 block">Version</label>
-              <Select
-                value={version}
-                onValueChange={v => setVersion(v)}
-              >
-                <SelectTrigger className="glass border-white/30">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {BIBLE_VERSIONS.map(v => (
-                    <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           <div className="flex gap-2">
             <Input
               placeholder="Rechercher dans la Bible..."
@@ -210,49 +197,49 @@ const BibleApp: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Navigation */}
+      {/* Navigation livres/chapitres */}
       <Card className="glass border-white/30">
         <CardContent className="p-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-wrap gap-4">
+            {/* Liste des livres */}
             <div>
-              <label className="text-sm font-medium mb-1 block">Livre</label>
-              <Select
-                value={selectedBook}
-                onValueChange={v => setSelectedBook(v)}
-              >
-                <SelectTrigger className="glass border-white/30">
-                  <SelectValue placeholder="Sélectionner un livre" />
-                </SelectTrigger>
-                <SelectContent>
-                  {books.map(bk => (
-                    <SelectItem key={bk} value={bk}>{bk}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="font-semibold mb-2">Livres</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-64 overflow-y-auto">
+                {books.map(bk => (
+                  <Button
+                    key={bk}
+                    variant={selectedBook === bk ? 'default' : 'outline'}
+                    onClick={() => setSelectedBook(bk)}
+                    className="w-full justify-start"
+                  >
+                    {bk}
+                  </Button>
+                ))}
+              </div>
             </div>
-            {selectedBook && (
+            {/* Liste des chapitres */}
+            {selectedBook && chapters.length > 0 && (
               <div>
-                <label className="text-sm font-medium mb-1 block">Chapitre</label>
-                <Select
-                  value={selectedChapter}
-                  onValueChange={v => setSelectedChapter(v)}
-                >
-                  <SelectTrigger className="glass border-white/30">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {chapters.map(ch => (
-                      <SelectItem key={ch} value={ch}>{ch}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="font-semibold mb-2">Chapitres</div>
+                <div className="flex flex-wrap gap-2">
+                  {chapters.map(ch => (
+                    <Button
+                      key={ch}
+                      variant={selectedChapter === ch ? 'default' : 'outline'}
+                      onClick={() => setSelectedChapter(ch)}
+                      className="w-12"
+                    >
+                      {ch}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Search Results */}
+      {/* Résultats de recherche */}
       {searchResults.length > 0 && (
         <Card className="glass border-white/30">
           <CardHeader>
@@ -270,14 +257,24 @@ const BibleApp: React.FC = () => {
                     </div>
                     <p className="text-gray-800 leading-relaxed">{verse.text}</p>
                   </div>
-                  <Button
-                    onClick={() => toggleFavorite(verse)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-yellow-500 hover:text-yellow-600"
-                  >
-                    {isVerseFavorite(verse) ? <Star fill="currentColor" size={16} /> : <StarOff size={16} />}
-                  </Button>
+                  <div className="flex flex-col gap-2 items-end">
+                    <Button
+                      onClick={() => toggleFavorite(verse)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-yellow-500 hover:text-yellow-600"
+                    >
+                      {isVerseFavorite(verse) ? <Star fill="currentColor" size={16} /> : <StarOff size={16} />}
+                    </Button>
+                    <Button
+                      onClick={() => handleShare(verse)}
+                      variant="outline"
+                      size="sm"
+                      className="text-spiritual-600 border-spiritual-200"
+                    >
+                      <Share2 size={14} /> Partager
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -285,7 +282,7 @@ const BibleApp: React.FC = () => {
         </Card>
       )}
 
-      {/* Chapter Reading */}
+      {/* Lecture du chapitre */}
       {selectedBook && verses.length > 0 && (
         <Card className="glass border-white/30">
           <CardHeader>
@@ -299,18 +296,52 @@ const BibleApp: React.FC = () => {
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex-1">
                     <span className="text-sm font-semibold text-spiritual-600 mr-3">
-                      {v.verse}
+                      {selectedBook} {selectedChapter}:{v.verse}
                     </span>
-                    <span className="text-gray-800 leading-relaxed">{v.text}</span>
+                    <span className="text-gray-700">{v.text}</span>
                   </div>
-                  <Button
-                    onClick={() => toggleFavorite(v)}
-                    variant="ghost"
-                    size="sm"
-                    className="text-yellow-500 hover:text-yellow-600"
-                  >
-                    {isVerseFavorite(v) ? <Star fill="currentColor" size={16} /> : <StarOff size={16} />}
-                  </Button>
+                  <div className="flex flex-col gap-2 items-end">
+                    <Button
+                      onClick={() => toggleFavorite({
+                        id: `${selectedBook}-${selectedChapter}-${v.verse}`,
+                        book: selectedBook,
+                        chapter: parseInt(selectedChapter, 10),
+                        verse: parseInt(v.verse, 10),
+                        text: v.text,
+                        version: LSG_VERSION,
+                        language: 'fr',
+                      })}
+                      variant="ghost"
+                      size="sm"
+                      className="text-yellow-500 hover:text-yellow-600"
+                    >
+                      {isVerseFavorite({
+                        id: `${selectedBook}-${selectedChapter}-${v.verse}`,
+                        book: selectedBook,
+                        chapter: parseInt(selectedChapter, 10),
+                        verse: parseInt(v.verse, 10),
+                        text: v.text,
+                        version: LSG_VERSION,
+                        language: 'fr',
+                      }) ? <Star fill="currentColor" size={16} /> : <StarOff size={16} />}
+                    </Button>
+                    <Button
+                      onClick={() => handleShare({
+                        id: `${selectedBook}-${selectedChapter}-${v.verse}`,
+                        book: selectedBook,
+                        chapter: parseInt(selectedChapter, 10),
+                        verse: parseInt(v.verse, 10),
+                        text: v.text,
+                        version: LSG_VERSION,
+                        language: 'fr',
+                      })}
+                      variant="outline"
+                      size="sm"
+                      className="text-spiritual-600 border-spiritual-200"
+                    >
+                      <Share2 size={14} /> Partager
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -318,18 +349,15 @@ const BibleApp: React.FC = () => {
         </Card>
       )}
 
-      {/* Empty State */}
-      {!selectedBook && !searchResults.length && (
+      {/* Message d'accueil ou d'erreur */}
+      {!selectedBook && !searchResults.length && !loading && !error && (
         <Card className="glass border-white/30">
           <CardContent className="p-8 text-center">
-            <Book size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold mb-2">Explorez la Bible</h3>
             <p className="text-gray-600">Sélectionnez un livre ou effectuez une recherche.</p>
           </CardContent>
         </Card>
       )}
-
-      {/* Loader & Errors */}
       {loading && <div className="text-center text-gray-500">Chargement...</div>}
       {error && <div className="text-center text-red-500">{error}</div>}
     </div>

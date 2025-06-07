@@ -33,10 +33,17 @@ const DailyChallenges = () => {
     const challenge = getDailyChallenge();
     setTodayChallenge(challenge);
 
-    // Charger les défis complétés
-    const saved = localStorage.getItem('completedChallenges');
-    if (saved) {
-      const completed = JSON.parse(saved);
+    // Charger les défis complétés avec gestion d'erreur
+    try {
+      const saved = localStorage.getItem('completedChallenges');
+      let completed: ChallengeCompletion[] = [];
+      
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // S'assurer que les données sont bien un tableau
+        completed = Array.isArray(parsed) ? parsed : [];
+      }
+      
       setCompletedChallenges(completed);
       
       // Vérifier si le défi d'aujourd'hui est complété
@@ -48,6 +55,11 @@ const DailyChallenges = () => {
       
       // Calculer la série
       calculateStreak(completed);
+    } catch (error) {
+      console.error('Erreur lors du chargement des défis complétés:', error);
+      // Réinitialiser avec un tableau vide en cas d'erreur
+      setCompletedChallenges([]);
+      localStorage.setItem('completedChallenges', JSON.stringify([]));
     }
   }, []);
 

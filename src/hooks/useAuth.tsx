@@ -14,7 +14,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Fonction de nettoyage de l'état d'authentification
+// Correction de l'exportation pour éviter les incompatibilités
 export const cleanupAuthState = () => {
   localStorage.removeItem('supabase.auth.token');
   Object.keys(localStorage).forEach((key) => {

@@ -1,10 +1,20 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from '@/components/AuthPage';
 import AppShell from '@/components/AppShell';
+import { useEffect } from 'react';
 
 export default function Index() {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        console.error('Le chargement prend trop de temps. Vérifiez la connexion ou les erreurs.');
+      }, 10000); // 10 secondes
+
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
 
   if (loading) {
     return (

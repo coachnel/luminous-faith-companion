@@ -1,0 +1,18 @@
+
+{
+  "version": "Louis Segond",
+  "books": [
+    {
+      "name": "Genèse",
+      "chapters": [
+        {
+          "number": 1,
+          "verses": [
+            "Au commencement, Dieu créa les cieux et la terre.",
+            "La terre était informe et vide..."
+          ]
+        }
+      ]
+    }
+  ]
+}

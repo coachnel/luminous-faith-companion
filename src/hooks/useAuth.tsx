@@ -40,7 +40,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
-        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          // Inclure les métadonnées utilisateur
+          const { data, error } = await supabase.auth.getUser();
+          if (data && typeof data.user_metadata === 'object' && data.user_metadata !== null) {
+            setUser({ ...session.user, ...data.user_metadata });
+          } else {
+            console.error('Erreur lors de la récupération des métadonnées utilisateur:', error);
+            setUser(session.user);
+          }
+        } else {
+          setUser(null);
+        }
+
         setLoading(false);
 
         // Déférer les appels de données pour éviter les blocages

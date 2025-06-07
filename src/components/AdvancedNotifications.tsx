@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bell, Clock, CheckCircle, Plus, Trash2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -97,22 +96,14 @@ const AdvancedNotifications = () => {
     });
   };
 
-  const triggerNotification = (alarm: CustomAlarm) => {
+  export const triggerNotification = (alarm: CustomAlarm) => {
     // Notification native du navigateur
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(`🔔 ${getAlarmTypeIcon(alarm.type)} Rappel`, {
-        body: alarm.message,
+      new Notification(alarm.message, {
         icon: '/favicon.ico',
-        badge: '/favicon.ico'
+        tag: alarm.id,
       });
     }
-    
-    // Notification toast
-    toast({
-      title: `🔔 ${getAlarmTypeIcon(alarm.type)} Rappel`,
-      description: alarm.message,
-      duration: 10000,
-    });
   };
 
   const getAlarmTypeIcon = (type: string) => {

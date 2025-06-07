@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { triggerNotification } from '@/components/AdvancedNotifications';
 
 interface PrayerRequest {
   id: string;
@@ -86,34 +87,45 @@ const PrayerSharing = () => {
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('prayer_requests')
-        .insert([{
+        .insert({
           title: newTitle,
           content: newContent,
-          author_name: isAnonymous ? 'Anonyme' : (user.user_metadata?.name || 'Utilisateur'),
+          author_name: isAnonymous ? 'Anonyme' : user?.name || 'Utilisateur',
           is_anonymous: isAnonymous,
-          user_id: user.id,
-          prayer_count: 0
-        }]);
+          prayer_count: 0,
+          user_id: user?.id,
+        });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
+      setPrayerRequests((prev) => [...prev, ...(data || [])]);
       setNewTitle('');
       setNewContent('');
       setIsAnonymous(false);
-      
-      toast({
-        title: "🙏 Demande partagée",
-        description: "Votre demande de prière a été partagée avec la communauté",
+
+      // Déclencher une notification
+      triggerNotification({
+        id: 'new-prayer-request',
+        time: new Date().toISOString(),
+        message: `${isAnonymous ? 'Un utilisateur anonyme' : user?.name} a partagé une demande de prière.`,
+        days: [],
+        active: true,
+        type: 'prayer',
       });
 
-      fetchPrayerRequests();
-    } catch (error) {
-      console.error('Erreur lors de la soumission:', error);
       toast({
-        description: "Erreur lors de la soumission de la demande",
-        variant: "destructive",
+        title: '🙏 Demande de prière partagée',
+        description: 'Votre demande a été partagée avec succès.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de partager la demande de prière.',
+        variant: 'destructive',
       });
     }
   };

@@ -1,12 +1,15 @@
 
 import React, { useState } from 'react';
-import { Home, Book, Heart, Settings, Bell, Edit } from 'lucide-react';
+import { Home, Book, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
-import BibleApp from './BibleApp';
+import BibleReader from './BibleReader';
 import FavoriteVerses from './FavoriteVerses';
 import NotesApp from './NotesApp';
 import SettingsApp from './SettingsApp';
-import Notifications from './Notifications';
+import AdvancedNotifications from './AdvancedNotifications';
+import ReadingPlans from './ReadingPlans';
+import DailyChallenges from './DailyChallenges';
+import PrayerSharing from './PrayerSharing';
 import { useAuth } from '@/hooks/useAuth';
 
 const MobileApp = () => {
@@ -15,11 +18,14 @@ const MobileApp = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Accueil', icon: Home, component: Dashboard },
-    { id: 'bible', label: 'Bible', icon: Book, component: BibleApp },
+    { id: 'bible', label: 'Bible', icon: Book, component: BibleReader },
     { id: 'favorites', label: 'Favoris', icon: Heart, component: FavoriteVerses },
     { id: 'notes', label: 'Notes', icon: Edit, component: NotesApp },
-    { id: 'notifications', label: 'Rappels', icon: Bell, component: Notifications },
-    { id: 'settings', label: 'Paramètres', icon: Settings, component: SettingsApp },
+    { id: 'plans', label: 'Plans', icon: Calendar, component: ReadingPlans },
+    { id: 'challenges', label: 'Défis', icon: Target, component: DailyChallenges },
+    { id: 'prayers', label: 'Prières', icon: MessageCircle, component: PrayerSharing },
+    { id: 'notifications', label: 'Alarmes', icon: Bell, component: AdvancedNotifications },
+    { id: 'settings', label: 'Réglages', icon: Settings, component: SettingsApp },
   ];
 
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || Dashboard;
@@ -50,32 +56,34 @@ const MobileApp = () => {
       </header>
 
       {/* Contenu principal */}
-      <main className="pb-20">
+      <main className="pb-24 min-h-screen">
         <ActiveComponent />
       </main>
 
-      {/* Navigation fixe en bas */}
+      {/* Navigation fixe en bas avec scroll horizontal */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 glass border-t border-white/30 backdrop-blur-md">
-        <div className="grid grid-cols-6 gap-1 p-2">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all ${
-                  isActive 
-                    ? 'bg-spiritual-500 text-white shadow-lg' 
-                    : 'text-gray-600 hover:bg-white/50 hover:text-spiritual-600'
-                }`}
-              >
-                <Icon size={20} />
-                <span className="text-xs mt-1 font-medium">{tab.label}</span>
-              </button>
-            );
-          })}
+        <div className="overflow-x-auto">
+          <div className="flex gap-1 p-2 min-w-max">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all min-w-[64px] ${
+                    isActive 
+                      ? 'bg-spiritual-500 text-white shadow-lg' 
+                      : 'text-gray-600 hover:bg-white/50 hover:text-spiritual-600'
+                  }`}
+                >
+                  <Icon size={18} />
+                  <span className="text-xs mt-1 font-medium whitespace-nowrap">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </nav>
     </div>

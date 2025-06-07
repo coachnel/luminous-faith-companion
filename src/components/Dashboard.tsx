@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Heart, BookOpen, Sparkles, Calendar } from 'lucide-react';
+import { Sun, Moon, Heart, BookOpen, Sparkles, Calendar, Target, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useFavoriteVerses, useUserPreferences } from '@/hooks/useSupabaseData';
-import { getDailyVerse, getRandomEncouragement } from '@/data/bibleVerses';
+import { getDailyVerse, getRandomEncouragement, getDailyWelcomeMessage, getDailyChallenge } from '@/data/bibleData';
 import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
@@ -15,11 +15,12 @@ const Dashboard = () => {
   const { preferences } = useUserPreferences();
   const [dailyVerse, setDailyVerse] = useState(getDailyVerse());
   const [greeting, setGreeting] = useState('');
-  const [encouragement, setEncouragement] = useState('');
+  const [welcomeMessage, setWelcomeMessage] = useState('');
   const [daysSinceStart, setDaysSinceStart] = useState(1);
-  const [dailyMessage, setDailyMessage] = useState('');
+  const [todayChallenge, setTodayChallenge] = useState('');
 
   useEffect(() => {
+    // Configuration du message d'accueil selon l'heure
     const hour = new Date().getHours();
     if (hour < 12) {
       setGreeting('Bonjour');
@@ -29,7 +30,11 @@ const Dashboard = () => {
       setGreeting('Bonsoir');
     }
 
-    setEncouragement(getRandomEncouragement());
+    // Message de bienvenue quotidien
+    setWelcomeMessage(getDailyWelcomeMessage());
+
+    // Défi du jour
+    setTodayChallenge(getDailyChallenge());
 
     // Calculer les jours depuis l'inscription
     if (profile?.created_at) {
@@ -39,20 +44,6 @@ const Dashboard = () => {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       setDaysSinceStart(diffDays);
     }
-
-    // Messages quotidiens variés
-    const messages = [
-      "Que la paix du Seigneur soit avec vous aujourd'hui",
-      "Votre foi grandit chaque jour",
-      "Dieu a de merveilleux projets pour vous",
-      "Prenez le temps de méditer Sa parole",
-      "Votre parcours spirituel vous fortifie",
-      "Que cette journée soit remplie de bénédictions"
-    ];
-    
-    const today = new Date();
-    const messageIndex = today.getDate() % messages.length;
-    setDailyMessage(messages[messageIndex]);
 
     // Vérifier les notifications intelligentes
     checkNotifications();
@@ -108,6 +99,11 @@ const Dashboard = () => {
       navigator.share({
         title: 'Verset du jour',
         text: `"${dailyVerse.text}" - ${dailyVerse.book} ${dailyVerse.chapter}:${dailyVerse.verse}`,
+      }).catch(() => {
+        navigator.clipboard.writeText(`"${dailyVerse.text}" - ${dailyVerse.book} ${dailyVerse.chapter}:${dailyVerse.verse}`);
+        toast({
+          description: "Verset copié dans le presse-papier",
+        });
       });
     } else {
       navigator.clipboard.writeText(`"${dailyVerse.text}" - ${dailyVerse.book} ${dailyVerse.chapter}:${dailyVerse.verse}`);
@@ -128,10 +124,11 @@ const Dashboard = () => {
   const isFavorite = favoriteVerses.some(fv => fv.verse_id === dailyVerse.id);
 
   return (
-    <div className="p-4 space-y-4 max-w-4xl mx-auto">
-      {/* Carte d'accueil fixe et stable */}
-      <Card className="glass border-white/30 sticky top-0 z-10 backdrop-blur-md">
-        <CardContent className="p-6 text-center">
+    <div className="p-4 space-y-6 max-w-4xl mx-auto">
+      {/* Carte d'accueil */}
+      <Card className="glass border-white/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-spiritual-500/10 to-heavenly-500/10"></div>
+        <CardContent className="p-6 text-center relative z-10">
           <div className="flex items-center justify-center gap-2 mb-3">
             {new Date().getHours() < 18 ? (
               <Sun className="text-yellow-500" size={24} />
@@ -142,7 +139,7 @@ const Dashboard = () => {
               {greeting}, {profile?.name || 'Bien-aimé(e)'} !
             </h2>
           </div>
-          <p className="text-gray-600 mb-2">{dailyMessage}</p>
+          <p className="text-gray-700 mb-3 font-medium">{welcomeMessage}</p>
           <div className="flex items-center justify-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="text-spiritual-500" size={16} />
@@ -153,14 +150,14 @@ const Dashboard = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="text-spiritual-500" size={16} />
               <span className="text-spiritual-600 font-medium">
-                Que cette journée soit bénie
+                Continuez ainsi !
               </span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Verset du jour avec position stable */}
+      {/* Verset du jour */}
       <Card className="glass border-white/30 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-spiritual-500/10 to-heavenly-500/10"></div>
         <CardContent className="p-6 relative z-10">
@@ -207,11 +204,29 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Défi du jour */}
+      <Card className="glass border-white/30 border-l-4 border-l-purple-500">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+              <Target className="text-purple-600" size={20} />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium text-purple-700">Défi spirituel du jour</h4>
+              <p className="text-sm text-gray-700">{todayChallenge}</p>
+            </div>
+            <Button size="sm" className="bg-purple-500 hover:bg-purple-600 text-white">
+              Commencer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Statistiques rapides */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="glass border-white/30">
           <CardContent className="p-4 text-center">
-            <BookOpen className="mx-auto mb-2 text-spiritual-600" size={24} />
+            <Heart className="mx-auto mb-2 text-red-500" size={24} />
             <div className="text-lg font-bold text-spiritual-700">{favoriteVerses.length}</div>
             <div className="text-sm text-gray-600">Versets favoris</div>
           </CardContent>
@@ -219,7 +234,7 @@ const Dashboard = () => {
 
         <Card className="glass border-white/30">
           <CardContent className="p-4 text-center">
-            <Heart className="mx-auto mb-2 text-red-500" size={24} />
+            <Calendar className="mx-auto mb-2 text-blue-500" size={24} />
             <div className="text-lg font-bold text-spiritual-700">{daysSinceStart}</div>
             <div className="text-sm text-gray-600">Jours actifs</div>
           </CardContent>
@@ -227,7 +242,7 @@ const Dashboard = () => {
 
         <Card className="glass border-white/30">
           <CardContent className="p-4 text-center">
-            <Calendar className="mx-auto mb-2 text-blue-500" size={24} />
+            <BookOpen className="mx-auto mb-2 text-green-500" size={24} />
             <div className="text-lg font-bold text-spiritual-700">
               {localStorage.getItem('lastBibleRead') === new Date().toDateString() ? '✅' : '📖'}
             </div>
@@ -239,12 +254,12 @@ const Dashboard = () => {
           <CardContent className="p-4 text-center">
             <Sparkles className="mx-auto mb-2 text-purple-500" size={24} />
             <div className="text-lg font-bold text-spiritual-700">🙏</div>
-            <div className="text-sm text-gray-600">Temps de prière</div>
+            <div className="text-sm text-gray-600">En prière</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Rappels intelligents */}
+      {/* Rappels rapides */}
       {preferences?.notification_preferences?.prayerReminder && (
         <Card className="glass border-white/30 border-l-4 border-l-spiritual-500">
           <CardContent className="p-4">
@@ -257,30 +272,12 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-600">Prenez un moment pour vous connecter avec Dieu</p>
               </div>
               <Button size="sm" className="spiritual-gradient">
-                Commencer
+                Prier maintenant
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Défi quotidien */}
-      <Card className="glass border-white/30 border-l-4 border-l-purple-500">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-              <span className="text-purple-600">🎯</span>
-            </div>
-            <div className="flex-1">
-              <h4 className="font-medium text-purple-700">Défi du jour</h4>
-              <p className="text-sm text-gray-600">Lisez un Psaume et écrivez une courte réflexion</p>
-            </div>
-            <Button size="sm" variant="outline">
-              Accepter
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

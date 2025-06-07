@@ -51,41 +51,45 @@ body {
   color: #374151;
   background: linear-gradient(135deg, var(--heavenly-50) 0%, var(--spiritual-50) 50%, #f3e8ff 100%);
   min-height: 100vh;
+  font-smooth: always;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Effets de verre morphique */
+/* Effets de verre morphique - Version stable */
 .glass {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Gradients spirituels */
+/* Gradients spirituels - Version stable */
 .spiritual-gradient {
   background: linear-gradient(135deg, var(--spiritual-500) 0%, var(--heavenly-500) 100%);
   color: white;
+  border: none;
+  transition: all 0.3s ease;
 }
 
 .spiritual-gradient:hover {
   background: linear-gradient(135deg, var(--spiritual-600) 0%, var(--heavenly-600) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
 }
 
-/* Effet de lueur pour les textes importants */
-.glow-text {
-  text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
-}
-
-/* Animations fluides */
+/* Animations stables et performantes */
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -94,13 +98,13 @@ body {
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.3s ease-out;
+  animation: scaleIn 0.3s ease-out forwards;
 }
 
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
@@ -108,23 +112,57 @@ body {
   }
 }
 
-/* Styles pour les cartes de verset */
+/* Cartes optimisées */
 .verse-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
   border-radius: 16px;
   padding: 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  will-change: transform;
 }
 
 .verse-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* Styles pour les boutons */
+/* Navigation fixe optimisée */
+.fixed-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: env(safe-area-inset-bottom) 0 0 0;
+}
+
+/* En-tête fixe optimisé */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Transitions fluides */
+.smooth-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Boutons améliorés */
 .btn-spiritual {
   background: linear-gradient(135deg, var(--spiritual-500), var(--heavenly-500));
   color: white;
@@ -132,14 +170,19 @@ body {
   padding: 12px 24px;
   border-radius: 12px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .btn-spiritual:hover {
   background: linear-gradient(135deg, var(--spiritual-600), var(--heavenly-600));
   transform: translateY(-1px);
-  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+}
+
+.btn-spiritual:active {
+  transform: translateY(0);
 }
 
 /* Amélioration de la lisibilité */
@@ -148,74 +191,13 @@ body {
   letter-spacing: 0.025em;
 }
 
-/* Styles responsifs optimisés */
-@media (max-width: 768px) {
-  .glass {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  
-  .verse-card {
-    padding: 16px;
-    border-radius: 12px;
-  }
-}
-
-/* Correction des problèmes de positionnement */
-.sticky-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.fixed-navigation {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Amélioration des transitions */
-.smooth-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Styles pour les notifications */
-.notification-enter {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-.notification-enter-active {
-  opacity: 1;
-  transform: translateX(0);
-  transition: all 0.3s ease-out;
-}
-
-.notification-exit {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.notification-exit-active {
-  opacity: 0;
-  transform: translateX(100%);
-  transition: all 0.3s ease-in;
-}
-
-/* Styles pour les formulaires */
+/* Formulaires améliorés */
 .form-glass {
   background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
 .form-glass:focus {
@@ -224,21 +206,111 @@ body {
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
 }
 
-/* Optimisation des performances */
+/* Styles responsifs optimisés */
+@media (max-width: 768px) {
+  .glass {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .verse-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  /* Optimisation pour petits écrans */
+  body {
+    font-size: 14px;
+  }
+
+  /* Navigation mobile optimisée */
+  .fixed-navigation {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  }
+}
+
+/* Optimisations pour les performances */
 .gpu-accelerated {
   transform: translateZ(0);
   will-change: transform;
 }
 
-/* Accessibilité */
+/* Accessibilité améliorée */
 .focus-visible:focus {
   outline: 2px solid var(--spiritual-500);
   outline-offset: 2px;
 }
 
-/* Préchargement des polices */
-@font-face {
-  font-family: 'Inter';
-  font-display: swap;
-  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Notifications améliorées */
+.toast-spiritual {
+  background: linear-gradient(135deg, var(--spiritual-500), var(--heavenly-500));
+  color: white;
+  border: none;
+  box-shadow: 
+    0 8px 32px rgba(168, 85, 247, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Scroll personnalisé */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--spiritual-400), var(--heavenly-400));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--spiritual-500), var(--heavenly-500));
+}
+
+/* Correction du problème de déformation mobile */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari */
+  .fixed-navigation {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+  }
+}
+
+/* Prévention des bugs de transformation */
+.no-transform {
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* États de focus améliorés */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--spiritual-500);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
+}
+
+/* Animation de chargement stable */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Correction pour les éléments qui "bougent" */
+.stable-element {
+  contain: layout style paint;
+  transform: translateZ(0);
 }

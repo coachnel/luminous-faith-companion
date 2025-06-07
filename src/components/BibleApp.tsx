@@ -8,6 +8,7 @@ import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
 import { bibleData } from '@/data/bibleData';
 import { bibleVerses } from '@/data/bibleVerses';
+import { fetchBooksForVersion } from '@/lib/bibleApi';
 
 interface BibleVerse {
   id: string;
@@ -28,25 +29,85 @@ const BibleApp = () => {
   const [version, setVersion] = useState('LSG');
   const { favoriteVerses, addFavoriteVerse, removeFavoriteVerse } = useFavoriteVerses();
 
-  const books = Object.keys(bibleData);
+  const [apiBooks, setApiBooks] = useState<any[]>([]);
+  const [loadingApi, setLoadingApi] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const books = version === 'LSG' ? Object.keys(bibleData) : apiBooks.map(b => b.id);
 
   // Utilitaire pour faire correspondre la clé du livre à son nom affiché
   const getBookName = (bookKey: string) => {
-    const found = bibleData.books?.find(b => b.id === bookKey);
-    return found ? found.name : bookKey;
+    if (version === 'LSG') {
+      const found = bibleData.books?.find(b => b.id === bookKey);
+      return found ? found.name : bookKey;
+    } else {
+      const found = apiBooks.find(b => b.id === bookKey);
+      return found ? found.name : bookKey;
+    }
   };
 
   useEffect(() => {
-    if (selectedBook && selectedChapter && version) {
-      const bookName = getBookName(selectedBook);
-      const verses = bibleVerses.filter(
-        v => v.book === bookName && v.chapter === selectedChapter && v.version === version
-      );
-      setCurrentVerses(verses);
+    if (['KJV', 'NIV', 'ESV'].includes(version)) {
+      setLoadingApi(true);
+      setApiError(null);
+      fetchBooksForVersion(version as 'KJV' | 'NIV' | 'ESV')
+        .then((books) => setApiBooks(books))
+        .catch((err) => setApiError('Erreur lors du chargement des livres pour cette version.'))
+        .finally(() => setLoadingApi(false));
+    } else {
+      setApiBooks([]);
+    }
+  }, [version]);
+
+  // Nouvelle fonction pour récupérer les versets d'un livre/chapitre/version via l'API
+  async function fetchVersesFromApi(bookId: string, chapter: number) {
+    setLoadingApi(true);
+    setApiError(null);
+    try {
+      // Recherche l'ID du livre dans apiBooks
+      const book = apiBooks.find(b => b.id === bookId);
+      if (!book) throw new Error('Livre non trouvé dans cette version');
+      // Appel API pour récupérer les versets du chapitre
+      const res = await fetch(`https://api.scripture.api.bible/v1/bibles/${version === 'KJV' ? 'de4e12af7f28f599-01' : version === 'NIV' ? '06125adad2d5898a-01' : '592420522e16049f-01'}/chapters/${bookId}.${chapter}/verses`, {
+        headers: { 'api-key': process.env.BIBLE_API_KEY || '20a2d5e5be291fab27c9111fa96b292f' },
+      });
+      if (!res.ok) throw new Error('Erreur API Bible');
+      const data = await res.json();
+      // Formatage des versets pour affichage
+      return data.data.map((v: any) => ({
+        id: v.id,
+        book: book.name,
+        chapter: chapter,
+        verse: v.reference.split(':')[1] || v.reference,
+        text: v.text,
+        version: version,
+        language: book.language || 'en',
+      }));
+    } catch (err) {
+      setApiError('Erreur lors du chargement des versets pour cette version.');
+      return [];
+    } finally {
+      setLoadingApi(false);
+    }
+  }
+
+  useEffect(() => {
+    if (version === 'LSG') {
+      if (selectedBook && selectedChapter && version) {
+        const bookName = getBookName(selectedBook);
+        const verses = bibleVerses.filter(
+          v => v.book === bookName && v.chapter === selectedChapter && v.version === version
+        );
+        setCurrentVerses(verses);
+      } else {
+        setCurrentVerses([]);
+      }
+    } else if (selectedBook && selectedChapter && apiBooks.length > 0) {
+      fetchVersesFromApi(selectedBook, selectedChapter).then(setCurrentVerses);
     } else {
       setCurrentVerses([]);
     }
-  }, [selectedBook, selectedChapter, version]);
+  }, [selectedBook, selectedChapter, version, apiBooks]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
@@ -275,6 +336,10 @@ const BibleApp = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Affichage d'un loader ou d'une erreur si besoin */}
+      {loadingApi && <div className="text-center text-gray-500">Chargement...</div>}
+      {apiError && <div className="text-center text-red-500">{apiError}</div>}
     </div>
   );
 };

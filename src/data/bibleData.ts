@@ -1,4 +1,3 @@
-
 // Bible complète en français (Louis Segond)
 export const bibleData = {
   versions: [
@@ -275,5 +274,13 @@ export const sampleVerses = {
     }
   }
 };
+
+// Ajout dynamique des versions API
+import { dynamicBibleVersions } from '@/lib/bibleApi';
+
+export const bibleVersions = [
+  { id: 'LSG', name: 'Louis Segond', language: 'fr' },
+  ...dynamicBibleVersions
+];
 
 export default bibleData;

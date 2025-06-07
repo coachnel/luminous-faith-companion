@@ -17,4 +17,3 @@ export default defineConfig(({ mode }) => ({
     },
   },
 }));
-// Lovable-tagger a été désactivé car il n'est plus présent dans le projet. Si vous souhaitez le réactiver, installez-le d'abord ou remplacez-le par une alternative.

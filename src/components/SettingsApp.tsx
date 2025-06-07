@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { User, Bell, Globe, Palette, Info, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -202,9 +201,9 @@ const SettingsApp = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm text-gray-600">
-            <p>Compagnon Spirituel v1.0</p>
+            <p>Compagnon spirituel v1.0</p>
             <p>Une application pour accompagner votre parcours spirituel</p>
-            <p>Développé avec ❤️ pour la communauté chrétienne</p>
+            <p>Développé par Nel Brunel MANKOU pour la communauté chrétienne</p>
           </div>
         </CardContent>
       </Card>

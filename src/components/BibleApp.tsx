@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { getBooks, getChapters, getVerses, loadBibleData } from '@/lib/bibleDataLoader';
 import type { BibleVerse } from '@/types';
 
-const LSG_VERSION = 'LSG';
+const LSG_VERSION = 'fr_apee';
 
 const BibleApp: React.FC = () => {
   const [books, setBooks] = useState<string[]>([]);

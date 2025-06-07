@@ -71,3 +71,16 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Déploiement sur Vercel
+
+Ce projet est configuré pour être déployé sur [Vercel](https://vercel.com/). Voici les étapes pour le déploiement :
+
+1. **Connectez-vous à Vercel** : Assurez-vous d'avoir un compte Vercel et connectez-vous.
+2. **Importez le projet** : Importez ce dépôt dans votre tableau de bord Vercel.
+3. **Configuration automatique** : Vercel détectera automatiquement la configuration grâce au fichier `vercel.json`.
+4. **Build Command** : `vite build`
+5. **Output Directory** : `dist`
+6. **Déployez** : Cliquez sur "Deploy" pour lancer le déploiement.
+
+Une fois déployé, votre application sera accessible via une URL générée par Vercel.

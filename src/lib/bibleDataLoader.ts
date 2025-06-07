@@ -3,7 +3,7 @@
    Responsibility: Centralized loader for Bible data (JSON/XML) with in-memory cache
    =================================================================== */
 
-import { BibleData, BookInfo, Verse } from '../types/bible';
+import { BibleData, BookInfo, Verse, Chapter } from '../types/bible';
 
 // src/lib/bibleDataLoader.ts
 class BibleDataCache {
@@ -75,4 +75,43 @@ class BibleDataCache {
 
 export const loadBibleData = async (): Promise<BibleData> => {
   return BibleDataCache.getInstance().loadBibleData();
+};
+
+export const getBooks = async (): Promise<BookInfo[]> => {
+  const bibleData = await loadBibleData();
+  const oldTestamentBooks = bibleData.oldTestament.map(book => ({
+    name: book.name,
+    testament: 'old',
+    chaptersCount: book.chapters.length,
+  }));
+
+  const newTestamentBooks = bibleData.newTestament.map(book => ({
+    name: book.name,
+    testament: 'new',
+    chaptersCount: book.chapters.length,
+  }));
+
+  return [...oldTestamentBooks, ...newTestamentBooks];
+};
+
+export const getChapters = async (bookName: string): Promise<Chapter[]> => {
+  const bibleData = await loadBibleData();
+  const book = [...bibleData.oldTestament, ...bibleData.newTestament].find(b => b.name === bookName);
+  if (!book) {
+    throw new Error(`Book not found: ${bookName}`);
+  }
+  return book.chapters;
+};
+
+export const getVerses = async (bookName: string, chapterNumber: number): Promise<Verse[]> => {
+  const bibleData = await loadBibleData();
+  const book = [...bibleData.oldTestament, ...bibleData.newTestament].find(b => b.name === bookName);
+  if (!book) {
+    throw new Error(`Book not found: ${bookName}`);
+  }
+  const chapter = book.chapters.find(c => c.chapter === chapterNumber);
+  if (!chapter) {
+    throw new Error(`Chapter not found: ${chapterNumber} in book ${bookName}`);
+  }
+  return chapter.verses;
 };

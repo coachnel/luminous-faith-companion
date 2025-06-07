@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Book, Star, StarOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
-import { bibleData } from '@/data/bibleData';
+import { bibleData, bibleVerses } from '@/data/bibleData';
 
 interface BibleVerse {
   id: string;
@@ -31,25 +30,13 @@ const BibleApp = () => {
   const books = Object.keys(bibleData);
 
   useEffect(() => {
-    if (selectedBook && bibleData[selectedBook]) {
-      const bookData = bibleData[selectedBook];
-      const verses: BibleVerse[] = [];
-      
-      if (bookData[selectedChapter]) {
-        Object.entries(bookData[selectedChapter]).forEach(([verseNum, text]) => {
-          verses.push({
-            id: `${selectedBook}-${selectedChapter}-${verseNum}`,
-            book: selectedBook,
-            chapter: selectedChapter,
-            verse: parseInt(verseNum),
-            text: text as string,
-            version,
-            language: 'fr'
-          });
-        });
-      }
-      
+    if (selectedBook && selectedChapter && version) {
+      const verses = bibleVerses.filter(
+        v => v.book === selectedBook && v.chapter === selectedChapter && v.version === version
+      );
       setCurrentVerses(verses);
+    } else {
+      setCurrentVerses([]);
     }
   }, [selectedBook, selectedChapter, version]);
 

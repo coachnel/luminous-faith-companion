@@ -39,33 +39,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Initialisation de l’état d’authentification');
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Changement d’état d’authentification:', event, session);
-        setSession(session);
+        try {
+          console.log('Changement d’état d’authentification:', event, session);
+          setSession(session);
 
-        if (session?.user) {
-          const { data, error } = await supabase.auth.getUser();
-          if (data?.user?.user_metadata) {
-            console.log('Mise à jour de l’utilisateur avec les métadonnées:', data.user.user_metadata);
-            setUser({ ...session.user, ...data.user.user_metadata });
+          if (session?.user) {
+            const { data, error } = await supabase.auth.getUser();
+            if (data?.user?.user_metadata) {
+              console.log('Mise à jour de l’utilisateur avec les métadonnées:', data.user.user_metadata);
+              setUser({ ...session.user, ...data.user.user_metadata });
+            } else {
+              console.error('Erreur lors de la récupération des métadonnées utilisateur:', error);
+              setUser(session.user);
+            }
           } else {
-            console.error('Erreur lors de la récupération des métadonnées utilisateur:', error);
-            setUser(session.user);
+            console.log('Aucun utilisateur connecté');
+            setUser(null);
           }
-        } else {
-          console.log('Aucun utilisateur connecté');
-          setUser(null);
+        } catch (error) {
+          console.error('Erreur inattendue dans onAuthStateChange:', error);
+        } finally {
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
 
     // Obtenir la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Session initiale:', session);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        console.log('Session initiale:', session);
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Erreur lors de la récupération de la session initiale:', error);
+      } finally {
+        setLoading(false);
+      }
     });
 
     // Gestion de la redirection après validation email Supabase

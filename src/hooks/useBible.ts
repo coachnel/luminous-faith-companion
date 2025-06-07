@@ -1,9 +1,18 @@
 // --- src/hooks/useBible.ts ---
-import { useState } from 'react';
-import bibleData from '../data/louis-segond.json';
+import { useState, useEffect } from 'react';
+import { loadBibleData } from '../lib/bibleDataLoader';
 
 const useBible = () => {
   const [favorites, setFavorites] = useState([]);
+  const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      const data = await loadBibleData('louis-segond');
+      setBooks(data.books);
+    };
+    fetchBooks();
+  }, []);
 
   const addFavorite = (verse) => {
     setFavorites([...favorites, verse]);
@@ -19,13 +28,11 @@ const useBible = () => {
   };
 
   return {
-    books: bibleData.books,
-    chapters: (book) => book.chapters,
-    verses: (chapter) => chapter.verses,
-    search,
+    books,
     favorites,
     addFavorite,
-    removeFavorite
+    removeFavorite,
+    search,
   };
 };
 

@@ -162,6 +162,12 @@ const BibleApp = () => {
     }
   };
 
+  // Affichage du nom du livre dans le header
+  const getBookDisplayName = () => {
+    const found = books.find(b => b.id === selectedBook);
+    return found ? found.name : selectedBook;
+  };
+
   return (
     <div className="p-4 space-y-6 max-w-6xl mx-auto">
       {/* En-tête avec recherche */}
@@ -281,7 +287,7 @@ const BibleApp = () => {
         <Card className="glass border-white/30">
           <CardHeader>
             <CardTitle className="text-lg">
-              {selectedBook} - Chapitre {selectedChapter}
+              {getBookDisplayName()} - Chapitre {selectedChapter}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">

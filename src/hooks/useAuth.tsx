@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,6 +58,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       setLoading(false);
     });
+
+    // Gestion de la redirection après validation email Supabase
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('email_confirmed') === 'true') {
+      // On tente de récupérer la session et de connecter l'utilisateur
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setSession(session);
+          setUser(session.user);
+          setLoading(false);
+          // Rediriger vers l'accueil
+          window.location.href = '/';
+        }
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, []);

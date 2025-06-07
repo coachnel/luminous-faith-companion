@@ -81,13 +81,13 @@ export const getBooks = async (): Promise<BookInfo[]> => {
   const bibleData = await loadBibleData();
   const oldTestamentBooks = bibleData.oldTestament.map(book => ({
     name: book.name,
-    testament: 'old',
+    testament: 'old' as const,
     chaptersCount: book.chapters.length,
   }));
 
   const newTestamentBooks = bibleData.newTestament.map(book => ({
     name: book.name,
-    testament: 'new',
+    testament: 'new' as const,
     chaptersCount: book.chapters.length,
   }));
 

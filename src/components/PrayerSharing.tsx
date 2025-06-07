@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Heart, Send, MessageCircle, User } from 'lucide-react';
+import { Heart, Send, MessageCircle, User, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -155,6 +154,34 @@ const PrayerSharing = () => {
     }
   };
 
+  const deletePrayerRequest = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('prayer_requests')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast({ description: 'Demande supprimée.' });
+      fetchPrayerRequests();
+    } catch (error) {
+      toast({ description: 'Erreur lors de la suppression', variant: 'destructive' });
+    }
+  };
+
+  // Suppression automatique des demandes de plus de 7 jours
+  useEffect(() => {
+    if (!loading && prayerRequests.length > 0) {
+      const now = new Date();
+      prayerRequests.forEach(async (req) => {
+        const created = new Date(req.created_at);
+        const diff = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff > 7) {
+          await deletePrayerRequest(req.id);
+        }
+      });
+    }
+  }, [loading, prayerRequests]);
+
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
       <Card className="glass border-white/30">
@@ -257,6 +284,12 @@ const PrayerSharing = () => {
                       </p>
                     </div>
                   </div>
+                  {/* Icône suppression visible uniquement pour l'auteur */}
+                  {user && user.id === request.user_id && (
+                    <Button variant="ghost" size="icon" onClick={() => deletePrayerRequest(request.id)} title="Supprimer" className="text-red-500 hover:bg-red-100">
+                      <Trash2 size={18} />
+                    </Button>
+                  )}
                 </div>
                 
                 <p className="text-gray-700 mb-4 leading-relaxed">

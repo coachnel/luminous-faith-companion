@@ -275,7 +275,24 @@ export function useUserPreferences() {
         .single();
 
       if (error) throw error;
-      setPreferences(data);
+      
+      // Transform the JSON data to match our interface
+      const transformedData: UserPreferences = {
+        user_id: data.user_id,
+        bible_version: data.bible_version,
+        language: data.language,
+        theme: data.theme,
+        notification_preferences: typeof data.notification_preferences === 'string' 
+          ? JSON.parse(data.notification_preferences) 
+          : data.notification_preferences,
+        reminder_times: typeof data.reminder_times === 'string' 
+          ? JSON.parse(data.reminder_times) 
+          : data.reminder_times,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      };
+      
+      setPreferences(transformedData);
     } catch (error) {
       console.error('Error fetching preferences:', error);
     } finally {

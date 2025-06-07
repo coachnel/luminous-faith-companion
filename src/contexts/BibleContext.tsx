@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { BibleData, Verse, BookInfo } from '../types/bible';
-import { loadBibleData } from '../lib/bibleDataLoader';
 
 interface BibleContextType {
   bibleData: BibleData | null;
@@ -32,16 +31,6 @@ export const BibleProvider: React.FC<BibleProviderProps> = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Verse[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    const initializeBible = async () => {
-      const data = await loadBibleData();
-      setBibleData(data);
-      setBooks(data.oldTestament.map(book => ({ name: book.name, testament: 'old', chaptersCount: book.chapters.length })));
-    };
-
-    initializeBible();
-  }, []);
 
   const getAvailableChapters = () => {
     const book = books.find(b => b.name === selectedBook);

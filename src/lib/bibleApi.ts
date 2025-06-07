@@ -15,63 +15,6 @@ const API_KEY = process.env.BIBLE_API_KEY || '20a2d5e5be291fab27c9111fa96b292f';
 // Simple cache local (mémoire) pour limiter les appels API
 const cache: Record<string, any> = {};
 
-// Récupère la liste des livres pour une version donnée
-export async function fetchBooksForVersion(version: keyof typeof VERSION_IDS) {
-  const cacheKey = `books_${version}`;
-  if (cache[cacheKey]) return cache[cacheKey];
-
-  try {
-    const res = await fetch(`${API_BASE}/bibles/${VERSION_IDS[version]}/books`, {
-      headers: { 'api-key': API_KEY },
-    });
-    if (!res.ok) throw new Error('Erreur API Bible');
-    const data = await res.json();
-    cache[cacheKey] = data.data;
-    return data.data;
-  } catch (err) {
-    console.error('Erreur récupération livres Bible API', err);
-    throw err;
-  }
-}
-
-// Récupère les versets d'un chapitre pour une version API
-export async function fetchVersesForChapter(version: keyof typeof VERSION_IDS, bookId: string, chapter: number) {
-  const cacheKey = `verses_${version}_${bookId}_${chapter}`;
-  if (cache[cacheKey]) return cache[cacheKey];
-  try {
-    const res = await fetch(`${API_BASE}/bibles/${VERSION_IDS[version]}/chapters/${bookId}.${chapter}/verses`, {
-      headers: { 'api-key': API_KEY },
-    });
-    if (!res.ok) throw new Error('Erreur API Bible');
-    const data = await res.json();
-    // On récupère le texte de chaque verset
-    const verses = await Promise.all(
-      data.data.map(async (v: any) => {
-        const verseRes = await fetch(`${API_BASE}/bibles/${VERSION_IDS[version]}/verses/${v.id}`, {
-          headers: { 'api-key': API_KEY },
-        });
-        if (!verseRes.ok) return null;
-        const verseData = await verseRes.json();
-        return {
-          id: v.id,
-          book: bookId,
-          chapter: chapter,
-          verse: parseInt(v.reference.split(':')[1] || v.reference),
-          text: verseData.data.content.replace(/<[^>]+>/g, ''),
-          version,
-          language: 'en',
-        };
-      })
-    );
-    const filtered = verses.filter(Boolean);
-    cache[cacheKey] = filtered;
-    return filtered;
-  } catch (err) {
-    console.error('Erreur récupération versets Bible API', err);
-    throw err;
-  }
-}
-
 // Ajoute dynamiquement les versions manquantes à la liste des versions disponibles
 export const dynamicBibleVersions = [
   { id: 'KJV', name: 'King James Version', language: 'en' },

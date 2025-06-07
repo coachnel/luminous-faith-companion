@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Bell, Globe, Palette, Info, LogOut } from 'lucide-react';
+import { User, Bell, Globe, Info, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -25,24 +25,6 @@ const SettingsApp = () => {
       });
       toast({
         description: "Préférences mises à jour",
-      });
-    } catch (error) {
-      toast({
-        description: "Erreur lors de la mise à jour",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleVersionChange = async (version: string) => {
-    if (!preferences) return;
-    
-    try {
-      await updatePreferences({
-        bible_version: version,
-      });
-      toast({
-        description: "Version de la Bible mise à jour",
       });
     } catch (error) {
       toast({
@@ -92,32 +74,6 @@ const SettingsApp = () => {
               <p className="text-gray-600">{user?.email}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Bible Version */}
-      <Card className="glass border-white/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span>📖</span>
-            Version de la Bible
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select 
-            value={preferences?.bible_version || 'LSG'} 
-            onValueChange={handleVersionChange}
-          >
-            <SelectTrigger className="glass border-white/30">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="glass border-white/30 backdrop-blur-md">
-              <SelectItem value="LSG">Louis Segond (1910)</SelectItem>
-              <SelectItem value="KJV">King James Version</SelectItem>
-              <SelectItem value="NIV">New International Version</SelectItem>
-              <SelectItem value="ESV">English Standard Version</SelectItem>
-            </SelectContent>
-          </Select>
         </CardContent>
       </Card>
 

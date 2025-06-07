@@ -1,6 +1,5 @@
 // --- src/hooks/useBible.ts ---
 import { useState, useEffect } from 'react';
-import { loadBibleData } from '../lib/bibleDataLoader';
 import { Verse } from '../types/bible';
 
 const useBible = () => {
@@ -11,8 +10,13 @@ const useBible = () => {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
+    // Remplacer par des données fictives ou une autre source de données
     const fetchBooks = async () => {
-      const data = await loadBibleData();
+      // Exemple de données fictives
+      const data = {
+        oldTestament: [],
+        newTestament: [],
+      };
       setBooks(data.oldTestament.concat(data.newTestament));
     };
     fetchBooks();

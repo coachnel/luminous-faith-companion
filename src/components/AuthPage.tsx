@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Mail, Lock, User, Chrome } from 'lucide-react';
+import { Mail, Lock, User, Chrome, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +13,30 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp, signInWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isLogin && !name) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez entrer votre nom",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -28,20 +48,45 @@ const AuthPage = () => {
       }
 
       if (result.error) {
+        let errorMessage = result.error.message;
+        
+        // Messages d'erreur en français
+        if (errorMessage.includes('Invalid login credentials')) {
+          errorMessage = 'Email ou mot de passe incorrect';
+        } else if (errorMessage.includes('User already registered')) {
+          errorMessage = 'Un compte existe déjà avec cet email';
+        } else if (errorMessage.includes('Signup not allowed')) {
+          errorMessage = 'Inscription non autorisée';
+        } else if (errorMessage.includes('Password should be at least')) {
+          errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+        } else if (errorMessage.includes('Invalid email')) {
+          errorMessage = 'Adresse email invalide';
+        }
+
         toast({
           title: "Erreur",
-          description: result.error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
         if (!isLogin) {
           toast({
-            title: "Inscription réussie",
-            description: "Vérifiez votre email pour confirmer votre compte",
+            title: "Inscription réussie ! 🎉",
+            description: "Vérifiez votre email pour confirmer votre compte. Vous pouvez aussi vous connecter directement.",
+          });
+          
+          // Basculer vers la connexion après inscription
+          setTimeout(() => {
+            setIsLogin(true);
+          }, 2000);
+        } else {
+          toast({
+            title: "Connexion réussie ! ✨",
+            description: "Bienvenue dans votre compagnon spirituel",
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erreur",
         description: "Une erreur inattendue s'est produite",
@@ -59,7 +104,7 @@ const AuthPage = () => {
       if (error) {
         toast({
           title: "Erreur",
-          description: error.message,
+          description: "Impossible de se connecter avec Google",
           variant: "destructive",
         });
       }
@@ -76,7 +121,7 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md glass border-white/30">
+      <Card className="w-full max-w-md glass border-white/30 shadow-2xl">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 rounded-full spiritual-gradient flex items-center justify-center">
             <span className="text-2xl">✝️</span>
@@ -142,13 +187,20 @@ const AuthPage = () => {
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 glass border-white/30"
+                className="pl-10 pr-10 glass border-white/30"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 h-4 w-4 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
 
             <Button
@@ -164,6 +216,7 @@ const AuthPage = () => {
             <button
               onClick={() => setIsLogin(!isLogin)}
               className="text-spiritual-600 hover:text-spiritual-700 text-sm"
+              disabled={loading}
             >
               {isLogin 
                 ? "Pas encore de compte ? S'inscrire" 
@@ -171,6 +224,12 @@ const AuthPage = () => {
               }
             </button>
           </div>
+
+          {!isLogin && (
+            <div className="text-xs text-gray-500 text-center">
+              En vous inscrivant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

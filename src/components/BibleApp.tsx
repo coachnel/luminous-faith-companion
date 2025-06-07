@@ -6,133 +6,103 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
-import { bibleData } from '@/data/bibleData';
-import { bibleVerses } from '@/data/bibleVerses';
-import { fetchBooksForVersion, fetchVersesForChapter } from '@/lib/bibleApi';
+import { getBooks, getChapters, getVerses, loadBibleData } from '@/lib/bibleDataLoader';
+import type { BibleVerse } from '@/types';
 
-interface BibleVerse {
-  id: string;
-  book: string;
-  chapter: number;
-  verse: number;
-  text: string;
-  version: string;
-  language: string;
-}
-
-const BIBLE_API_VERSIONS = ['KJV', 'NIV', 'ESV'];
+const BIBLE_VERSIONS = [
+  { id: 'LSG', name: 'Louis Segond (LSG)' },
+  { id: 'KJV', name: 'King James Version (KJV)' },
+  { id: 'NIV', name: 'New International Version (NIV)' },
+  { id: 'ESV', name: 'English Standard Version (ESV)' },
+];
 
 const BibleApp = () => {
+  const [version, setVersion] = useState('LSG');
+  const [books, setBooks] = useState<string[]>([]);
   const [selectedBook, setSelectedBook] = useState('');
-  const [selectedChapter, setSelectedChapter] = useState<number>(1);
+  const [chapters, setChapters] = useState<string[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState('');
+  const [verses, setVerses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { favoriteVerses, addFavoriteVerse, removeFavoriteVerse } = useFavoriteVerses();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<BibleVerse[]>([]);
-  const [currentVerses, setCurrentVerses] = useState<BibleVerse[]>([]);
-  const [version, setVersion] = useState('LSG');
-  const { favoriteVerses, addFavoriteVerse, removeFavoriteVerse } = useFavoriteVerses();
 
-  const [books, setBooks] = useState<any[]>([]);
-  const [loadingApi, setLoadingApi] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  // Remplace la logique books/apiBooks par books dynamique
-  const bookOptions = version === 'LSG'
-    ? bibleData.books.map(b => ({ id: b.id, name: b.name }))
-    : books.map(b => ({ id: b.id, name: b.name }));
-
-  // Récupère la liste des chapitres selon le livre sélectionné
-  const getChapterOptions = () => {
-    if (!selectedBook) return [];
-    const found = books.find(b => b.id === selectedBook);
-    return found ? Array.from({ length: found.chapters }, (_, i) => i + 1) : [];
-  };
-
-  // Récupère la liste des livres selon la version
+  // Charge la liste des livres à chaque changement de version
   useEffect(() => {
-    setLoadingApi(true);
-    setApiError(null);
-    if (version === 'LSG') {
-      setBooks(bibleData.books);
-      setSelectedBook(bibleData.books[0]?.id || '');
-      setLoadingApi(false);
-    } else if (BIBLE_API_VERSIONS.includes(version)) {
-      fetchBooksForVersion(version as 'KJV' | 'NIV' | 'ESV')
-        .then(apiBooks => {
-          setBooks(apiBooks);
-          setSelectedBook(apiBooks[0]?.id || '');
-        })
-        .catch(() => setApiError('Erreur chargement des livres'))
-        .finally(() => setLoadingApi(false));
-    }
-    setSelectedChapter(1);
-    setCurrentVerses([]);
+    setLoading(true);
+    getBooks(version)
+      .then((books) => {
+        setBooks(books);
+        setSelectedBook(books[0] || '');
+      })
+      .catch(() => setError('Erreur chargement des livres'))
+      .finally(() => setLoading(false));
+    setSelectedChapter('');
+    setVerses([]);
   }, [version]);
 
-  // Récupère la liste des chapitres selon le livre sélectionné
+  // Charge la liste des chapitres à chaque changement de livre
   useEffect(() => {
     if (!selectedBook) return;
-    const book = books.find(b => b.id === selectedBook);
-    if (book) {
-      setSelectedChapter(1);
-    }
-    setCurrentVerses([]);
-  }, [selectedBook, books]);
+    setLoading(true);
+    getChapters(version, selectedBook)
+      .then((chaps) => {
+        setChapters(chaps);
+        setSelectedChapter(chaps[0] || '');
+      })
+      .catch(() => setError('Erreur chargement des chapitres'))
+      .finally(() => setLoading(false));
+    setVerses([]);
+  }, [version, selectedBook]);
 
-  // Récupère les versets à chaque changement de livre/chapter/version
+  // Charge les versets à chaque changement de chapitre
   useEffect(() => {
     if (!selectedBook || !selectedChapter) return;
-    setLoadingApi(true);
-    setApiError(null);
-    if (version === 'LSG') {
-      const bookName = books.find(b => b.id === selectedBook)?.name;
-      const filtered = bibleVerses.filter(
-        v => v.book === bookName && v.chapter === selectedChapter
-      );
-      setCurrentVerses(filtered);
-      setLoadingApi(false);
-    } else if (BIBLE_API_VERSIONS.includes(version)) {
-      fetchVersesForChapter(version as 'KJV' | 'NIV' | 'ESV', selectedBook, selectedChapter)
-        .then(apiVerses => setCurrentVerses(apiVerses))
-        .catch(() => setApiError('Erreur chargement des versets'))
-        .finally(() => setLoadingApi(false));
-    }
-  }, [version, selectedBook, selectedChapter, books]);
+    setLoading(true);
+    getVerses(version, selectedBook, selectedChapter)
+      .then(setVerses)
+      .catch(() => setError('Erreur chargement des versets'))
+      .finally(() => setLoading(false));
+  }, [version, selectedBook, selectedChapter]);
 
-  const handleSearch = () => {
+  // Recherche textuelle dans toute la version courante (local uniquement)
+  const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-
-    const results: BibleVerse[] = [];
-    const query = searchQuery.toLowerCase();
-
-    Object.entries(bibleData).forEach(([bookName, bookData]) => {
-      Object.entries(bookData).forEach(([chapterNum, chapterData]) => {
-        Object.entries(chapterData).forEach(([verseNum, text]) => {
-          if ((text as string).toLowerCase().includes(query)) {
-            results.push({
-              id: `${bookName}-${chapterNum}-${verseNum}`,
-              book: bookName,
-              chapter: parseInt(chapterNum),
-              verse: parseInt(verseNum),
-              text: text as string,
-              version,
-              language: 'fr'
-            });
-          }
+    setLoading(true);
+    setSearchResults([]);
+    try {
+      const data = await loadBibleData(version);
+      const results: BibleVerse[] = [];
+      const query = searchQuery.toLowerCase();
+      Object.entries(data).forEach(([bookName, bookData]) => {
+        Object.entries(bookData).forEach(([chapterNum, chapterData]) => {
+          Object.entries(chapterData).forEach(([verseNum, text]) => {
+            if ((text as string).toLowerCase().includes(query)) {
+              results.push({
+                id: `${bookName}-${chapterNum}-${verseNum}`,
+                book: bookName,
+                chapter: parseInt(chapterNum),
+                verse: parseInt(verseNum),
+                text: text as string,
+                version,
+                language: version === 'LSG' ? 'fr' : 'en',
+              });
+            }
+          });
         });
       });
-    });
-
-    setSearchResults(results.slice(0, 50)); // Limite à 50 résultats
-    
-    if (results.length === 0) {
-      toast({
-        description: "Aucun verset trouvé pour cette recherche",
-      });
-    } else {
-      toast({
-        title: "🔍 Recherche terminée",
-        description: `${results.length} verset(s) trouvé(s)`,
-      });
+      setSearchResults(results.slice(0, 50));
+      if (results.length === 0) {
+        toast({ description: "Aucun verset trouvé pour cette recherche" });
+      } else {
+        toast({ title: "🔍 Recherche terminée", description: `${results.length} verset(s) trouvé(s)` });
+      }
+    } catch (e) {
+      setError('Erreur lors de la recherche');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,28 +114,19 @@ const BibleApp = () => {
     try {
       if (isVerseFavorite(verse)) {
         await removeFavoriteVerse(verse.id);
-        toast({
-          description: "Verset retiré des favoris",
-        });
+        toast({ description: "Verset retiré des favoris" });
       } else {
         await addFavoriteVerse(verse);
-        toast({
-          title: "⭐ Ajouté aux favoris",
-          description: "Le verset a été ajouté à vos favoris",
-        });
+        toast({ title: "⭐ Ajouté aux favoris", description: "Le verset a été ajouté à vos favoris" });
       }
     } catch (error) {
-      toast({
-        description: "Erreur lors de la modification des favoris",
-        variant: "destructive",
-      });
+      toast({ description: "Erreur lors de la modification des favoris", variant: "destructive" });
     }
   };
 
-  // Affichage du nom du livre dans le header
+  // Affichage du nom du livre dans le header (fallback = id brut)
   const getBookDisplayName = () => {
-    const found = books.find(b => b.id === selectedBook);
-    return found ? found.name : selectedBook;
+    return selectedBook;
   };
 
   return (
@@ -183,15 +144,14 @@ const BibleApp = () => {
           <div className="flex gap-4 items-center">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">Version</label>
-              <Select value={version} onValueChange={v => { setVersion(v); setSelectedBook(''); setSelectedChapter(1); setCurrentVerses([]); }}>
+              <Select value={version} onValueChange={v => { setVersion(v); setSelectedBook(''); setSelectedChapter(''); }}>
                 <SelectTrigger className="glass border-white/30">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="LSG">Louis Segond (LSG)</SelectItem>
-                  <SelectItem value="KJV">King James Version (KJV)</SelectItem>
-                  <SelectItem value="NIV">New International Version (NIV)</SelectItem>
-                  <SelectItem value="ESV">English Standard Version (ESV)</SelectItem>
+                  {BIBLE_VERSIONS.map(v => (
+                    <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -219,13 +179,13 @@ const BibleApp = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-1 block">Livre</label>
-              <Select value={selectedBook} onValueChange={v => { setSelectedBook(v); setSelectedChapter(1); }}>
+              <Select value={selectedBook} onValueChange={v => { setSelectedBook(v); setSelectedChapter(''); }}>
                 <SelectTrigger className="glass border-white/30">
                   <SelectValue placeholder="Sélectionner un livre" />
                 </SelectTrigger>
                 <SelectContent>
-                  {bookOptions.map(book => (
-                    <SelectItem key={book.id} value={book.id}>{book.name}</SelectItem>
+                  {books.map(book => (
+                    <SelectItem key={book} value={book}>{book}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -233,13 +193,13 @@ const BibleApp = () => {
             {selectedBook && (
               <div>
                 <label className="text-sm font-medium mb-1 block">Chapitre</label>
-                <Select value={selectedChapter.toString()} onValueChange={value => setSelectedChapter(parseInt(value))}>
+                <Select value={selectedChapter} onValueChange={value => setSelectedChapter(value)}>
                   <SelectTrigger className="glass border-white/30">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {getChapterOptions().map(ch => (
-                      <SelectItem key={ch} value={ch.toString()}>{ch}</SelectItem>
+                    {chapters.map(ch => (
+                      <SelectItem key={ch} value={ch}>{ch}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -283,7 +243,7 @@ const BibleApp = () => {
       )}
 
       {/* Lecture du chapitre */}
-      {selectedBook && currentVerses.length > 0 && (
+      {selectedBook && verses.length > 0 && (
         <Card className="glass border-white/30">
           <CardHeader>
             <CardTitle className="text-lg">
@@ -291,8 +251,8 @@ const BibleApp = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {currentVerses.map((verse) => (
-              <div key={verse.id} className="verse-card p-4 border border-white/20 rounded-lg">
+            {verses.map((verse: any) => (
+              <div key={verse.id || `${verse.verse}`} className="verse-card p-4 border border-white/20 rounded-lg">
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex-1">
                     <span className="text-sm font-semibold text-spiritual-600 mr-3">
@@ -328,8 +288,8 @@ const BibleApp = () => {
       )}
 
       {/* Affichage d'un loader ou d'une erreur si besoin */}
-      {loadingApi && <div className="text-center text-gray-500">Chargement...</div>}
-      {apiError && <div className="text-center text-red-500">{apiError}</div>}
+      {loading && <div className="text-center text-gray-500">Chargement...</div>}
+      {error && <div className="text-center text-red-500">{error}</div>}
     </div>
   );
 };

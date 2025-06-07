@@ -50,9 +50,8 @@ const PrayerSharing = () => {
 
   const fetchPrayerRequests = async () => {
     try {
-      // Use raw SQL query since the table might not be in types yet
       const { data, error } = await supabase
-        .from('prayer_requests' as any)
+        .from('prayer_requests')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -89,7 +88,7 @@ const PrayerSharing = () => {
 
     try {
       const { error } = await supabase
-        .from('prayer_requests' as any)
+        .from('prayer_requests')
         .insert([{
           title: newTitle,
           content: newContent,
@@ -133,7 +132,7 @@ const PrayerSharing = () => {
       const newCount = (currentRequest?.prayer_count || 0) + 1;
 
       const { error } = await supabase
-        .from('prayer_requests' as any)
+        .from('prayer_requests')
         .update({ prayer_count: newCount })
         .eq('id', requestId);
 

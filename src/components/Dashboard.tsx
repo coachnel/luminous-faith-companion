@@ -77,10 +77,10 @@ const Dashboard = () => {
   useEffect(() => {
     // Calculer le nombre de jours d'utilisation
     const firstVisit = localStorage.getItem('firstVisit');
-    const today = new Date().toDateString();
+    const todayString = new Date().toDateString();
     
     if (!firstVisit) {
-      localStorage.setItem('firstVisit', today);
+      localStorage.setItem('firstVisit', todayString);
       setDaysUsing(1);
     } else {
       const start = new Date(firstVisit);
@@ -91,8 +91,8 @@ const Dashboard = () => {
     }
 
     // Message quotidien basé sur la date
-    const today = new Date();
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+    const currentDate = new Date();
+    const dayOfYear = Math.floor((currentDate.getTime() - new Date(currentDate.getFullYear(), 0, 0).getTime()) / 86400000);
     const messageIndex = dayOfYear % welcomeMessages.length;
     setDailyMessage(welcomeMessages[messageIndex]);
 
@@ -112,20 +112,20 @@ const Dashboard = () => {
   const userName = user?.user_metadata?.name || 'Cher utilisateur';
 
   // Défi du jour basé sur la date
-  const today = new Date();
-  const challengeIndex = today.getDate() % dailyChallenges.length;
+  const todayDate = new Date();
+  const challengeIndex = todayDate.getDate() % dailyChallenges.length;
   const todayChallenge = dailyChallenges[challengeIndex];
 
   const markChallengeComplete = () => {
     const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '{}');
-    const todayKey = today.toDateString();
+    const todayKey = todayDate.toDateString();
     completedChallenges[todayKey] = true;
     localStorage.setItem('completedChallenges', JSON.stringify(completedChallenges));
   };
 
   const isChallengeCompleted = () => {
     const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '{}');
-    return completedChallenges[today.toDateString()] || false;
+    return completedChallenges[todayDate.toDateString()] || false;
   };
 
   return (

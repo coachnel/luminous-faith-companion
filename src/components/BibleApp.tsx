@@ -46,6 +46,23 @@ const BibleApp = () => {
     }
   };
 
+  // Récupère la liste des livres selon la version
+  const bookOptions = version === 'LSG'
+    ? bibleData.books.map(b => ({ id: b.id, name: b.name }))
+    : apiBooks.map(b => ({ id: b.id, name: b.name }));
+
+  // Récupère la liste des chapitres selon le livre sélectionné et la version
+  const getChapterOptions = () => {
+    if (!selectedBook) return [];
+    if (version === 'LSG') {
+      const found = bibleData.books?.find(b => b.id === selectedBook);
+      return found ? Array.from({ length: found.chapters }, (_, i) => i + 1) : [];
+    } else {
+      const found = apiBooks.find(b => b.id === selectedBook);
+      return found ? Array.from({ length: found.chapters }, (_, i) => i + 1) : [];
+    }
+  };
+
   useEffect(() => {
     if (['KJV', 'NIV', 'ESV'].includes(version)) {
       setLoadingApi(true);
@@ -173,11 +190,6 @@ const BibleApp = () => {
     }
   };
 
-  const getChapterOptions = () => {
-    if (!selectedBook || !bibleData[selectedBook]) return [];
-    return Object.keys(bibleData[selectedBook]).map(ch => parseInt(ch)).sort((a, b) => a - b);
-  };
-
   return (
     <div className="p-4 space-y-6 max-w-6xl mx-auto">
       {/* En-tête avec recherche */}
@@ -193,14 +205,15 @@ const BibleApp = () => {
           <div className="flex gap-4 items-center">
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">Version</label>
-              <Select value={version} onValueChange={setVersion}>
+              <Select value={version} onValueChange={v => { setVersion(v); setSelectedBook(''); setSelectedChapter(1); setCurrentVerses([]); }}>
                 <SelectTrigger className="glass border-white/30">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="LSG">Louis Segond (LSG)</SelectItem>
-                  <SelectItem value="NEG">Nouvelle Édition de Genève</SelectItem>
-                  <SelectItem value="BDS">Bible du Semeur</SelectItem>
+                  <SelectItem value="KJV">King James Version (KJV)</SelectItem>
+                  <SelectItem value="NIV">New International Version (NIV)</SelectItem>
+                  <SelectItem value="ESV">English Standard Version (ESV)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -228,22 +241,21 @@ const BibleApp = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-1 block">Livre</label>
-              <Select value={selectedBook} onValueChange={setSelectedBook}>
+              <Select value={selectedBook} onValueChange={v => { setSelectedBook(v); setSelectedChapter(1); }}>
                 <SelectTrigger className="glass border-white/30">
                   <SelectValue placeholder="Sélectionner un livre" />
                 </SelectTrigger>
                 <SelectContent>
-                  {books.map(book => (
-                    <SelectItem key={book} value={book}>{book}</SelectItem>
+                  {bookOptions.map(book => (
+                    <SelectItem key={book.id} value={book.id}>{book.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
             {selectedBook && (
               <div>
                 <label className="text-sm font-medium mb-1 block">Chapitre</label>
-                <Select value={selectedChapter.toString()} onValueChange={(value) => setSelectedChapter(parseInt(value))}>
+                <Select value={selectedChapter.toString()} onValueChange={value => setSelectedChapter(parseInt(value))}>
                   <SelectTrigger className="glass border-white/30">
                     <SelectValue />
                   </SelectTrigger>

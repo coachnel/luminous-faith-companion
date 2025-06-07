@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Target, CheckCircle, BookOpen, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,8 +13,16 @@ interface ChallengeCompletion {
   completed: boolean;
 }
 
+interface DailyChallenge {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: string;
+}
+
 const DailyChallenges = () => {
-  const [todayChallenge, setTodayChallenge] = useState('');
+  const [todayChallenge, setTodayChallenge] = useState<DailyChallenge | null>(null);
   const [reflection, setReflection] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
   const [completedChallenges, setCompletedChallenges] = useState<ChallengeCompletion[]>([]);
@@ -78,10 +85,12 @@ const DailyChallenges = () => {
       return;
     }
 
+    if (!todayChallenge) return;
+
     const today = new Date().toDateString();
     const completion: ChallengeCompletion = {
       date: today,
-      challenge: todayChallenge,
+      challenge: todayChallenge.title,
       reflection: reflection.trim(),
       completed: true
     };
@@ -123,6 +132,10 @@ const DailyChallenges = () => {
     return recent;
   };
 
+  if (!todayChallenge) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
       <Card className="glass border-white/30">
@@ -163,8 +176,12 @@ const DailyChallenges = () => {
           </div>
 
           <div className="bg-white/50 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">{todayChallenge.icon}</span>
+              <h4 className="text-lg font-semibold">{todayChallenge.title}</h4>
+            </div>
             <p className="text-lg text-gray-700 leading-relaxed">
-              {todayChallenge}
+              {todayChallenge.description}
             </p>
           </div>
 

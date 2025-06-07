@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
-import { bibleData, bibleVerses } from '@/data/bibleData';
+import { bibleData } from '@/data/bibleData';
+import { bibleVerses } from '@/data/bibleVerses';
 
 interface BibleVerse {
   id: string;
@@ -29,10 +30,17 @@ const BibleApp = () => {
 
   const books = Object.keys(bibleData);
 
+  // Utilitaire pour faire correspondre la clé du livre à son nom affiché
+  const getBookName = (bookKey: string) => {
+    const found = bibleData.books?.find(b => b.id === bookKey);
+    return found ? found.name : bookKey;
+  };
+
   useEffect(() => {
     if (selectedBook && selectedChapter && version) {
+      const bookName = getBookName(selectedBook);
       const verses = bibleVerses.filter(
-        v => v.book === selectedBook && v.chapter === selectedChapter && v.version === version
+        v => v.book === bookName && v.chapter === selectedChapter && v.version === version
       );
       setCurrentVerses(verses);
     } else {

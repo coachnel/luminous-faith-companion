@@ -1,70 +1,103 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Heart, Filter, CheckCircle } from 'lucide-react';
+import { Search, Book, Star, StarOff } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { bibleBooks, dailyVerses } from '@/data/bibleVerses';
 import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
+import { bibleData } from '@/data/bibleData';
+
+interface BibleVerse {
+  id: string;
+  book: string;
+  chapter: number;
+  verse: number;
+  text: string;
+  version: string;
+  language: string;
+}
 
 const BibleApp = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedBook, setSelectedBook] = useState('');
-  const [selectedVersion, setSelectedVersion] = useState('LSG');
-  const [currentVerses, setCurrentVerses] = useState(dailyVerses);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState<number>(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<BibleVerse[]>([]);
+  const [currentVerses, setCurrentVerses] = useState<BibleVerse[]>([]);
+  const [version, setVersion] = useState('LSG');
   const { favoriteVerses, addFavoriteVerse, removeFavoriteVerse } = useFavoriteVerses();
 
+  const books = Object.keys(bibleData);
+
+  useEffect(() => {
+    if (selectedBook && bibleData[selectedBook]) {
+      const bookData = bibleData[selectedBook];
+      const verses: BibleVerse[] = [];
+      
+      if (bookData[selectedChapter]) {
+        Object.entries(bookData[selectedChapter]).forEach(([verseNum, text]) => {
+          verses.push({
+            id: `${selectedBook}-${selectedChapter}-${verseNum}`,
+            book: selectedBook,
+            chapter: selectedChapter,
+            verse: parseInt(verseNum),
+            text: text as string,
+            version,
+            language: 'fr'
+          });
+        });
+      }
+      
+      setCurrentVerses(verses);
+    }
+  }, [selectedBook, selectedChapter, version]);
+
   const handleSearch = () => {
-    if (!searchTerm) {
-      setCurrentVerses(dailyVerses);
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
+    if (!searchQuery.trim()) return;
 
-    setIsSearching(true);
-    
-    // Recherche intelligente par mot-clé
-    const filtered = dailyVerses.filter(verse =>
-      verse.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      verse.book.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const results: BibleVerse[] = [];
+    const query = searchQuery.toLowerCase();
 
-    setSearchResults(filtered);
-    setCurrentVerses(filtered);
-
-    // Marquer la lecture comme effectuée
-    localStorage.setItem('lastBibleRead', new Date().toDateString());
-    
-    toast({
-      description: `${filtered.length} verset(s) trouvé(s) pour "${searchTerm}"`,
+    Object.entries(bibleData).forEach(([bookName, bookData]) => {
+      Object.entries(bookData).forEach(([chapterNum, chapterData]) => {
+        Object.entries(chapterData).forEach(([verseNum, text]) => {
+          if ((text as string).toLowerCase().includes(query)) {
+            results.push({
+              id: `${bookName}-${chapterNum}-${verseNum}`,
+              book: bookName,
+              chapter: parseInt(chapterNum),
+              verse: parseInt(verseNum),
+              text: text as string,
+              version,
+              language: 'fr'
+            });
+          }
+        });
+      });
     });
-  };
 
-  const handleBookSelect = (bookName: string) => {
-    setSelectedBook(bookName);
-    if (bookName === 'all') {
-      setCurrentVerses(dailyVerses);
-      setIsSearching(false);
+    setSearchResults(results.slice(0, 50)); // Limite à 50 résultats
+    
+    if (results.length === 0) {
+      toast({
+        description: "Aucun verset trouvé pour cette recherche",
+      });
     } else {
-      const filtered = dailyVerses.filter(verse => verse.book === bookName);
-      setCurrentVerses(filtered.length ? filtered : dailyVerses);
-      setIsSearching(true);
-      
-      // Marquer la lecture comme effectuée
-      localStorage.setItem('lastBibleRead', new Date().toDateString());
+      toast({
+        title: "🔍 Recherche terminée",
+        description: `${results.length} verset(s) trouvé(s)`,
+      });
     }
   };
 
-  const handleToggleFavorite = async (verse: any) => {
+  const isVerseFavorite = (verse: BibleVerse) => {
+    return favoriteVerses.some(fav => fav.verse_id === verse.id);
+  };
+
+  const toggleFavorite = async (verse: BibleVerse) => {
     try {
-      const isFavorite = favoriteVerses.some(fv => fv.verse_id === verse.id);
-      
-      if (isFavorite) {
+      if (isVerseFavorite(verse)) {
         await removeFavoriteVerse(verse.id);
         toast({
           description: "Verset retiré des favoris",
@@ -72,206 +105,178 @@ const BibleApp = () => {
       } else {
         await addFavoriteVerse(verse);
         toast({
-          description: "Verset ajouté aux favoris ❤️",
+          title: "⭐ Ajouté aux favoris",
+          description: "Le verset a été ajouté à vos favoris",
         });
       }
     } catch (error) {
       toast({
-        description: "Erreur lors de la sauvegarde",
+        description: "Erreur lors de la modification des favoris",
         variant: "destructive",
       });
     }
   };
 
-  // Suggestions de recherche intelligente
-  const searchSuggestions = [
-    'amour', 'paix', 'espoir', 'foi', 'joie', 'pardon', 'sagesse', 'force'
-  ];
-
-  const bibleVersions = [
-    { value: 'LSG', label: 'Louis Segond (1910)' },
-    { value: 'KJV', label: 'King James Version' },
-    { value: 'NIV', label: 'New International Version' },
-    { value: 'ESV', label: 'English Standard Version' },
-  ];
+  const getChapterOptions = () => {
+    if (!selectedBook || !bibleData[selectedBook]) return [];
+    return Object.keys(bibleData[selectedBook]).map(ch => parseInt(ch)).sort((a, b) => a - b);
+  };
 
   return (
-    <div className="p-4 space-y-4 max-w-4xl mx-auto">
-      {/* En-tête avec recherche et filtres */}
+    <div className="p-4 space-y-6 max-w-6xl mx-auto">
+      {/* En-tête avec recherche */}
       <Card className="glass border-white/30">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <span>📖</span>
-            Bible complète
-            {isSearching && (
-              <span className="text-sm bg-spiritual-100 text-spiritual-700 px-2 py-1 rounded-full">
-                {currentVerses.length} résultat(s)
-              </span>
-            )}
+          <CardTitle className="flex items-center gap-2">
+            <Book className="text-spiritual-600" size={24} />
+            Bible - Lecture et Recherche
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Sélection de version */}
+          <div className="flex gap-4 items-center">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-1 block">Version</label>
+              <Select value={version} onValueChange={setVersion}>
+                <SelectTrigger className="glass border-white/30">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="LSG">Louis Segond (LSG)</SelectItem>
+                  <SelectItem value="NEG">Nouvelle Édition de Genève</SelectItem>
+                  <SelectItem value="BDS">Bible du Semeur</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Recherche */}
           <div className="flex gap-2">
             <Input
-              placeholder="Rechercher un verset, un mot-clé..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="glass border-white/30"
+              placeholder="Rechercher dans la Bible (ex: amour, paix, joie...)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className="glass border-white/30"
             />
             <Button onClick={handleSearch} className="spiritual-gradient">
-              <Search size={18} />
+              <Search size={16} />
             </Button>
           </div>
-
-          {/* Suggestions de recherche */}
-          {!isSearching && (
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-gray-600">Suggestions:</span>
-              {searchSuggestions.map((suggestion) => (
-                <Button
-                  key={suggestion}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm(suggestion);
-                    setTimeout(handleSearch, 100);
-                  }}
-                  className="text-xs glass border-white/30"
-                >
-                  {suggestion}
-                </Button>
-              ))}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select onValueChange={handleBookSelect}>
-              <SelectTrigger className="glass border-white/30">
-                <SelectValue placeholder="Choisir un livre..." />
-              </SelectTrigger>
-              <SelectContent className="glass border-white/30 backdrop-blur-md">
-                <SelectItem value="all">Tous les livres</SelectItem>
-                {bibleBooks.map((book) => (
-                  <SelectItem key={book.name} value={book.name}>
-                    {book.name} ({book.chapters} chapitres)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-              <SelectTrigger className="glass border-white/30">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="glass border-white/30 backdrop-blur-md">
-                {bibleVersions.map((version) => (
-                  <SelectItem key={version.value} value={version.value}>
-                    {version.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Bouton pour marquer la lecture */}
-          <Button 
-            onClick={() => {
-              localStorage.setItem('lastBibleRead', new Date().toDateString());
-              toast({
-                title: "📖 Lecture enregistrée",
-                description: "Votre temps de lecture a été marqué pour aujourd'hui",
-              });
-            }}
-            className="w-full spiritual-gradient"
-            variant="outline"
-          >
-            <CheckCircle size={18} className="mr-2" />
-            Marquer ma lecture d'aujourd'hui
-          </Button>
         </CardContent>
       </Card>
 
-      {/* Liste des versets */}
-      <div className="space-y-4">
-        {currentVerses.map((verse) => {
-          const isFavorite = favoriteVerses.some(fv => fv.verse_id === verse.id);
-          
-          return (
-            <Card key={verse.id} className="glass border-white/30 hover:shadow-lg transition-all">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-spiritual-600 bg-spiritual-100 px-3 py-1 rounded-full">
+      {/* Navigation des livres */}
+      <Card className="glass border-white/30">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Livre</label>
+              <Select value={selectedBook} onValueChange={setSelectedBook}>
+                <SelectTrigger className="glass border-white/30">
+                  <SelectValue placeholder="Sélectionner un livre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {books.map(book => (
+                    <SelectItem key={book} value={book}>{book}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {selectedBook && (
+              <div>
+                <label className="text-sm font-medium mb-1 block">Chapitre</label>
+                <Select value={selectedChapter.toString()} onValueChange={(value) => setSelectedChapter(parseInt(value))}>
+                  <SelectTrigger className="glass border-white/30">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getChapterOptions().map(ch => (
+                      <SelectItem key={ch} value={ch.toString()}>{ch}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Résultats de recherche */}
+      {searchResults.length > 0 && (
+        <Card className="glass border-white/30">
+          <CardHeader>
+            <CardTitle className="text-lg">
+              Résultats de recherche ({searchResults.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {searchResults.map((verse) => (
+              <div key={verse.id} className="verse-card p-4 border border-white/20 rounded-lg">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <div className="text-sm text-gray-600 mb-2">
                       {verse.book} {verse.chapter}:{verse.verse}
-                    </span>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                      {selectedVersion}
-                    </span>
+                    </div>
+                    <p className="text-gray-800 leading-relaxed">{verse.text}</p>
                   </div>
                   <Button
+                    onClick={() => toggleFavorite(verse)}
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleToggleFavorite(verse)}
-                    className={`${
-                      isFavorite ? 'text-red-500' : 'text-gray-400'
-                    } hover:scale-110 transition-all`}
+                    className="text-yellow-500 hover:text-yellow-600"
                   >
-                    <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+                    {isVerseFavorite(verse) ? <Star fill="currentColor" size={16} /> : <StarOff size={16} />}
                   </Button>
                 </div>
-                
-                <p className="text-lg leading-relaxed text-gray-700 italic mb-3">
-                  "{verse.text}"
-                </p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
-                    Version {verse.version}
-                  </span>
+      {/* Lecture du chapitre */}
+      {selectedBook && currentVerses.length > 0 && (
+        <Card className="glass border-white/30">
+          <CardHeader>
+            <CardTitle className="text-lg">
+              {selectedBook} - Chapitre {selectedChapter}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {currentVerses.map((verse) => (
+              <div key={verse.id} className="verse-card p-4 border border-white/20 rounded-lg">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-spiritual-600 mr-3">
+                      {verse.verse}
+                    </span>
+                    <span className="text-gray-800 leading-relaxed">{verse.text}</span>
+                  </div>
                   <Button
-                    variant="outline"
+                    onClick={() => toggleFavorite(verse)}
+                    variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: 'Verset biblique',
-                          text: `"${verse.text}" - ${verse.book} ${verse.chapter}:${verse.verse}`,
-                        });
-                      } else {
-                        navigator.clipboard.writeText(`"${verse.text}" - ${verse.book} ${verse.chapter}:${verse.verse}`);
-                        toast({
-                          description: "Verset copié dans le presse-papier",
-                        });
-                      }
-                    }}
-                    className="glass border-white/30"
+                    className="text-yellow-500 hover:text-yellow-600"
                   >
-                    Partager
+                    {isVerseFavorite(verse) ? <Star fill="currentColor" size={16} /> : <StarOff size={16} />}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
-      {currentVerses.length === 0 && (
+      {!selectedBook && searchResults.length === 0 && (
         <Card className="glass border-white/30">
           <CardContent className="p-8 text-center">
-            <div className="text-4xl mb-4">📖</div>
-            <h3 className="text-lg font-semibold mb-2">Aucun verset trouvé</h3>
-            <p className="text-gray-600 mb-4">Essayez avec d'autres termes de recherche</p>
-            <Button 
-              onClick={() => {
-                setSearchTerm('');
-                setCurrentVerses(dailyVerses);
-                setIsSearching(false);
-              }}
-              className="spiritual-gradient"
-            >
-              Afficher tous les versets
-            </Button>
+            <Book className="mx-auto mb-4 text-gray-400" size={48} />
+            <h3 className="text-lg font-semibold mb-2">Explorez la Bible</h3>
+            <p className="text-gray-600">
+              Sélectionnez un livre pour commencer la lecture ou utilisez la recherche pour trouver des versets spécifiques.
+            </p>
           </CardContent>
         </Card>
       )}

@@ -96,7 +96,7 @@ const AdvancedNotifications = () => {
     });
   };
 
-  export const triggerNotification = (alarm: CustomAlarm) => {
+  const triggerNotification = (alarm: CustomAlarm) => {
     // Notification native du navigateur
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(alarm.message, {

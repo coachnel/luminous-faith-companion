@@ -3,97 +3,76 @@
    Responsibility: Centralized loader for Bible data (JSON/XML) with in-memory cache
    =================================================================== */
 
+import { BibleData, BookInfo, Verse } from '../types/bible';
+
 // src/lib/bibleDataLoader.ts
-const cache: Record<string, any> = {};
+class BibleDataCache {
+  private static instance: BibleDataCache;
+  private cache: BibleData | null = null;
+  private loading: Promise<BibleData> | null = null;
 
-/**
- * Load Bible data for a given version, preferring JSON, then XML, then fallback API.
- */
-export async function loadBibleData(version: string): Promise<any> {
-  if (cache[version]) {
-    return cache[version];
+  static getInstance(): BibleDataCache {
+    if (!BibleDataCache.instance) {
+      BibleDataCache.instance = new BibleDataCache();
+    }
+    return BibleDataCache.instance;
   }
 
-  // 1. Try JSON import
-  try {
-    const module = await import(
-      /* webpackChunkName: "bible-[request]" */
-      `../data/json/${version.toLowerCase()}.json`
-    );
-    cache[version] = module.default ?? module;
-    return cache[version];
-  } catch (jsonErr) {
-    // JSON not available, continue to XML
+  async loadBibleData(): Promise<BibleData> {
+    if (this.cache) {
+      return this.cache;
+    }
+
+    if (this.loading) {
+      return this.loading;
+    }
+
+    this.loading = this.fetchBibleData();
+    this.cache = await this.loading;
+    this.loading = null;
+
+    return this.cache;
   }
 
-  // 2. Try XML import and parse
-  try {
-    // Note: ensure your bundler supports raw import for XML files
-    // e.g., import xml as text: xml?raw
-    const xmlText = await import(
-      `../data/xml/${version.toLowerCase()}.xml?raw`
-    );
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText.default ?? xmlText, 'application/xml');
-    const data: any = {};
-    // Assuming XML structure: <Bible><Book name="Genesis"><Chapter num="1"><Verse num="1">...</Verse></Chapter>...</Book>...</Bible>
-    xmlDoc.querySelectorAll('Book').forEach(bookEl => {
-      const bookName = bookEl.getAttribute('name')!;
-      data[bookName] = {};
-      bookEl.querySelectorAll('Chapter').forEach(chEl => {
-        const chapNum = chEl.getAttribute('num')!;
-        data[bookName][chapNum] = {};
-        chEl.querySelectorAll('Verse').forEach(vEl => {
-          const verseNum = vEl.getAttribute('num')!;
-          data[bookName][chapNum][verseNum] = vEl.textContent || '';
-        });
-      });
+  private async fetchBibleData(): Promise<BibleData> {
+    try {
+      const response = await fetch('/louis-segond.json');
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.warn(
+        'Impossible de charger louis-segond.json, utilisation des données de démonstration'
+      );
+    }
+
+    return this.createMockBibleData();
+  }
+
+  private createMockBibleData(): BibleData {
+    const oldTestamentBooks = ['Genèse', 'Exode'];
+    const newTestamentBooks = ['Matthieu', 'Jean'];
+
+    const createBook = (name: string, chaptersCount: number = 3) => ({
+      name,
+      chapters: Array.from({ length: chaptersCount }, (_, chapterIndex) => ({
+        chapter: chapterIndex + 1,
+        verses: Array.from({ length: 10 }, (_, verseIndex) => ({
+          book: name,
+          chapter: chapterIndex + 1,
+          verse: verseIndex + 1,
+          text: `Ceci est le verset ${verseIndex + 1} du chapitre ${chapterIndex + 1} de ${name}.`,
+        })),
+      })),
     });
-    cache[version] = data;
-    return data;
-  } catch (xmlErr) {
-    // XML not available, continue to API fallback
-  }
 
-  // 3. Fallback to external API (if implemented)
-  // TODO: implement fetch() to remote Bible API for missing versions
-  throw new Error(
-    `Aucune donnée locale (JSON/XML) ni API disponible pour la version ${version}`
-  );
+    return {
+      oldTestament: oldTestamentBooks.map(name => createBook(name, 3)),
+      newTestament: newTestamentBooks.map(name => createBook(name, 3)),
+    };
+  }
 }
 
-export async function getBooks(version: string): Promise<string[]> {
-  const data = await loadBibleData(version);
-  return Object.keys(data);
-}
-
-export async function getChapters(
-  version: string,
-  book: string
-): Promise<string[]> {
-  const data = await loadBibleData(version);
-  if (!data[book]) {
-    throw new Error(`Livre non trouvé: ${book}`);
-  }
-  return Object.keys(data[book]);
-}
-
-export async function getVerses(
-  version: string,
-  book: string,
-  chapter: string | number
-): Promise<Array<{ verse: string; text: string }>> {
-  const data = await loadBibleData(version);
-  const chapterData = data[book]?.[chapter];
-  if (!chapterData) {
-    throw new Error(
-      `Chapitre non trouvé: ${book} ${chapter}`
-    );
-  }
-  if (Array.isArray(chapterData)) {
-    // Already array of {verse, text}
-    return chapterData;
-  }
-  // Convert object map to array, en forçant text:string
-  return Object.entries(chapterData).map(([verse, text]) => ({ verse, text: String(text) }));
-}
+export const loadBibleData = async (): Promise<BibleData> => {
+  return BibleDataCache.getInstance().loadBibleData();
+};

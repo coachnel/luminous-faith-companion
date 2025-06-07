@@ -96,16 +96,6 @@ const AdvancedNotifications = () => {
     });
   };
 
-  const triggerNotification = (alarm: CustomAlarm) => {
-    // Notification native du navigateur
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(alarm.message, {
-        icon: '/favicon.ico',
-        tag: alarm.id,
-      });
-    }
-  };
-
   const getAlarmTypeIcon = (type: string) => {
     switch (type) {
       case 'prayer': return '🙏';
@@ -486,6 +476,15 @@ const AdvancedNotifications = () => {
       </Card>
     </div>
   );
+};
+
+export const triggerNotification = (alarm: CustomAlarm) => {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(alarm.message, {
+      icon: '/favicon.ico',
+      tag: alarm.id,
+    });
+  }
 };
 
 export default AdvancedNotifications;

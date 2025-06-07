@@ -34,6 +34,44 @@ export async function fetchBooksForVersion(version: keyof typeof VERSION_IDS) {
   }
 }
 
+// Récupère les versets d'un chapitre pour une version API
+export async function fetchVersesForChapter(version: keyof typeof VERSION_IDS, bookId: string, chapter: number) {
+  const cacheKey = `verses_${version}_${bookId}_${chapter}`;
+  if (cache[cacheKey]) return cache[cacheKey];
+  try {
+    const res = await fetch(`${API_BASE}/bibles/${VERSION_IDS[version]}/chapters/${bookId}.${chapter}/verses`, {
+      headers: { 'api-key': API_KEY },
+    });
+    if (!res.ok) throw new Error('Erreur API Bible');
+    const data = await res.json();
+    // On récupère le texte de chaque verset
+    const verses = await Promise.all(
+      data.data.map(async (v: any) => {
+        const verseRes = await fetch(`${API_BASE}/bibles/${VERSION_IDS[version]}/verses/${v.id}`, {
+          headers: { 'api-key': API_KEY },
+        });
+        if (!verseRes.ok) return null;
+        const verseData = await verseRes.json();
+        return {
+          id: v.id,
+          book: bookId,
+          chapter: chapter,
+          verse: parseInt(v.reference.split(':')[1] || v.reference),
+          text: verseData.data.content.replace(/<[^>]+>/g, ''),
+          version,
+          language: 'en',
+        };
+      })
+    );
+    const filtered = verses.filter(Boolean);
+    cache[cacheKey] = filtered;
+    return filtered;
+  } catch (err) {
+    console.error('Erreur récupération versets Bible API', err);
+    throw err;
+  }
+}
+
 // Ajoute dynamiquement les versions manquantes à la liste des versions disponibles
 export const dynamicBibleVersions = [
   { id: 'KJV', name: 'King James Version', language: 'en' },

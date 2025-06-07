@@ -8,7 +8,7 @@ import { useFavoriteVerses } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
 import { bibleData } from '@/data/bibleData';
 import { bibleVerses } from '@/data/bibleVerses';
-import { fetchBooksForVersion } from '@/lib/bibleApi';
+import { fetchBooksForVersion, fetchVersesForChapter } from '@/lib/bibleApi';
 
 interface BibleVerse {
   id: string;
@@ -20,6 +20,8 @@ interface BibleVerse {
   language: string;
 }
 
+const BIBLE_API_VERSIONS = ['KJV', 'NIV', 'ESV'];
+
 const BibleApp = () => {
   const [selectedBook, setSelectedBook] = useState('');
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
@@ -29,102 +31,72 @@ const BibleApp = () => {
   const [version, setVersion] = useState('LSG');
   const { favoriteVerses, addFavoriteVerse, removeFavoriteVerse } = useFavoriteVerses();
 
-  const [apiBooks, setApiBooks] = useState<any[]>([]);
+  const [books, setBooks] = useState<any[]>([]);
   const [loadingApi, setLoadingApi] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const books = version === 'LSG' ? Object.keys(bibleData) : apiBooks.map(b => b.id);
+  // Remplace la logique books/apiBooks par books dynamique
+  const bookOptions = version === 'LSG'
+    ? bibleData.books.map(b => ({ id: b.id, name: b.name }))
+    : books.map(b => ({ id: b.id, name: b.name }));
 
-  // Utilitaire pour faire correspondre la clé du livre à son nom affiché
-  const getBookName = (bookKey: string) => {
-    if (version === 'LSG') {
-      const found = bibleData.books?.find(b => b.id === bookKey);
-      return found ? found.name : bookKey;
-    } else {
-      const found = apiBooks.find(b => b.id === bookKey);
-      return found ? found.name : bookKey;
-    }
+  // Récupère la liste des chapitres selon le livre sélectionné
+  const getChapterOptions = () => {
+    if (!selectedBook) return [];
+    const found = books.find(b => b.id === selectedBook);
+    return found ? Array.from({ length: found.chapters }, (_, i) => i + 1) : [];
   };
 
   // Récupère la liste des livres selon la version
-  const bookOptions = version === 'LSG'
-    ? bibleData.books.map(b => ({ id: b.id, name: b.name }))
-    : apiBooks.map(b => ({ id: b.id, name: b.name }));
-
-  // Récupère la liste des chapitres selon le livre sélectionné et la version
-  const getChapterOptions = () => {
-    if (!selectedBook) return [];
-    if (version === 'LSG') {
-      const found = bibleData.books?.find(b => b.id === selectedBook);
-      return found ? Array.from({ length: found.chapters }, (_, i) => i + 1) : [];
-    } else {
-      const found = apiBooks.find(b => b.id === selectedBook);
-      return found ? Array.from({ length: found.chapters }, (_, i) => i + 1) : [];
-    }
-  };
-
   useEffect(() => {
-    if (['KJV', 'NIV', 'ESV'].includes(version)) {
-      setLoadingApi(true);
-      setApiError(null);
-      fetchBooksForVersion(version as 'KJV' | 'NIV' | 'ESV')
-        .then((books) => setApiBooks(books))
-        .catch((err) => setApiError('Erreur lors du chargement des livres pour cette version.'))
-        .finally(() => setLoadingApi(false));
-    } else {
-      setApiBooks([]);
-    }
-  }, [version]);
-
-  // Nouvelle fonction pour récupérer les versets d'un livre/chapitre/version via l'API
-  async function fetchVersesFromApi(bookId: string, chapter: number) {
     setLoadingApi(true);
     setApiError(null);
-    try {
-      // Recherche l'ID du livre dans apiBooks
-      const book = apiBooks.find(b => b.id === bookId);
-      if (!book) throw new Error('Livre non trouvé dans cette version');
-      // Appel API pour récupérer les versets du chapitre
-      const res = await fetch(`https://api.scripture.api.bible/v1/bibles/${version === 'KJV' ? 'de4e12af7f28f599-01' : version === 'NIV' ? '06125adad2d5898a-01' : '592420522e16049f-01'}/chapters/${bookId}.${chapter}/verses`, {
-        headers: { 'api-key': process.env.BIBLE_API_KEY || '20a2d5e5be291fab27c9111fa96b292f' },
-      });
-      if (!res.ok) throw new Error('Erreur API Bible');
-      const data = await res.json();
-      // Formatage des versets pour affichage
-      return data.data.map((v: any) => ({
-        id: v.id,
-        book: book.name,
-        chapter: chapter,
-        verse: v.reference.split(':')[1] || v.reference,
-        text: v.text,
-        version: version,
-        language: book.language || 'en',
-      }));
-    } catch (err) {
-      setApiError('Erreur lors du chargement des versets pour cette version.');
-      return [];
-    } finally {
-      setLoadingApi(false);
-    }
-  }
-
-  useEffect(() => {
     if (version === 'LSG') {
-      if (selectedBook && selectedChapter && version) {
-        const bookName = getBookName(selectedBook);
-        const verses = bibleVerses.filter(
-          v => v.book === bookName && v.chapter === selectedChapter && v.version === version
-        );
-        setCurrentVerses(verses);
-      } else {
-        setCurrentVerses([]);
-      }
-    } else if (selectedBook && selectedChapter && apiBooks.length > 0) {
-      fetchVersesFromApi(selectedBook, selectedChapter).then(setCurrentVerses);
-    } else {
-      setCurrentVerses([]);
+      setBooks(bibleData.books);
+      setSelectedBook(bibleData.books[0]?.id || '');
+      setLoadingApi(false);
+    } else if (BIBLE_API_VERSIONS.includes(version)) {
+      fetchBooksForVersion(version as 'KJV' | 'NIV' | 'ESV')
+        .then(apiBooks => {
+          setBooks(apiBooks);
+          setSelectedBook(apiBooks[0]?.id || '');
+        })
+        .catch(() => setApiError('Erreur chargement des livres'))
+        .finally(() => setLoadingApi(false));
     }
-  }, [selectedBook, selectedChapter, version, apiBooks]);
+    setSelectedChapter(1);
+    setCurrentVerses([]);
+  }, [version]);
+
+  // Récupère la liste des chapitres selon le livre sélectionné
+  useEffect(() => {
+    if (!selectedBook) return;
+    const book = books.find(b => b.id === selectedBook);
+    if (book) {
+      setSelectedChapter(1);
+    }
+    setCurrentVerses([]);
+  }, [selectedBook, books]);
+
+  // Récupère les versets à chaque changement de livre/chapter/version
+  useEffect(() => {
+    if (!selectedBook || !selectedChapter) return;
+    setLoadingApi(true);
+    setApiError(null);
+    if (version === 'LSG') {
+      const bookName = books.find(b => b.id === selectedBook)?.name;
+      const filtered = bibleVerses.filter(
+        v => v.book === bookName && v.chapter === selectedChapter
+      );
+      setCurrentVerses(filtered);
+      setLoadingApi(false);
+    } else if (BIBLE_API_VERSIONS.includes(version)) {
+      fetchVersesForChapter(version as 'KJV' | 'NIV' | 'ESV', selectedBook, selectedChapter)
+        .then(apiVerses => setCurrentVerses(apiVerses))
+        .catch(() => setApiError('Erreur chargement des versets'))
+        .finally(() => setLoadingApi(false));
+    }
+  }, [version, selectedBook, selectedChapter, books]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;

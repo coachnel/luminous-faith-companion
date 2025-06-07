@@ -3,7 +3,6 @@ import { Heart, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Verse } from '../types/bible';
-import { useBible } from '../contexts/BibleContext';
 import { toast } from '@/hooks/use-toast';
 
 interface VerseCardProps {
@@ -11,15 +10,11 @@ interface VerseCardProps {
 }
 
 const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
-  const { toggleFavorite, isFavorite } = useBible();
-  
   const verseId = `${verse.book}-${verse.chapter}-${verse.verse}`;
-  const isVerseInFavorites = isFavorite(verseId);
 
   const handleFavoriteToggle = () => {
-    toggleFavorite(verseId);
     toast({
-      title: isVerseInFavorites ? "Retiré des favoris" : "Ajouté aux favoris",
+      title: "Ajouté aux favoris",
       description: `${verse.book} ${verse.chapter}:${verse.verse}`,
       duration: 2000,
     });
@@ -68,12 +63,10 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
               variant="ghost"
               size="sm"
               onClick={handleFavoriteToggle}
-              className={`p-1.5 sm:p-2 hover:bg-purple-50 transition-colors ${
-                isVerseInFavorites ? 'text-red-500' : 'text-gray-400'
-              }`}
-              aria-label={isVerseInFavorites ? "Retirer des favoris" : "Ajouter aux favoris"}
+              className={`p-1.5 sm:p-2 hover:bg-purple-50 transition-colors`}
+              aria-label="Ajouter aux favoris"
             >
-              <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isVerseInFavorites ? 'fill-current' : ''}`} />
+              <Heart className={`h-3 w-3 sm:h-4 sm:w-4`} />
             </Button>
             <Button
               variant="ghost"

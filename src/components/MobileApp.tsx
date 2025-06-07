@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Home, Book, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle } from 'lucide-react';
+import { Home, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
-import BibleApp from './BibleApp';
 import FavoriteVerses from './FavoriteVerses';
 import NotesApp from './NotesApp';
 import SettingsApp from './SettingsApp';
@@ -17,7 +16,6 @@ const MobileApp = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Accueil', icon: Home, component: Dashboard },
-    { id: 'bible', label: 'Bible', icon: Book, component: BibleApp }, // Correction : affiche la vraie section Bible
     { id: 'favorites', label: 'Favoris', icon: Heart, component: FavoriteVerses },
     { id: 'notes', label: 'Notes', icon: Edit, component: NotesApp },
     { id: 'plans', label: 'Plans', icon: Calendar, component: ReadingPlans },

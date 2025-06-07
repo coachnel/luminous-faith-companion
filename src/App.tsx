@@ -7,8 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import AppShell from "@/components/AppShell";
 import NotFound from "./pages/NotFound";
-import { BibleProvider } from "./contexts/BibleContext";
-import BibleView from "./components/BibleView";
 
 const queryClient = new QueryClient();
 
@@ -19,15 +17,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <BibleProvider>
-            <Routes>
-              <Route path="/" element={<AppShell />} />
-              <Route path="/auth" element={<AppShell />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <BibleView />
-          </BibleProvider>
+          <Routes>
+            <Route path="/" element={<AppShell />} />
+            <Route path="/auth" element={<AppShell />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -7,20 +7,35 @@ const BibleView = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [selectedChapter, setSelectedChapter] = useState(null);
 
+  const handleBookChange = (bookName) => {
+    const book = books.find((b) => b.name === bookName);
+    setSelectedBook(book);
+    setSelectedChapter(null); // Reset chapter selection
+  };
+
+  const handleChapterChange = (chapterNumber) => {
+    const chapter = selectedBook?.chapters.find((c) => c.number === parseInt(chapterNumber));
+    setSelectedChapter(chapter);
+  };
+
   return (
     <div className="bible-view">
-      <h1 className="title">Genèse - Chapitre 1</h1>
+      <h1 className="title">{selectedBook?.name || 'Livres de la Bible'}</h1>
       <div className="navigation">
-        <select onChange={(e) => setSelectedBook(e.target.value)}>
+        <select onChange={(e) => handleBookChange(e.target.value)}>
+          <option value="">Sélectionnez un livre</option>
           {books.map((book) => (
             <option key={book.name} value={book.name}>{book.name}</option>
           ))}
         </select>
-        <select onChange={(e) => setSelectedChapter(e.target.value)}>
-          {selectedBook?.chapters.map((chapter) => (
-            <option key={chapter.number} value={chapter.number}>Chapitre {chapter.number}</option>
-          ))}
-        </select>
+        {selectedBook && (
+          <select onChange={(e) => handleChapterChange(e.target.value)}>
+            <option value="">Sélectionnez un chapitre</option>
+            {selectedBook.chapters.map((chapter) => (
+              <option key={chapter.number} value={chapter.number}>Chapitre {chapter.number}</option>
+            ))}
+          </select>
+        )}
       </div>
       <div className="verses">
         {selectedChapter?.verses.map((verse, index) => (

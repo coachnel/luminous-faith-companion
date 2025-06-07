@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { Home, Book, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle } from 'lucide-react';
 import Dashboard from './Dashboard';
-import BibleReader from './BibleReader';
 import FavoriteVerses from './FavoriteVerses';
 import NotesApp from './NotesApp';
 import SettingsApp from './SettingsApp';
@@ -18,7 +16,7 @@ const MobileApp = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Accueil', icon: Home, component: Dashboard },
-    { id: 'bible', label: 'Bible', icon: Book, component: BibleReader },
+    { id: 'bible', label: 'Bible', icon: Book, component: Dashboard }, // Remplacez par BibleApp si nécessaire
     { id: 'favorites', label: 'Favoris', icon: Heart, component: FavoriteVerses },
     { id: 'notes', label: 'Notes', icon: Edit, component: NotesApp },
     { id: 'plans', label: 'Plans', icon: Calendar, component: ReadingPlans },

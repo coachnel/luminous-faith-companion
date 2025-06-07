@@ -34,39 +34,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Ajout de journaux pour diagnostiquer l'état d'authentification
   useEffect(() => {
-    // Configurer l'écouteur d'état d'authentification
+    console.log('Initialisation de l’état d’authentification');
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('Changement d’état d’authentification:', event, session);
         setSession(session);
 
         if (session?.user) {
-          // Inclure les métadonnées utilisateur
           const { data, error } = await supabase.auth.getUser();
-          if (data && typeof data.user_metadata === 'object' && data.user_metadata !== null) {
-            setUser({ ...session.user, ...data.user_metadata });
+          if (data?.user?.user_metadata) {
+            console.log('Mise à jour de l’utilisateur avec les métadonnées:', data.user.user_metadata);
+            setUser({ ...session.user, ...data.user.user_metadata });
           } else {
             console.error('Erreur lors de la récupération des métadonnées utilisateur:', error);
             setUser(session.user);
           }
         } else {
+          console.log('Aucun utilisateur connecté');
           setUser(null);
         }
 
         setLoading(false);
-
-        // Déférer les appels de données pour éviter les blocages
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            console.log('User signed in successfully');
-          }, 0);
-        }
       }
     );
 
     // Obtenir la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Session initiale:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

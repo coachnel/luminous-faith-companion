@@ -9,20 +9,26 @@ const useBible = () => {
   });
   const [books, setBooks] = useState([]);
 
+  // Ajout de journaux pour diagnostiquer les problèmes liés aux favoris et aux livres
   useEffect(() => {
-    // Remplacer par des données fictives ou une autre source de données
+    console.log('Chargement des livres de la Bible...');
     const fetchBooks = async () => {
-      // Exemple de données fictives
-      const data = {
-        oldTestament: [],
-        newTestament: [],
-      };
-      setBooks(data.oldTestament.concat(data.newTestament));
+      try {
+        const data = {
+          oldTestament: [],
+          newTestament: [],
+        };
+        setBooks(data.oldTestament.concat(data.newTestament));
+        console.log('Livres chargés avec succès:', data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des livres:', error);
+      }
     };
     fetchBooks();
   }, []);
 
   useEffect(() => {
+    console.log('Mise à jour des favoris:', Array.from(favorites));
     localStorage.setItem('bibleFavorites', JSON.stringify(Array.from(favorites)));
   }, [favorites]);
 

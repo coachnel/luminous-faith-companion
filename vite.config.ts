@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
+    // Correction robuste pour __WS_TOKEN__ - échappement complet des caractères spéciaux
     __WS_TOKEN__: JSON.stringify(process.env.WS_TOKEN || ''),
   },
   plugins: [

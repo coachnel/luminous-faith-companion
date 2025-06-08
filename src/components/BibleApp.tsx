@@ -1,115 +1,211 @@
-/* ===================================================================
-   File: src/components/BibleApp.tsx
-   Responsibility: Main React component for Bible navigation & search
-   =================================================================== */
 
 import React, { useState, useEffect } from 'react';
+import { Book, ChevronLeft, Search, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getBooks, getChapters, getVerses } from '@/lib/bibleDataLoader';
+import { BookInfo, Chapter, Verse } from '@/types/bible';
+import VerseCard from './VerseCard';
 
-const BIBLE_VERSION = 'fr_apee';
-
-const BibleApp: React.FC = () => {
-  const [books, setBooks] = useState<string[]>([]);
-  const [selectedBook, setSelectedBook] = useState<string | null>(null);
-  const [chapters, setChapters] = useState<string[]>([]);
-  const [selectedChapter, setSelectedChapter] = useState<number>(1);
-  const [verses, setVerses] = useState<Array<{ verse: string; text: string }>>([]);
+const BibleApp = () => {
+  const [books, setBooks] = useState<BookInfo[]>([]);
+  const [selectedBook, setSelectedBook] = useState<string>('');
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<number>(0);
+  const [verses, setVerses] = useState<Verse[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<'books' | 'chapters' | 'verses' | 'search'>('books');
 
-  // Chargement des livres au montage
   useEffect(() => {
-    setLoading(true);
-    getBooks(BIBLE_VERSION)
-      .then(setBooks)
-      .catch(() => setError('Erreur lors du chargement des livres'))
-      .finally(() => setLoading(false));
+    const loadBooks = async () => {
+      try {
+        const booksData = await getBooks();
+        setBooks(booksData);
+      } catch (error) {
+        console.error('Error loading books:', error);
+      }
+    };
+    loadBooks();
   }, []);
 
-  // Chargement des chapitres quand un livre est sélectionné
-  useEffect(() => {
-    if (!selectedBook) return;
+  const handleBookSelect = async (bookName: string) => {
     setLoading(true);
-    getChapters(BIBLE_VERSION, selectedBook)
-      .then(list => {
-        setChapters(list);
-        setSelectedChapter(1);
-      })
-      .catch(() => setError('Erreur lors du chargement des chapitres'))
-      .finally(() => setLoading(false));
-  }, [selectedBook]);
+    try {
+      const chaptersData = await getChapters(bookName);
+      setSelectedBook(bookName);
+      setChapters(chaptersData);
+      setView('chapters');
+    } catch (error) {
+      console.error('Error loading chapters:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Chargement des versets quand un chapitre est sélectionné
-  useEffect(() => {
-    if (!selectedBook || !selectedChapter) return;
+  const handleChapterSelect = async (chapterNumber: number) => {
     setLoading(true);
-    getVerses(BIBLE_VERSION, selectedBook, selectedChapter)
-      .then(setVerses)
-      .catch(() => setError('Erreur lors du chargement des versets'))
-      .finally(() => setLoading(false));
-  }, [selectedBook, selectedChapter]);
-
-  // Navigation chapitres
-  const goToPrevChapter = () => {
-    if (selectedChapter > 1) setSelectedChapter(selectedChapter - 1);
-  };
-  const goToNextChapter = () => {
-    if (selectedChapter < chapters.length) setSelectedChapter(selectedChapter + 1);
+    try {
+      const versesData = await getVerses(selectedBook, chapterNumber);
+      setSelectedChapter(chapterNumber);
+      setVerses(versesData);
+      setView('verses');
+    } catch (error) {
+      console.error('Error loading verses:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Retour à la liste des livres
-  const handleBackToBooks = () => {
-    setSelectedBook(null);
-    setChapters([]);
-    setSelectedChapter(1);
-    setVerses([]);
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setLoading(true);
+    try {
+      // Simple search implementation - in a real app, this would be more sophisticated
+      const allVerses: Verse[] = [];
+      for (const book of books) {
+        const chapters = await getChapters(book.name);
+        for (const chapter of chapters) {
+          const verses = await getVerses(book.name, chapter.chapter);
+          allVerses.push(...verses);
+        }
+      }
+      
+      const results = allVerses.filter(verse =>
+        verse.text.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 20); // Limit results
+      
+      setSearchResults(results);
+      setView('search');
+    } catch (error) {
+      console.error('Error searching:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const renderBooks = () => (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold mb-4">Livres de la Bible</h2>
+      <div className="grid gap-2">
+        {books.map((book) => (
+          <Button
+            key={book.name}
+            variant="outline"
+            className="justify-start h-auto p-4"
+            onClick={() => handleBookSelect(book.name)}
+          >
+            <div className="text-left">
+              <div className="font-medium">{book.name}</div>
+              <div className="text-sm text-gray-500">
+                {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+              </div>
+            </div>
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderChapters = () => (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Button variant="ghost" size="sm" onClick={() => setView('books')}>
+          <ChevronLeft size={16} />
+        </Button>
+        <h2 className="text-xl font-bold">{selectedBook}</h2>
+      </div>
+      <div className="grid grid-cols-5 gap-2">
+        {chapters.map((chapter) => (
+          <Button
+            key={chapter.chapter}
+            variant="outline"
+            className="aspect-square"
+            onClick={() => handleChapterSelect(chapter.chapter)}
+          >
+            {chapter.chapter}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderVerses = () => (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Button variant="ghost" size="sm" onClick={() => setView('chapters')}>
+          <ChevronLeft size={16} />
+        </Button>
+        <h2 className="text-xl font-bold">{selectedBook} {selectedChapter}</h2>
+      </div>
+      <div className="space-y-3">
+        {verses.map((verse) => (
+          <VerseCard key={`${verse.book}-${verse.chapter}-${verse.verse}`} verse={verse} />
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSearch = () => (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Button variant="ghost" size="sm" onClick={() => setView('books')}>
+          <ChevronLeft size={16} />
+        </Button>
+        <h2 className="text-xl font-bold">Résultats de recherche</h2>
+      </div>
+      {searchResults.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">Aucun résultat trouvé</p>
+      ) : (
+        <div className="space-y-3">
+          {searchResults.map((verse) => (
+            <VerseCard key={`${verse.book}-${verse.chapter}-${verse.verse}`} verse={verse} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      {loading && <div className="text-gray-500 mb-4">Chargement...</div>}
-
-      {/* Liste des livres */}
-      {!selectedBook && !loading && (
-        <div>
-          <h2 className="text-xl font-bold mb-4">Livres de la Bible</h2>
-          <ul className="divide-y divide-gray-200">
-            {books.map(book => (
-              <li key={book}>
-                <Button variant="ghost" className="w-full justify-between py-3 text-left" onClick={() => setSelectedBook(book)}>
-                  {book}
-                  <span className="ml-2">&gt;</span>
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Navigation chapitre + affichage versets */}
-      {selectedBook && (
-        <div>
-          <div className="flex items-center mb-4">
-            <Button variant="ghost" onClick={handleBackToBooks}>&lt;</Button>
-            <h2 className="flex-1 text-center text-lg font-semibold">{selectedBook}</h2>
+    <div className="p-4 max-w-4xl mx-auto">
+      <Card className="glass border-white/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Book className="text-spiritual-600" size={24} />
+            Bible
+          </CardTitle>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Rechercher dans la Bible..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className="glass border-white/30"
+            />
+            <Button onClick={handleSearch} disabled={loading} className="spiritual-gradient">
+              <Search size={16} />
+            </Button>
           </div>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Button variant="outline" size="sm" onClick={goToPrevChapter} disabled={selectedChapter === 1}>&lt;</Button>
-            <span>Chapitre {selectedChapter} / {chapters.length}</span>
-            <Button variant="outline" size="sm" onClick={goToNextChapter} disabled={selectedChapter === chapters.length}>&gt;</Button>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            {verses.map(v => (
-              <div key={v.verse} className="flex items-start gap-2 mb-2">
-                <span className="font-bold w-6 text-right text-gray-500">{v.verse}</span>
-                <span className="flex-1 text-gray-900">{v.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-spiritual-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p>Chargement...</p>
+            </div>
+          ) : (
+            <>
+              {view === 'books' && renderBooks()}
+              {view === 'chapters' && renderChapters()}
+              {view === 'verses' && renderVerses()}
+              {view === 'search' && renderSearch()}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

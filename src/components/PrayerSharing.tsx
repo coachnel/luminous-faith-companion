@@ -30,6 +30,13 @@ const PrayerSharing = () => {
   const [loading, setLoading] = useState(true);
   const [prayedFor, setPrayedFor] = useState<Set<string>>(new Set());
 
+  // Helper function to get user display name
+  const getUserDisplayName = () => {
+    if (!user) return 'Utilisateur';
+    // Check user_metadata first, then fallback to email
+    return user.user_metadata?.name || user.email?.split('@')[0] || 'Utilisateur';
+  };
+
   useEffect(() => {
     fetchPrayerRequests();
     loadPrayedFor();
@@ -92,7 +99,7 @@ const PrayerSharing = () => {
         .insert({
           title: newTitle,
           content: newContent,
-          author_name: isAnonymous ? 'Anonyme' : user?.name || 'Utilisateur',
+          author_name: isAnonymous ? 'Anonyme' : getUserDisplayName(),
           is_anonymous: isAnonymous,
           prayer_count: 0,
           user_id: user?.id,
@@ -111,7 +118,7 @@ const PrayerSharing = () => {
       triggerNotification({
         id: 'new-prayer-request',
         time: new Date().toISOString(),
-        message: `${isAnonymous ? 'Un utilisateur anonyme' : user?.name} a partagé une demande de prière.`,
+        message: `${isAnonymous ? 'Un utilisateur anonyme' : getUserDisplayName()} a partagé une demande de prière.`,
         days: [],
         active: true,
         type: 'prayer',

@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Heart, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -11,13 +12,36 @@ interface VerseCardProps {
 
 const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
   const verseId = `${verse.book}-${verse.chapter}-${verse.verse}`;
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    // Charger l'état des favoris depuis localStorage
+    const favorites = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
+    setIsFavorite(favorites.includes(verseId));
+  }, [verseId]);
 
   const handleFavoriteToggle = () => {
-    toast({
-      title: "Ajouté aux favoris",
-      description: `${verse.book} ${verse.chapter}:${verse.verse}`,
-      duration: 2000,
-    });
+    const favorites = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
+    
+    if (isFavorite) {
+      const updated = favorites.filter((id: string) => id !== verseId);
+      localStorage.setItem('bibleFavorites', JSON.stringify(updated));
+      setIsFavorite(false);
+      toast({
+        title: "Retiré des favoris",
+        description: `${verse.book} ${verse.chapter}:${verse.verse}`,
+        duration: 2000,
+      });
+    } else {
+      const updated = [...favorites, verseId];
+      localStorage.setItem('bibleFavorites', JSON.stringify(updated));
+      setIsFavorite(true);
+      toast({
+        title: "⭐ Ajouté aux favoris",
+        description: `${verse.book} ${verse.chapter}:${verse.verse}`,
+        duration: 2000,
+      });
+    }
   };
 
   const handleShare = async () => {
@@ -29,8 +53,13 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
           title: `${verse.book} ${verse.chapter}:${verse.verse}`,
           text: shareText,
         });
+        toast({
+          title: "Verset partagé",
+          description: "Le verset a été partagé avec succès",
+          duration: 2000,
+        });
       } catch (error) {
-        console.log('Sharing cancelled or failed');
+        console.log('Partage annulé');
       }
     } else {
       try {
@@ -41,10 +70,10 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
           duration: 2000,
         });
       } catch (error) {
-        console.log('Clipboard copy failed');
         toast({
           title: "Erreur",
           description: "Impossible de copier le verset",
+          variant: "destructive",
           duration: 2000,
         });
       }
@@ -63,10 +92,12 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
               variant="ghost"
               size="sm"
               onClick={handleFavoriteToggle}
-              className={`p-1.5 sm:p-2 hover:bg-purple-50 transition-colors`}
-              aria-label="Ajouter aux favoris"
+              className={`p-1.5 sm:p-2 hover:bg-purple-50 transition-colors ${
+                isFavorite ? 'text-yellow-500' : 'text-gray-400'
+              }`}
+              aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
-              <Heart className={`h-3 w-3 sm:h-4 sm:w-4`} />
+              <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isFavorite ? 'fill-current' : ''}`} />
             </Button>
             <Button
               variant="ghost"

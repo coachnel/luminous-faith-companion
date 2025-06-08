@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
-import { Home, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle } from 'lucide-react';
+import { Home, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle, Book } from 'lucide-react';
 import Dashboard from './Dashboard';
 import FavoriteVerses from './FavoriteVerses';
+import BibleApp from './BibleApp';
 import NotesApp from './NotesApp';
 import SettingsApp from './SettingsApp';
 import AdvancedNotifications from './AdvancedNotifications';
@@ -16,6 +18,7 @@ const MobileApp = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Accueil', icon: Home, component: Dashboard },
+    { id: 'bible', label: 'Bible', icon: Book, component: BibleApp },
     { id: 'favorites', label: 'Favoris', icon: Heart, component: FavoriteVerses },
     { id: 'notes', label: 'Notes', icon: Edit, component: NotesApp },
     { id: 'plans', label: 'Plans', icon: Calendar, component: ReadingPlans },

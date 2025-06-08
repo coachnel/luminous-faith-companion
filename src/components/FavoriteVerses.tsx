@@ -1,49 +1,56 @@
 
 import React, { useState, useEffect } from 'react';
-import { Heart, Trash2 } from 'lucide-react';
+import { Heart, Trash2, Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Verse } from '@/types/bible';
+import { getVerses } from '@/lib/bibleLoader';
 import VerseCard from './VerseCard';
 
 const FavoriteVerses = () => {
   const [favorites, setFavorites] = useState<Verse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadFavorites();
   }, []);
 
-  const loadFavorites = () => {
+  const loadFavorites = async () => {
     try {
-      const storedFavorites = localStorage.getItem('bibleFavorites');
-      if (storedFavorites) {
-        const favoriteIds = JSON.parse(storedFavorites);
-        // For now, we'll create mock verses since we don't have a complete favorite verse storage system
-        const mockFavorites: Verse[] = favoriteIds.map((id: string, index: number) => ({
-          book: 'Psaume',
-          chapter: 23,
-          verse: index + 1,
-          text: `Verset favori ${index + 1} - L'Éternel est mon berger: je ne manquerai de rien.`
-        }));
-        setFavorites(mockFavorites);
+      const favoriteIds = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
+      const favoriteVerses: Verse[] = [];
+
+      // Charger chaque verset favori
+      for (const verseId of favoriteIds) {
+        const [book, chapter, verse] = verseId.split('-');
+        try {
+          const verses = await getVerses(book, parseInt(chapter));
+          const favoriteVerse = verses.find(v => v.verse === parseInt(verse));
+          if (favoriteVerse) {
+            favoriteVerses.push(favoriteVerse);
+          }
+        } catch (error) {
+          console.error(`Erreur lors du chargement du verset favori ${verseId}:`, error);
+        }
       }
+
+      setFavorites(favoriteVerses);
     } catch (error) {
-      console.error('Error loading favorites:', error);
+      console.error('Erreur lors du chargement des favoris:', error);
       setFavorites([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const removeFavorite = (verseId: string) => {
     try {
-      const storedFavorites = localStorage.getItem('bibleFavorites');
-      if (storedFavorites) {
-        const favoriteIds = JSON.parse(storedFavorites);
-        const updatedIds = favoriteIds.filter((id: string) => id !== verseId);
-        localStorage.setItem('bibleFavorites', JSON.stringify(updatedIds));
-        loadFavorites();
-      }
+      const favoriteIds = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
+      const updatedIds = favoriteIds.filter((id: string) => id !== verseId);
+      localStorage.setItem('bibleFavorites', JSON.stringify(updatedIds));
+      loadFavorites();
     } catch (error) {
-      console.error('Error removing favorite:', error);
+      console.error('Erreur lors de la suppression du favori:', error);
     }
   };
 
@@ -51,6 +58,19 @@ const FavoriteVerses = () => {
     localStorage.removeItem('bibleFavorites');
     setFavorites([]);
   };
+
+  if (loading) {
+    return (
+      <div className="p-4 space-y-4 max-w-4xl mx-auto">
+        <Card className="glass border-white/30">
+          <CardContent className="p-8 text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Chargement des favoris...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
@@ -85,7 +105,7 @@ const FavoriteVerses = () => {
             <Heart className="mx-auto mb-4 text-gray-400" size={48} />
             <h3 className="text-lg font-semibold mb-2">Aucun verset favori</h3>
             <p className="text-gray-600">
-              Explorez la Bible et ajoutez vos versets préférés en cliquant sur le cœur
+              Explorez la Bible et ajoutez vos versets préférés en cliquant sur l'étoile ⭐
             </p>
           </CardContent>
         </Card>

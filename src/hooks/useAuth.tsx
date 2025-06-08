@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +15,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Correction de l'exportation pour éviter les incompatibilités
 export const cleanupAuthState = () => {
   localStorage.removeItem('supabase.auth.token');
   Object.keys(localStorage).forEach((key) => {
@@ -34,130 +34,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Ajout de journaux pour diagnostiquer l'état d'authentification
   useEffect(() => {
-    console.log('Initialisation de l’état d’authentification');
+    console.log('Initialisation de l\'authentification');
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        try {
-          console.log('Changement d’état d’authentification:', event, session);
-          setSession(session);
-
-          if (session?.user) {
-            const { data, error } = await supabase.auth.getUser();
-            if (data?.user?.user_metadata) {
-              console.log('Mise à jour de l’utilisateur avec les métadonnées:', data.user.user_metadata);
-              setUser({ ...session.user, ...data.user.user_metadata });
-            } else {
-              console.error('Erreur lors de la récupération des métadonnées utilisateur:', error);
-              setUser(session.user);
-            }
-          } else {
-            console.log('Aucun utilisateur connecté');
-            setUser(null);
-          }
-        } catch (error) {
-          console.error('Erreur inattendue dans onAuthStateChange:', error);
-        } finally {
-          setLoading(false);
+        console.log('Événement auth:', event, session?.user?.email);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('Utilisateur connecté:', session.user.email);
         }
+        
+        setLoading(false);
       }
     );
 
-    // Obtenir la session initiale
+    // Vérifier la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
-      try {
-        console.log('Session initiale:', session);
-        setSession(session);
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error('Erreur lors de la récupération de la session initiale:', error);
-      } finally {
-        setLoading(false);
-      }
+      console.log('Session initiale:', session?.user?.email);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
-
-    // Gestion de la redirection après validation email Supabase
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('email_confirmed') === 'true') {
-      // On tente de récupérer la session et de connecter l'utilisateur
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setSession(session);
-          setUser(session.user);
-          setLoading(false);
-          // Rediriger vers l'accueil
-          window.location.href = '/';
-        }
-      });
-    }
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Ajout d'une alternative temporaire pour simuler une session locale si Supabase ne répond pas
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (loading) {
-        console.warn('Supabase ne répond pas. Simulation d’une session locale.');
-        setUser({
-          id: 'local-user',
-          email: 'local@user.com',
-          app_metadata: {},
-          user_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-        } as User);
-        setSession({ access_token: 'local-token' } as Session);
-        setLoading(false);
-      }
-    }, 10000); // 10 secondes
-
-    return () => clearTimeout(timeout);
-  }, [loading]);
-
   const signIn = async (email: string, password: string) => {
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continuer même si cela échoue
-      }
-
+      console.log('Tentative de connexion pour:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
-      if (error) throw error;
-      
-      if (data.user) {
-        // Actualisation complète de la page pour un état propre
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
+      if (error) {
+        console.error('Erreur de connexion:', error.message);
+        return { error };
       }
       
+      console.log('Connexion réussie:', data.user?.email);
       return { error: null };
+      
     } catch (error) {
+      console.error('Erreur inattendue lors de la connexion:', error);
       return { error };
     }
   };
 
   const signUp = async (email: string, password: string, name?: string) => {
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continuer même si cela échoue
-      }
-
+      console.log('Tentative d\'inscription pour:', email);
+      
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           emailRedirectTo: redirectUrl,
@@ -167,21 +103,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      return { error };
+      if (error) {
+        console.error('Erreur d\'inscription:', error.message);
+        return { error };
+      }
+
+      console.log('Inscription réussie:', data.user?.email);
+      
+      // Si l'utilisateur n'a pas besoin de confirmer son email
+      if (data.user && !data.user.email_confirmed_at) {
+        console.log('Email de confirmation envoyé');
+      }
+      
+      return { error: null };
+      
     } catch (error) {
+      console.error('Erreur inattendue lors de l\'inscription:', error);
       return { error };
     }
   };
 
   const signInWithGoogle = async () => {
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continuer même si cela échoue
-      }
-
       const redirectUrl = `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signInWithOAuth({
@@ -190,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           redirectTo: redirectUrl
         }
       });
+      
       return { error };
     } catch (error) {
       return { error };
@@ -198,16 +142,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      console.log('Déconnexion en cours...');
+      
+      await supabase.auth.signOut();
       cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Ignorer les erreurs
-      }
-      window.location.href = '/auth';
+      
+      setUser(null);
+      setSession(null);
+      
+      console.log('Déconnexion terminée');
+      
     } catch (error) {
-      console.error('Error signing out:', error);
-      window.location.href = '/auth';
+      console.error('Erreur lors de la déconnexion:', error);
     }
   };
 

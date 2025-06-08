@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { Home, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle, Book } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle, Book, Download } from 'lucide-react';
 import Dashboard from './Dashboard';
 import FavoriteVerses from './FavoriteVerses';
 import BibleApp from './BibleApp';
@@ -11,10 +10,19 @@ import ReadingPlans from './ReadingPlans';
 import DailyChallenges from './DailyChallenges';
 import PrayerSharing from './PrayerSharing';
 import { useAuth } from '@/hooks/useAuth';
+import { usePWAPrompt } from '@/hooks/usePWAPrompt';
 
 const MobileApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { signOut } = useAuth();
+  const { promptInstall, isAvailable } = usePWAPrompt();
+  const [showInstall, setShowInstall] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowInstall(true);
+    window.addEventListener('pwa-install-available', handler);
+    return () => window.removeEventListener('pwa-install-available', handler);
+  }, []);
 
   const handleNavigate = (path: string) => {
     setActiveTab(path);
@@ -37,6 +45,15 @@ const MobileApp = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50">
+      {/* Bouton d'installation PWA */}
+      {showInstall && isAvailable && (
+        <button
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full bg-purple-600 text-white shadow-lg flex items-center gap-2 animate-bounce"
+          onClick={promptInstall}
+        >
+          <Download className="w-5 h-5" /> Installer l'application
+        </button>
+      )}
       {/* En-tête fixe */}
       <header className="sticky top-0 z-20 glass border-b border-white/30 backdrop-blur-md">
         <div className="flex items-center justify-between p-4">

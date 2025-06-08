@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Bell, Clock, CheckCircle, Plus } from 'lucide-react';
+import { Bell, Clock, CheckCircle, Plus, BellRing } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUserPreferences } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
 
@@ -21,57 +20,96 @@ const Notifications = () => {
   const [customAlarms, setCustomAlarms] = useState<CustomAlarm[]>([]);
   const [newAlarmTime, setNewAlarmTime] = useState('');
   const [newAlarmMessage, setNewAlarmMessage] = useState('');
+  const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
+    // Vérifier l'état des permissions de notification
+    if ('Notification' in window) {
+      setHasPermission(Notification.permission === 'granted');
+    }
+
     const savedAlarms = localStorage.getItem('customAlarms');
     if (savedAlarms) {
       setCustomAlarms(JSON.parse(savedAlarms));
     }
 
-    // Vérifier les notifications intelligentes
-    checkIntelligentNotifications();
+    // Démarrer le système de vérification des notifications
+    startNotificationSystem();
     
-    // Configurer la vérification périodique
-    const interval = setInterval(checkIntelligentNotifications, 60000); // Toutes les minutes
+    const interval = setInterval(checkNotifications, 60000); // Vérifier toutes les minutes
     
     return () => clearInterval(interval);
   }, []);
+
+  const startNotificationSystem = () => {
+    console.log('📱 Système de notifications démarré');
+    checkNotifications();
+  };
+
+  const checkNotifications = () => {
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const today = now.getDay(); // 0 = dimanche, 1 = lundi, etc.
+
+    // Vérifier les alarmes personnalisées
+    customAlarms.forEach(alarm => {
+      if (alarm.active && alarm.time === currentTime && alarm.days.includes(today.toString())) {
+        showNotification('⏰ Rappel', alarm.message);
+      }
+    });
+
+    // Vérifier les notifications intelligentes
+    checkIntelligentNotifications();
+  };
 
   const checkIntelligentNotifications = () => {
     const lastBibleRead = localStorage.getItem('lastBibleRead');
     const lastNotesCheck = localStorage.getItem('lastNotesReminder');
     const today = new Date().toDateString();
     
-    // Notification pour la lecture biblique
-    if (!lastBibleRead || lastBibleRead !== today) {
-      const daysSinceRead = lastBibleRead ? 
-        Math.floor((new Date().getTime() - new Date(lastBibleRead).getTime()) / (1000 * 60 * 60 * 24)) : 1;
-      
-      if (daysSinceRead >= 1) {
+    // Notification pour la lecture biblique (une fois par jour)
+    if (preferences?.notification_preferences?.dailyVerse && (!lastBibleRead || lastBibleRead !== today)) {
+      const now = new Date();
+      if (now.getHours() === 8 && now.getMinutes() === 0) { // 8h00
         showNotification(
-          "📖 Lecture biblique",
-          daysSinceRead === 1 ? 
-            "Vous n'avez pas lu la Bible aujourd'hui" : 
-            `Vous n'avez pas lu la Bible depuis ${daysSinceRead} jours`
+          "📖 Verset du jour",
+          "Découvrez votre verset quotidien pour nourrir votre âme"
         );
       }
     }
 
     // Notification pour relire les notes
-    if (!lastNotesCheck || lastNotesCheck !== today) {
+    if (preferences?.notification_preferences?.readingReminder && (!lastNotesCheck || lastNotesCheck !== today)) {
       const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
       if (notes.length > 0) {
+        const now = new Date();
+        if (now.getHours() === 19 && now.getMinutes() === 0) { // 19h00
+          showNotification(
+            "📝 Vos notes spirituelles",
+            "Prenez un moment pour relire vos réflexions"
+          );
+          localStorage.setItem('lastNotesReminder', today);
+        }
+      }
+    }
+
+    // Rappels de prière
+    if (preferences?.notification_preferences?.prayerReminder) {
+      const prayerTimes = ['08:00', '12:00', '20:00'];
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      
+      if (prayerTimes.includes(currentTime)) {
         showNotification(
-          "📝 Vos notes",
-          "N'oubliez pas de relire vos réflexions spirituelles"
+          "🙏 Moment de prière",
+          "Prenez un instant pour vous recueillir et prier"
         );
-        localStorage.setItem('lastNotesReminder', today);
       }
     }
   };
 
   const showNotification = (title: string, message: string) => {
-    // Notification toast
+    // Notification toast (toujours visible)
     toast({
       title,
       description: message,
@@ -79,22 +117,42 @@ const Notifications = () => {
     });
 
     // Notification native si autorisée
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, {
-        body: message,
-        icon: '/favicon.ico'
-      });
+    if (hasPermission && 'Notification' in window) {
+      try {
+        new Notification(title, {
+          body: message,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico'
+        });
+      } catch (error) {
+        console.warn('Erreur lors de l\'affichage de la notification:', error);
+      }
     }
   };
 
   const requestNotificationPermission = async () => {
     if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        toast({
-          title: "✅ Notifications activées",
-          description: "Vous recevrez maintenant des rappels spirituels",
-        });
+      try {
+        const permission = await Notification.requestPermission();
+        setHasPermission(permission === 'granted');
+        
+        if (permission === 'granted') {
+          toast({
+            title: "✅ Notifications activées",
+            description: "Vous recevrez maintenant des rappels spirituels",
+          });
+          
+          // Test de notification
+          showNotification('🎉 Notifications activées', 'Vos rappels spirituels sont maintenant opérationnels');
+        } else {
+          toast({
+            title: "ℹ️ Notifications refusées",
+            description: "Vous pouvez les activer dans les paramètres de votre navigateur",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Erreur lors de la demande de permission:', error);
       }
     }
   };
@@ -135,6 +193,11 @@ const Notifications = () => {
     );
     setCustomAlarms(updatedAlarms);
     localStorage.setItem('customAlarms', JSON.stringify(updatedAlarms));
+    
+    const alarm = updatedAlarms.find(a => a.id === id);
+    toast({
+      description: alarm?.active ? "Alarme activée" : "Alarme désactivée",
+    });
   };
 
   const removeAlarm = (id: string) => {
@@ -173,49 +236,54 @@ const Notifications = () => {
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Bell className="text-spiritual-600" size={24} />
+            <BellRing className="text-spiritual-600" size={24} />
             Notifications & Rappels
           </CardTitle>
         </CardHeader>
       </Card>
 
-      {/* Demande de permission */}
-      {Notification.permission !== 'granted' && (
-        <Card className="glass border-white/30 border-l-4 border-l-orange-500">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                <Bell className="text-orange-600" size={20} />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-orange-700">Activer les notifications</h4>
-                <p className="text-sm text-gray-600">Autorisez les notifications pour recevoir vos rappels spirituels</p>
-              </div>
-              <Button onClick={requestNotificationPermission} className="bg-orange-500 hover:bg-orange-600">
+      {/* Statut du système de notifications */}
+      <Card className="glass border-white/30 bg-white/90">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${hasPermission ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+            <div className="flex-1">
+              <h4 className="font-medium">
+                {hasPermission ? '✅ Système actif' : '❌ Système inactif'}
+              </h4>
+              <p className="text-sm text-gray-600">
+                {hasPermission 
+                  ? 'Les notifications fonctionnent correctement' 
+                  : 'Cliquez pour activer les notifications'}
+              </p>
+            </div>
+            {!hasPermission && (
+              <Button onClick={requestNotificationPermission} className="bg-green-500 hover:bg-green-600">
                 Activer
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Notifications intelligentes */}
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="text-lg">Notifications intelligentes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Rappel de lecture biblique</h4>
-              <p className="text-sm text-gray-600">Vous rappelle si vous n'avez pas lu la Bible</p>
+              <h4 className="font-medium">Verset du jour (8h00)</h4>
+              <p className="text-sm text-gray-600">Notification quotidienne avec votre verset</p>
             </div>
             <Button
               variant={preferences?.notification_preferences?.dailyVerse ? "default" : "outline"}
               onClick={() => updateNotificationPreference('dailyVerse', !preferences?.notification_preferences?.dailyVerse)}
+              className={preferences?.notification_preferences?.dailyVerse ? "bg-green-500" : ""}
             >
               {preferences?.notification_preferences?.dailyVerse ? 'Activé' : 'Désactivé'}
             </Button>
@@ -223,12 +291,13 @@ const Notifications = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Rappel de prière</h4>
+              <h4 className="font-medium">Rappels de prière (8h, 12h, 20h)</h4>
               <p className="text-sm text-gray-600">Moments de prière programmés</p>
             </div>
             <Button
               variant={preferences?.notification_preferences?.prayerReminder ? "default" : "outline"}
               onClick={() => updateNotificationPreference('prayerReminder', !preferences?.notification_preferences?.prayerReminder)}
+              className={preferences?.notification_preferences?.prayerReminder ? "bg-green-500" : ""}
             >
               {preferences?.notification_preferences?.prayerReminder ? 'Activé' : 'Désactivé'}
             </Button>
@@ -236,12 +305,13 @@ const Notifications = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Rappel de notes</h4>
-              <p className="text-sm text-gray-600">Vous encourage à relire vos réflexions</p>
+              <h4 className="font-medium">Rappel de notes (19h00)</h4>
+              <p className="text-sm text-gray-600">Encouragement à relire vos réflexions</p>
             </div>
             <Button
               variant={preferences?.notification_preferences?.readingReminder ? "default" : "outline"}
               onClick={() => updateNotificationPreference('readingReminder', !preferences?.notification_preferences?.readingReminder)}
+              className={preferences?.notification_preferences?.readingReminder ? "bg-green-500" : ""}
             >
               {preferences?.notification_preferences?.readingReminder ? 'Activé' : 'Désactivé'}
             </Button>
@@ -250,7 +320,7 @@ const Notifications = () => {
       </Card>
 
       {/* Alarmes personnalisées */}
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="text-lg">Alarmes personnalisées</CardTitle>
         </CardHeader>
@@ -261,13 +331,13 @@ const Notifications = () => {
               placeholder="Heure"
               value={newAlarmTime}
               onChange={(e) => setNewAlarmTime(e.target.value)}
-              className="glass border-white/30"
+              className="glass border-white/30 bg-white/90"
             />
             <Input
               placeholder="Message de rappel"
               value={newAlarmMessage}
               onChange={(e) => setNewAlarmMessage(e.target.value)}
-              className="glass border-white/30"
+              className="glass border-white/30 bg-white/90"
             />
             <Button onClick={addCustomAlarm} className="spiritual-gradient">
               <Plus size={18} className="mr-2" />
@@ -277,7 +347,7 @@ const Notifications = () => {
 
           <div className="space-y-3">
             {customAlarms.map((alarm) => (
-              <div key={alarm.id} className="flex items-center justify-between p-3 rounded-lg bg-white/50 border border-white/30">
+              <div key={alarm.id} className="flex items-center justify-between p-3 rounded-lg bg-white/70 border border-white/30">
                 <div className="flex items-center gap-3">
                   <Clock size={20} className="text-spiritual-600" />
                   <div>
@@ -290,6 +360,7 @@ const Notifications = () => {
                     variant={alarm.active ? "default" : "outline"}
                     size="sm"
                     onClick={() => toggleAlarm(alarm.id)}
+                    className={alarm.active ? "bg-green-500" : ""}
                   >
                     {alarm.active ? <CheckCircle size={16} /> : <Clock size={16} />}
                   </Button>

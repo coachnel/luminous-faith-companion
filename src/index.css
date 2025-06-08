@@ -69,15 +69,17 @@
   }
 }
 
-/* Classes personnalisées pour l'application spirituelle */
+/* Classes personnalisées pour l'application spirituelle - VERSION AMÉLIORÉE */
 .glass {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .spiritual-gradient {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .heavenly-gradient {
@@ -103,7 +105,42 @@
   }
 }
 
-/* Classes Tailwind personnalisées */
+/* Améliorations pour la lisibilité des modales et popups */
+.modal-content {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(147, 51, 234, 0.2);
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
+}
+
+/* Amélioration des contrastes pour les textes */
+.dialog-content {
+  color: #1a1a1a !important;
+}
+
+.dialog-content input,
+.dialog-content textarea {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid #e5e7eb !important;
+  color: #111827 !important;
+}
+
+.dialog-content input:focus,
+.dialog-content textarea:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+}
+
+.dialog-content label {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+.dialog-content .placeholder {
+  color: #6b7280 !important;
+}
+
+/* Classes Tailwind personnalisées optimisées */
 @layer utilities {
   .text-spiritual-50 { color: rgb(248 250 252); }
   .text-spiritual-100 { color: rgb(241 245 249); }
@@ -151,4 +188,68 @@
 
   .text-bible-primary { color: rgb(102 126 234); }
   .bg-bible-primary { background-color: rgb(102 126 234); }
+
+  /* Optimisations pour la lisibilité */
+  .text-readable { 
+    color: #1f2937 !important; 
+    font-weight: 500;
+  }
+  
+  .bg-readable { 
+    background-color: rgba(255, 255, 255, 0.95) !important; 
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .border-soft { 
+    border-color: rgba(139, 92, 246, 0.2) !important; 
+  }
+
+  .shadow-soft { 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important; 
+  }
+}
+
+/* Corrections spécifiques pour les composants UI */
+[data-radix-dialog-content] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(147, 51, 234, 0.2) !important;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-radix-dialog-content] input,
+[data-radix-dialog-content] textarea {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid #e5e7eb !important;
+  color: #111827 !important;
+}
+
+[data-radix-dialog-content] input:focus,
+[data-radix-dialog-content] textarea:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+}
+
+/* Amélioration générale des contrastes */
+.improved-contrast {
+  color: #1f2937 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.improved-contrast label {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+.improved-contrast input,
+.improved-contrast textarea {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 2px solid #d1d5db !important;
+  color: #111827 !important;
+}
+
+.improved-contrast input:focus,
+.improved-contrast textarea:focus {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
 }

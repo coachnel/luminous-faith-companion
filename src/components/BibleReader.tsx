@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Book, ChevronLeft, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,8 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getBooks, getChapters, getVerses, searchVerses } from '@/lib/bibleLoader';
 import { BookInfo, Chapter, Verse } from '@/types/bible';
 import VerseCard from './VerseCard';
+import OnlineUsers from './OnlineUsers';
+import { useTranslation } from '@/lib/translations';
+import { useUserPreferences } from '@/hooks/useSupabaseData';
 
 const BibleReader = () => {
+  const { preferences } = useUserPreferences();
+  const { t } = useTranslation(preferences?.language || 'fr');
+  
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [selectedBook, setSelectedBook] = useState<string>('');
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -39,11 +44,14 @@ const BibleReader = () => {
 
   const loadBooks = async () => {
     try {
+      setLoading(true);
       const booksData = await getBooks();
       setBooks(booksData);
     } catch (error) {
       console.error('Erreur lors du chargement des livres:', error);
       setBooks([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,6 +79,9 @@ const BibleReader = () => {
       setSelectedChapter(chapterNumber);
       setVerses(versesData);
       setView('verses');
+      
+      // Marquer la lecture de la Bible aujourd'hui
+      localStorage.setItem('lastBibleRead', new Date().toDateString());
     } catch (error) {
       console.error('Erreur lors du chargement des versets:', error);
       setVerses([]);
@@ -100,25 +111,28 @@ const BibleReader = () => {
 
   const renderBooks = () => (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold mb-4">Livres de la Bible</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">{t('bible')}</h2>
+        <OnlineUsers />
+      </div>
       
       {oldTestamentBooks.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
-            Ancien Testament ({oldTestamentBooks.length} livres)
+            {t('oldTestament')} ({oldTestamentBooks.length} livres)
           </h3>
           <div className="grid gap-2">
             {oldTestamentBooks.map((book) => (
               <Button
                 key={book.name}
                 variant="outline"
-                className="justify-start h-auto p-4 hover:bg-purple-50"
+                className="justify-start h-auto p-4 hover:bg-purple-50 border-purple-200"
                 onClick={() => handleBookSelect(book.name)}
               >
                 <div className="text-left">
                   <div className="font-medium">{book.name}</div>
                   <div className="text-sm text-gray-500">
-                    {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+                    {book.chaptersCount} {t('chapter')}{book.chaptersCount > 1 ? 's' : ''}
                   </div>
                 </div>
               </Button>
@@ -130,20 +144,20 @@ const BibleReader = () => {
       {newTestamentBooks.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
-            Nouveau Testament ({newTestamentBooks.length} livres)
+            {t('newTestament')} ({newTestamentBooks.length} livres)
           </h3>
           <div className="grid gap-2">
             {newTestamentBooks.map((book) => (
               <Button
                 key={book.name}
                 variant="outline"
-                className="justify-start h-auto p-4 hover:bg-purple-50"
+                className="justify-start h-auto p-4 hover:bg-purple-50 border-purple-200"
                 onClick={() => handleBookSelect(book.name)}
               >
                 <div className="text-left">
                   <div className="font-medium">{book.name}</div>
                   <div className="text-sm text-gray-500">
-                    {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+                    {book.chaptersCount} {t('chapter')}{book.chaptersCount > 1 ? 's' : ''}
                   </div>
                 </div>
               </Button>
@@ -161,13 +175,16 @@ const BibleReader = () => {
           <ChevronLeft size={16} />
         </Button>
         <h2 className="text-xl font-bold">{selectedBook}</h2>
+        <div className="ml-auto">
+          <OnlineUsers />
+        </div>
       </div>
       <div className="grid grid-cols-5 gap-2">
         {chapters.map((chapter) => (
           <Button
             key={chapter.chapter}
             variant="outline"
-            className="aspect-square hover:bg-purple-50"
+            className="aspect-square hover:bg-purple-50 border-purple-200"
             onClick={() => handleChapterSelect(chapter.chapter)}
           >
             {chapter.chapter}
@@ -184,6 +201,9 @@ const BibleReader = () => {
           <ChevronLeft size={16} />
         </Button>
         <h2 className="text-xl font-bold">{selectedBook} {selectedChapter}</h2>
+        <div className="ml-auto">
+          <OnlineUsers />
+        </div>
       </div>
       <div className="space-y-3">
         {verses.map((verse) => (
@@ -202,10 +222,13 @@ const BibleReader = () => {
         <h2 className="text-xl font-bold">
           Résultats de recherche ({searchResults.length})
         </h2>
+        <div className="ml-auto">
+          <OnlineUsers />
+        </div>
       </div>
       {searchResults.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
-          {searchQuery ? 'Aucun résultat trouvé' : 'Saisissez votre recherche ci-dessus'}
+          {searchQuery ? t('noResults') : 'Saisissez votre recherche ci-dessus'}
         </p>
       ) : (
         <div className="space-y-3">
@@ -219,7 +242,7 @@ const BibleReader = () => {
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/80">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Book className="text-purple-600" size={24} />
@@ -229,10 +252,10 @@ const BibleReader = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
               <Input
-                placeholder="Rechercher dans la Bible..."
+                placeholder={`${t('search')} dans la Bible...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 glass border-white/30"
+                className="pl-10 glass border-white/30 bg-white/90"
               />
             </div>
           </div>
@@ -241,7 +264,7 @@ const BibleReader = () => {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p>Chargement...</p>
+              <p>{t('loading')}</p>
             </div>
           ) : (
             <>

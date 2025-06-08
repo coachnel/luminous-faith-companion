@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { readingPlans } from '@/data/bibleData';
 import { toast } from '@/hooks/use-toast';
+import CustomReadingPlan from './CustomReadingPlan';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface UserProgress {
   planId: string;
@@ -65,6 +67,7 @@ const ReadingPlans = () => {
     setUserProgress(null);
     setSelectedPlan('');
     localStorage.removeItem('readingPlanProgress');
+    localStorage.removeItem('currentCustomPlan');
     
     toast({
       description: "Plan de lecture réinitialisé",
@@ -73,6 +76,15 @@ const ReadingPlans = () => {
 
   const getCurrentPlan = () => {
     if (!userProgress) return null;
+    
+    // Vérifier s'il s'agit d'un plan personnalisé
+    if (userProgress.planId.startsWith('custom-')) {
+      const customPlan = localStorage.getItem('currentCustomPlan');
+      if (customPlan) {
+        return JSON.parse(customPlan);
+      }
+    }
+    
     return readingPlans.find(plan => plan.id === userProgress.planId);
   };
 
@@ -87,7 +99,7 @@ const ReadingPlans = () => {
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calendar className="text-spiritual-600" size={24} />
@@ -97,60 +109,69 @@ const ReadingPlans = () => {
       </Card>
 
       {!userProgress ? (
-        // Sélection d'un plan
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-center mb-4">Choisissez votre plan de lecture</h3>
+        <Tabs defaultValue="predefined" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="predefined">Plans prédéfinis</TabsTrigger>
+            <TabsTrigger value="custom">Plans personnalisés</TabsTrigger>
+          </TabsList>
           
-          {readingPlans.map((plan) => (
-            <Card key={plan.id} className="glass border-white/30 hover:shadow-lg transition-all">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-spiritual-700 mb-2">
-                      {plan.name}
-                    </h4>
-                    <p className="text-gray-600 mb-3">{plan.description}</p>
-                    <div className="flex items-center gap-2 text-sm text-spiritual-600">
-                      <Target size={16} />
-                      <span>{plan.duration} jours</span>
+          <TabsContent value="predefined" className="space-y-4">
+            <h3 className="text-lg font-semibold text-center mb-4">Choisissez votre plan de lecture</h3>
+            
+            {readingPlans.map((plan) => (
+              <Card key={plan.id} className="glass border-white/30 hover:shadow-lg transition-all bg-white/90">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h4 className="text-lg font-semibold text-spiritual-700 mb-2">
+                        {plan.name}
+                      </h4>
+                      <p className="text-gray-600 mb-3">{plan.description}</p>
+                      <div className="flex items-center gap-2 text-sm text-spiritual-600">
+                        <Target size={16} />
+                        <span>{plan.duration} jours</span>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => startPlan(plan.id)}
+                      className="spiritual-gradient ml-4"
+                    >
+                      Commencer
+                    </Button>
+                  </div>
+                  
+                  {/* Aperçu des premiers jours */}
+                  <div className="border-t pt-4">
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Aperçu des premiers jours :</h5>
+                    <div className="space-y-2">
+                      {plan.schedule.slice(0, 3).map((scheduleItem) => (
+                        <div key={scheduleItem.day} className="text-sm text-gray-600">
+                          <span className="font-medium">Jour {scheduleItem.day}:</span> {scheduleItem.books.join(', ')}
+                          {scheduleItem.chapters && ` (chapitres ${scheduleItem.chapters.join(', ')})`}
+                        </div>
+                      ))}
+                      {plan.schedule.length > 3 && (
+                        <div className="text-sm text-gray-500 italic">
+                          ... et {plan.schedule.length - 3} autres jours
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <Button
-                    onClick={() => startPlan(plan.id)}
-                    className="spiritual-gradient ml-4"
-                  >
-                    Commencer
-                  </Button>
-                </div>
-                
-                {/* Aperçu des premiers jours */}
-                <div className="border-t pt-4">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Aperçu des premiers jours :</h5>
-                  <div className="space-y-2">
-                    {plan.schedule.slice(0, 3).map((scheduleItem) => (
-                      <div key={scheduleItem.day} className="text-sm text-gray-600">
-                        <span className="font-medium">Jour {scheduleItem.day}:</span> {scheduleItem.books.join(', ')}
-                        {scheduleItem.chapters && ` (chapitres ${scheduleItem.chapters.join(', ')})`}
-                      </div>
-                    ))}
-                    {plan.schedule.length > 3 && (
-                      <div className="text-sm text-gray-500 italic">
-                        ... et {plan.schedule.length - 3} autres jours
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+          
+          <TabsContent value="custom">
+            <CustomReadingPlan />
+          </TabsContent>
+        </Tabs>
       ) : (
-        // Plan en cours
+        // Plan en cours - code existant simplifié
         <div className="space-y-4">
           {currentPlan && (
             <>
-              {/* Progression actuelle */}
-              <Card className="glass border-white/30">
+              <Card className="glass border-white/30 bg-white/90">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-spiritual-700">
@@ -200,7 +221,7 @@ const ReadingPlans = () => {
               </Card>
 
               {/* Planning de lecture */}
-              <Card className="glass border-white/30">
+              <Card className="glass border-white/30 bg-white/90">
                 <CardHeader>
                   <CardTitle className="text-lg">Planning de lecture</CardTitle>
                 </CardHeader>

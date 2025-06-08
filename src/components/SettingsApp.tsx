@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { User, Bell, Globe, Info, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,11 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useUserPreferences } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from '@/lib/translations';
 
 const SettingsApp = () => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { preferences, updatePreferences } = useUserPreferences();
+  const { t } = useTranslation(preferences?.language || 'fr');
 
   const handleNotificationToggle = async (type: string, value: boolean) => {
     if (!preferences) return;
@@ -42,8 +45,13 @@ const SettingsApp = () => {
         language: language,
       });
       toast({
-        description: "Langue mise à jour",
+        description: "Langue mise à jour - Rechargez la page pour voir les changements",
       });
+      
+      // Recharger la page après un délai pour appliquer la nouvelle langue
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       toast({
         description: "Erreur lors de la mise à jour",
@@ -55,11 +63,11 @@ const SettingsApp = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Profile Section */}
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User size={20} />
-            Profil
+            {t('profile')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -78,11 +86,11 @@ const SettingsApp = () => {
       </Card>
 
       {/* Language */}
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe size={20} />
-            Langue
+            {t('language')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -90,25 +98,28 @@ const SettingsApp = () => {
             value={preferences?.language || 'fr'} 
             onValueChange={handleLanguageChange}
           >
-            <SelectTrigger className="glass border-white/30">
+            <SelectTrigger className="glass border-white/30 bg-white/90">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="glass border-white/30 backdrop-blur-md">
+            <SelectContent className="glass border-white/30 backdrop-blur-md bg-white/95">
               <SelectItem value="fr">Français</SelectItem>
               <SelectItem value="en">English</SelectItem>
               <SelectItem value="es">Español</SelectItem>
               <SelectItem value="de">Deutsch</SelectItem>
             </SelectContent>
           </Select>
+          <p className="text-xs text-gray-500 mt-2">
+            La page se rechargera automatiquement pour appliquer la nouvelle langue
+          </p>
         </CardContent>
       </Card>
 
       {/* Notifications */}
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell size={20} />
-            Notifications
+            {t('notifications')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -148,7 +159,7 @@ const SettingsApp = () => {
       </Card>
 
       {/* About */}
-      <Card className="glass border-white/30">
+      <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info size={20} />
@@ -157,15 +168,16 @@ const SettingsApp = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm text-gray-600">
-            <p>Compagnon spirituel v1.0</p>
+            <p>Compagnon spirituel v2.0</p>
             <p>Une application pour accompagner votre parcours spirituel</p>
             <p>Développé par Nel Brunel MANKOU pour la communauté chrétienne</p>
+            <p className="text-xs text-green-600 font-medium">✅ Application stabilisée et optimisée</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Sign Out */}
-      <Card className="glass border-white/30 border-red-200">
+      <Card className="glass border-white/30 border-red-200 bg-white/90">
         <CardContent className="p-4">
           <Button
             onClick={signOut}

@@ -16,17 +16,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const cleanupAuthState = () => {
-  localStorage.removeItem('supabase.auth.token');
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
+  try {
+    localStorage.removeItem('supabase.auth.token');
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  } catch (error) {
+    console.warn('Erreur lors du nettoyage des données d\'authentification:', error);
+  }
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -35,10 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('Initialisation de l\'authentification');
-    
+    let mounted = true;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Événement auth:', event, session?.user?.email);
         
         setSession(session);
@@ -48,19 +54,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('Utilisateur connecté:', session.user.email);
         }
         
+        if (event === 'SIGNED_OUT') {
+          cleanupAuthState();
+        }
+        
         setLoading(false);
       }
     );
 
     // Vérifier la session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('Session initiale:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch((error) => {
+      console.error('Erreur lors de la récupération de la session:', error);
+      if (mounted) {
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -109,12 +129,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Inscription réussie:', data.user?.email);
-      
-      // Si l'utilisateur n'a pas besoin de confirmer son email
-      if (data.user && !data.user.email_confirmed_at) {
-        console.log('Email de confirmation envoyé');
-      }
-      
       return { error: null };
       
     } catch (error) {

@@ -1,11 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Book, ChevronLeft, Search, ChevronDown } from 'lucide-react';
+import { Book, ChevronLeft, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { getBooks, getChapters, getVerses, searchVerses } from '@/lib/bibleLoader';
 import { BookInfo, Chapter, Verse } from '@/types/bible';
 import VerseCard from './VerseCard';
@@ -27,14 +25,17 @@ const BibleReader = () => {
 
   useEffect(() => {
     if (searchQuery.trim()) {
-      performSearch();
+      const debounceTimer = setTimeout(() => {
+        performSearch();
+      }, 500);
+      return () => clearTimeout(debounceTimer);
     } else {
       setSearchResults([]);
       if (view === 'search') {
         setView(selectedBook ? (selectedChapter ? 'verses' : 'chapters') : 'books');
       }
     }
-  }, [searchQuery]);
+  }, [searchQuery, view, selectedBook, selectedChapter]);
 
   const loadBooks = async () => {
     try {
@@ -42,6 +43,7 @@ const BibleReader = () => {
       setBooks(booksData);
     } catch (error) {
       console.error('Erreur lors du chargement des livres:', error);
+      setBooks([]);
     }
   };
 
@@ -56,6 +58,7 @@ const BibleReader = () => {
       setView('chapters');
     } catch (error) {
       console.error('Erreur lors du chargement des chapitres:', error);
+      setChapters([]);
     } finally {
       setLoading(false);
     }
@@ -70,6 +73,7 @@ const BibleReader = () => {
       setView('verses');
     } catch (error) {
       console.error('Erreur lors du chargement des versets:', error);
+      setVerses([]);
     } finally {
       setLoading(false);
     }
@@ -85,6 +89,7 @@ const BibleReader = () => {
       setView('search');
     } catch (error) {
       console.error('Erreur lors de la recherche:', error);
+      setSearchResults([]);
     } finally {
       setLoading(false);
     }
@@ -97,53 +102,55 @@ const BibleReader = () => {
     <div className="space-y-4">
       <h2 className="text-xl font-bold mb-4">Livres de la Bible</h2>
       
-      {/* Ancien Testament */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
-          Ancien Testament ({oldTestamentBooks.length} livres)
-        </h3>
-        <div className="grid gap-2">
-          {oldTestamentBooks.map((book) => (
-            <Button
-              key={book.name}
-              variant="outline"
-              className="justify-start h-auto p-4 hover:bg-purple-50"
-              onClick={() => handleBookSelect(book.name)}
-            >
-              <div className="text-left">
-                <div className="font-medium">{book.name}</div>
-                <div className="text-sm text-gray-500">
-                  {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+      {oldTestamentBooks.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
+            Ancien Testament ({oldTestamentBooks.length} livres)
+          </h3>
+          <div className="grid gap-2">
+            {oldTestamentBooks.map((book) => (
+              <Button
+                key={book.name}
+                variant="outline"
+                className="justify-start h-auto p-4 hover:bg-purple-50"
+                onClick={() => handleBookSelect(book.name)}
+              >
+                <div className="text-left">
+                  <div className="font-medium">{book.name}</div>
+                  <div className="text-sm text-gray-500">
+                    {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+                  </div>
                 </div>
-              </div>
-            </Button>
-          ))}
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Nouveau Testament */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
-          Nouveau Testament ({newTestamentBooks.length} livres)
-        </h3>
-        <div className="grid gap-2">
-          {newTestamentBooks.map((book) => (
-            <Button
-              key={book.name}
-              variant="outline"
-              className="justify-start h-auto p-4 hover:bg-purple-50"
-              onClick={() => handleBookSelect(book.name)}
-            >
-              <div className="text-left">
-                <div className="font-medium">{book.name}</div>
-                <div className="text-sm text-gray-500">
-                  {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+      {newTestamentBooks.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
+            Nouveau Testament ({newTestamentBooks.length} livres)
+          </h3>
+          <div className="grid gap-2">
+            {newTestamentBooks.map((book) => (
+              <Button
+                key={book.name}
+                variant="outline"
+                className="justify-start h-auto p-4 hover:bg-purple-50"
+                onClick={() => handleBookSelect(book.name)}
+              >
+                <div className="text-left">
+                  <div className="font-medium">{book.name}</div>
+                  <div className="text-sm text-gray-500">
+                    {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
+                  </div>
                 </div>
-              </div>
-            </Button>
-          ))}
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -202,8 +209,8 @@ const BibleReader = () => {
         </p>
       ) : (
         <div className="space-y-3">
-          {searchResults.map((verse) => (
-            <VerseCard key={`${verse.book}-${verse.chapter}-${verse.verse}`} verse={verse} />
+          {searchResults.map((verse, index) => (
+            <VerseCard key={`${verse.book}-${verse.chapter}-${verse.verse}-${index}`} verse={verse} />
           ))}
         </div>
       )}

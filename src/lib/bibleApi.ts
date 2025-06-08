@@ -1,3 +1,4 @@
+
 // src/lib/bibleApi.ts
 // Intégration de l'API https://api.scripture.api.bible pour les versions KJV, NIV, ESV
 // Clé API à sécuriser ensuite via variable d'environnement
@@ -10,7 +11,7 @@ const VERSION_IDS = {
 };
 
 // Utilise la clé API en dur pour le développement, à remplacer ensuite
-const API_KEY = process.env.BIBLE_API_KEY || '20a2d5e5be291fab27c9111fa96b292f';
+const API_KEY = import.meta.env.VITE_BIBLE_API_KEY || '20a2d5e5be291fab27c9111fa96b292f';
 
 // Simple cache local (mémoire) pour limiter les appels API
 const cache: Record<string, any> = {};

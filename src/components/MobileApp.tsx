@@ -16,6 +16,10 @@ const MobileApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { signOut } = useAuth();
 
+  const handleNavigate = (path: string) => {
+    setActiveTab(path);
+  };
+
   const tabs = [
     { id: 'dashboard', label: 'Accueil', icon: Home, component: Dashboard },
     { id: 'bible', label: 'Bible', icon: Book, component: BibleApp },
@@ -28,7 +32,8 @@ const MobileApp = () => {
     { id: 'settings', label: 'Réglages', icon: Settings, component: SettingsApp },
   ];
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || Dashboard;
+  const activeTabData = tabs.find(tab => tab.id === activeTab);
+  const ActiveComponent = activeTabData?.component || Dashboard;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50">
@@ -57,7 +62,11 @@ const MobileApp = () => {
 
       {/* Contenu principal */}
       <main className="pb-24 min-h-screen">
-        <ActiveComponent />
+        {activeTab === 'dashboard' ? (
+          <Dashboard onNavigate={handleNavigate} />
+        ) : (
+          <ActiveComponent />
+        )}
       </main>
 
       {/* Navigation fixe en bas avec scroll horizontal */}

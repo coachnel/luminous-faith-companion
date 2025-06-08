@@ -21,7 +21,7 @@ const MobileApp = () => {
   };
 
   const tabs = [
-    { id: 'dashboard', label: 'Accueil', icon: Home, component: Dashboard },
+    { id: 'dashboard', label: 'Accueil', icon: Home, component: () => <Dashboard onNavigate={handleNavigate} /> },
     { id: 'bible', label: 'Bible', icon: Book, component: BibleApp },
     { id: 'favorites', label: 'Favoris', icon: Heart, component: FavoriteVerses },
     { id: 'notes', label: 'Notes', icon: Edit, component: NotesApp },
@@ -33,7 +33,7 @@ const MobileApp = () => {
   ];
 
   const activeTabData = tabs.find(tab => tab.id === activeTab);
-  const ActiveComponent = activeTabData?.component || Dashboard;
+  const ActiveComponent = activeTabData?.component || (() => <Dashboard onNavigate={handleNavigate} />);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50">
@@ -62,11 +62,7 @@ const MobileApp = () => {
 
       {/* Contenu principal */}
       <main className="pb-24 min-h-screen">
-        {activeTab === 'dashboard' ? (
-          <Dashboard onNavigate={handleNavigate} />
-        ) : (
-          <ActiveComponent />
-        )}
+        <ActiveComponent />
       </main>
 
       {/* Navigation fixe en bas avec scroll horizontal */}

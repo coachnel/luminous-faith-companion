@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -161,6 +160,22 @@ export function useNotes() {
     }
   };
 
+  const updateNote = async (id: string, noteData: Partial<Omit<Note, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .update(noteData)
+        .eq('id', id)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+      await fetchNotes();
+    } catch (error) {
+      console.error('Error updating note:', error);
+      throw error;
+    }
+  };
+
   const deleteNote = async (id: string) => {
     try {
       const { error } = await supabase
@@ -176,7 +191,7 @@ export function useNotes() {
     }
   };
 
-  return { notes, loading, addNote, deleteNote, refetch: fetchNotes };
+  return { notes, loading, addNote, updateNote, deleteNote, refetch: fetchNotes };
 }
 
 export function useFavoriteVerses() {

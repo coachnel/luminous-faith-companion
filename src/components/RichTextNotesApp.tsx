@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, Share2, MessageSquare, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ interface Note {
 
 const RichTextNotesApp = () => {
   const { user } = useAuth();
-  const { notes, createNote, updateNote, deleteNote } = useNotes();
+  const { notes, addNote, updateNote, deleteNote } = useNotes();
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -39,11 +38,10 @@ const RichTextNotesApp = () => {
     if (!user) return;
     
     try {
-      await createNote({
+      await addNote({
         title: 'Nouvelle note',
         content: '',
         tags: [],
-        user_id: user.id,
       });
       toast({
         title: "Note créée",

@@ -12,11 +12,13 @@ import DailyChallenges from './DailyChallenges';
 import PrayerSharing from './PrayerSharing';
 import { useAuth } from '@/hooks/useAuth';
 import { usePWAPrompt } from '@/hooks/usePWAPrompt';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const MobileApp = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { signOut } = useAuth();
   const { promptInstall, isAvailable } = usePWAPrompt();
+  const { scheduleDailyReminders } = useNotifications();
   const [showInstall, setShowInstall] = useState(false);
 
   useEffect(() => {
@@ -24,6 +26,11 @@ const MobileApp = () => {
     window.addEventListener('pwa-install-available', handler);
     return () => window.removeEventListener('pwa-install-available', handler);
   }, []);
+
+  useEffect(() => {
+    // Programmer les rappels quotidiens au chargement de l'app
+    scheduleDailyReminders();
+  }, [scheduleDailyReminders]);
 
   const handleNavigate = (path: string) => {
     setActiveTab(path);
@@ -55,6 +62,7 @@ const MobileApp = () => {
           <Download className="w-5 h-5" /> Installer l'application
         </button>
       )}
+      
       {/* En-tête fixe */}
       <header className="sticky top-0 z-20 glass border-b border-white/30 backdrop-blur-md">
         <div className="flex items-center justify-between p-4">
@@ -66,7 +74,7 @@ const MobileApp = () => {
               <h1 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-spiritual-600 to-heavenly-600">
                 Compagnon Spirituel
               </h1>
-              <p className="text-xs text-gray-600">Votre parcours de foi</p>
+              <p className="text-xs text-gray-600">Bible complète • 73 livres</p>
             </div>
           </div>
           <button

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, BookOpen, Users, Bell } from 'lucide-react';
+import { Calendar, BookOpen, Users, Bell, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,7 +18,8 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     totalUsers: 0,
     notesCount: 0,
     favoritesCount: 0,
-    readingStreak: 0
+    readingStreak: 0,
+    prayerRequestsCount: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +31,7 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     try {
       setLoading(true);
 
-      // Get total users count
+      // Get total users count from profiles table
       const { count: totalUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
@@ -47,18 +48,36 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user?.id);
 
-      // Calculate reading streak from localStorage for now
+      // Get total prayer requests count
+      const { count: prayerRequestsCount } = await supabase
+        .from('prayer_requests')
+        .select('*', { count: 'exact', head: true });
+
+      // Calculate reading streak from localStorage
       const lastRead = localStorage.getItem('lastBibleRead');
+      const today = new Date().toDateString();
       let streak = 0;
-      if (lastRead === new Date().toDateString()) {
+      
+      if (lastRead === today) {
         streak = parseInt(localStorage.getItem('readingStreak') || '1');
+      } else if (lastRead) {
+        // Check if last read was yesterday
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (lastRead === yesterday.toDateString()) {
+          streak = parseInt(localStorage.getItem('readingStreak') || '1');
+        } else {
+          // Reset streak if more than a day has passed
+          localStorage.setItem('readingStreak', '0');
+        }
       }
 
       setUserStats({
         totalUsers: totalUsers || 0,
         notesCount: notesCount || 0,
         favoritesCount: favoritesCount || 0,
-        readingStreak: streak
+        readingStreak: streak,
+        prayerRequestsCount: prayerRequestsCount || 0
       });
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
@@ -72,8 +91,8 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       <div className="p-4 space-y-6 max-w-6xl mx-auto">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map(i => (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-24 bg-gray-200 rounded"></div>
             ))}
           </div>
@@ -102,7 +121,7 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <Users className="text-purple-600" size={24} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Utilisateurs</p>
+                <p className="text-sm text-gray-600">Communauté</p>
                 <p className="text-2xl font-bold text-gray-800">{userStats.totalUsers}</p>
               </div>
             </div>
@@ -130,7 +149,7 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <Calendar className="text-green-600" size={24} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Notes créées</p>
+                <p className="text-sm text-gray-600">Mes notes</p>
                 <p className="text-2xl font-bold text-gray-800">{userStats.notesCount}</p>
               </div>
             </div>
@@ -144,7 +163,7 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <span className="text-red-600 text-xl">⭐</span>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Versets favoris</p>
+                <p className="text-sm text-gray-600">Favoris</p>
                 <p className="text-2xl font-bold text-gray-800">{userStats.favoritesCount}</p>
               </div>
             </div>
@@ -163,6 +182,32 @@ const RealTimeDashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <div className="space-y-4">
           <QuickActions onNavigate={onNavigate} />
           
+          {/* Statistiques communautaires */}
+          <Card className="glass border-white/30 bg-white/90">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="text-spiritual-600" size={20} />
+                Activité communautaire
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Demandes de prière partagées</span>
+                  <span className="font-semibold text-spiritual-600">{userStats.prayerRequestsCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Membres de la communauté</span>
+                  <span className="font-semibold text-spiritual-600">{userStats.totalUsers}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Votre engagement (jours)</span>
+                  <span className="font-semibold text-spiritual-600">{userStats.readingStreak}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Rappels rapides */}
           <Card className="glass border-white/30 bg-white/90">
             <CardHeader>

@@ -1,291 +1,377 @@
 
-import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, Tag, Edit, Bold, Italic, Underline, Share, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit3, Trash2, Share2, MessageSquare, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
 import { useNotes } from '@/hooks/useSupabaseData';
 import { toast } from '@/hooks/use-toast';
 
-const RichTextNotesApp = () => {
-  const { notes, loading, addNote, deleteNote } = useNotes();
-  const [isAdding, setIsAdding] = useState(false);
-  const [newNote, setNewNote] = useState({ title: '', content: '', tags: [] });
-  const [selectedText, setSelectedText] = useState('');
-  const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
 
-  const handleSubmit = async () => {
-    if (newNote.title && newNote.content) {
+const RichTextNotesApp = () => {
+  const { user } = useAuth();
+  const { notes, createNote, updateNote, deleteNote } = useNotes();
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredNotes = notes.filter(note =>
+    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const handleCreateNote = async () => {
+    if (!user) return;
+    
+    try {
+      await createNote({
+        title: 'Nouvelle note',
+        content: '',
+        tags: [],
+        user_id: user.id,
+      });
+      toast({
+        title: "Note créée",
+        description: "Nouvelle note ajoutée avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la note",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditNote = (note: Note) => {
+    setSelectedNote(note);
+    setEditTitle(note.title);
+    setEditContent(note.content);
+    setEditTags(note.tags.join(', '));
+    setIsEditing(true);
+  };
+
+  const handleSaveNote = async () => {
+    if (!selectedNote) return;
+
+    try {
+      const tags = editTags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      await updateNote(selectedNote.id, {
+        title: editTitle,
+        content: editContent,
+        tags,
+      });
+      
+      setIsEditing(false);
+      setSelectedNote(null);
+      toast({
+        title: "Note sauvegardée",
+        description: "Modifications enregistrées avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder la note",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) return;
+
+    try {
+      await deleteNote(noteId);
+      setSelectedNote(null);
+      setIsEditing(false);
+      toast({
+        title: "Note supprimée",
+        description: "Note supprimée avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la note",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShareNote = async (note: Note) => {
+    const shareText = `📝 ${note.title}\n\n${note.content}\n\n#CompagnonSpirituel`;
+    
+    if (navigator.share) {
       try {
-        await addNote(newNote);
-        setNewNote({ title: '', content: '', tags: [] });
-        setIsAdding(false);
+        await navigator.share({
+          title: note.title,
+          text: shareText,
+        });
         toast({
-          description: "Note sauvegardée avec succès ✨",
+          title: "Note partagée",
+          description: "Note partagée avec succès",
+        });
+      } catch (error) {
+        console.log('Partage annulé');
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: "Note copiée",
+          description: "Note copiée dans le presse-papiers",
         });
       } catch (error) {
         toast({
-          description: "Erreur lors de la sauvegarde",
+          title: "Erreur",
+          description: "Impossible de copier la note",
           variant: "destructive",
         });
       }
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteNote(id);
-      toast({
-        description: "Note supprimée",
-      });
-    } catch (error) {
-      toast({
-        description: "Erreur lors de la suppression",
-        variant: "destructive",
-      });
-    }
-  };
+  const formatText = (type: string) => {
+    const textarea = document.getElementById('note-content') as HTMLTextAreaElement;
+    if (!textarea) return;
 
-  const formatText = (format: string) => {
-    if (!textArea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = editContent.substring(start, end);
     
-    const start = textArea.selectionStart;
-    const end = textArea.selectionEnd;
-    const selectedText = textArea.value.substring(start, end);
-    
-    if (selectedText) {
-      let formattedText = '';
-      switch (format) {
-        case 'bold':
-          formattedText = `**${selectedText}**`;
-          break;
-        case 'italic':
-          formattedText = `*${selectedText}*`;
-          break;
-        case 'underline':
-          formattedText = `__${selectedText}__`;
-          break;
-        default:
-          formattedText = selectedText;
-      }
-      
-      const newContent = 
-        textArea.value.substring(0, start) + 
-        formattedText + 
-        textArea.value.substring(end);
-      
-      setNewNote({ ...newNote, content: newContent });
+    let formattedText = '';
+    switch (type) {
+      case 'bold':
+        formattedText = `**${selectedText}**`;
+        break;
+      case 'italic':
+        formattedText = `*${selectedText}*`;
+        break;
+      case 'underline':
+        formattedText = `__${selectedText}__`;
+        break;
+      case 'list':
+        formattedText = `\n• ${selectedText}`;
+        break;
+      default:
+        formattedText = selectedText;
     }
-  };
 
-  const shareNote = (note: any, type: 'internal' | 'external') => {
-    if (type === 'external') {
-      const shareText = `${note.title}\n\n${note.content}\n\n- Partagé depuis Compagnon Spirituel`;
-      if (navigator.share) {
-        navigator.share({
-          title: note.title,
-          text: shareText,
-        });
-      } else {
-        navigator.clipboard.writeText(shareText);
-        toast({
-          description: "Note copiée dans le presse-papiers",
-        });
-      }
-    } else {
-      // Internal sharing - could be extended with community features
-      toast({
-        description: "Fonctionnalité de partage interne en développement",
-      });
-    }
+    const newContent = editContent.substring(0, start) + formattedText + editContent.substring(end);
+    setEditContent(newContent);
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
-  const renderFormattedContent = (content: string) => {
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/__(.*?)__/g, '<u>$1</u>');
-  };
-
-  if (loading) {
-    return (
-      <div className="p-4 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-spiritual-500 border-t-transparent rounded-full mx-auto"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Header */}
-      <Card className="glass border-white/30">
-        <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <span>📝</span>
-            Journal spirituel
-          </CardTitle>
-          <Dialog open={isAdding} onOpenChange={setIsAdding}>
-            <DialogTrigger asChild>
-              <Button className="floating-button spiritual-gradient" size="sm">
-                <Plus size={18} />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="glass border-white/30 backdrop-blur-md bg-white/95">
-              <DialogHeader>
-                <DialogTitle>Nouvelle note</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Input
-                  placeholder="Titre de votre note..."
-                  value={newNote.title}
-                  onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                  className="glass border-white/30 bg-white"
-                />
-                
-                {/* Formatting toolbar */}
-                <div className="flex gap-2 p-2 bg-gray-50 rounded-lg">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => formatText('bold')}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Bold size={14} />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => formatText('italic')}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Italic size={14} />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => formatText('underline')}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Underline size={14} />
-                  </Button>
-                </div>
-                
-                <Textarea
-                  ref={setTextArea}
-                  placeholder="Écrivez vos réflexions spirituelles... Utilisez **gras**, *italique*, __souligné__"
-                  value={newNote.content}
-                  onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                  className="glass border-white/30 min-h-[120px] bg-white"
-                />
-                <div className="flex gap-2">
-                  <Button onClick={handleSubmit} className="spiritual-gradient">
-                    Sauvegarder
-                  </Button>
-                  <Button variant="outline" onClick={() => setIsAdding(false)}>
-                    Annuler
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-      </Card>
+    <div className="p-4 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">Mes Notes Spirituelles</h1>
+          <Button onClick={handleCreateNote} className="spiritual-gradient text-white">
+            <Plus size={16} className="mr-2" />
+            Nouvelle note
+          </Button>
+        </div>
+        
+        <div className="mb-4">
+          <Input
+            placeholder="Rechercher dans vos notes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="glass border-white/30 bg-white/90"
+          />
+        </div>
+      </div>
 
-      {/* Notes List */}
-      <div className="space-y-4">
-        {notes.length === 0 ? (
-          <Card className="glass border-white/30">
-            <CardContent className="p-8 text-center">
-              <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold mb-2">Aucune note pour le moment</h3>
-              <p className="text-gray-600 mb-4">
-                Commencez à écrire vos réflexions spirituelles
-              </p>
-              <Button 
-                onClick={() => setIsAdding(true)}
-                className="spiritual-gradient"
-              >
-                Créer ma première note
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          notes.map((note) => (
-            <Card key={note.id} className="glass border-white/30">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg text-spiritual-700">
-                    {note.title}
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => shareNote(note, 'internal')}
-                      className="text-blue-400 hover:text-blue-600 hover:scale-110 transition-all"
-                    >
-                      <MessageSquare size={16} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => shareNote(note, 'external')}
-                      className="text-green-400 hover:text-green-600 hover:scale-110 transition-all"
-                    >
-                      <Share size={16} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(note.id)}
-                      className="text-red-400 hover:text-red-600 hover:scale-110 transition-all"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Calendar size={14} />
-                  {formatDate(note.created_at)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div 
-                  className="text-gray-700 leading-relaxed whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ 
-                    __html: renderFormattedContent(note.content) 
-                  }}
-                />
-                {note.tags && note.tags.length > 0 && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <Tag size={14} className="text-gray-400" />
-                    {note.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="bg-spiritual-100 text-spiritual-700 px-2 py-1 rounded-full text-xs"
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Liste des notes */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-700">
+            Notes ({filteredNotes.length})
+          </h2>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {filteredNotes.map((note) => (
+              <Card key={note.id} className="glass border-white/30 bg-white/90 hover:shadow-lg transition-all cursor-pointer">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-sm font-medium text-gray-800 line-clamp-1">
+                      {note.title}
+                    </CardTitle>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditNote(note)}
+                        className="p-1 h-6 w-6"
                       >
+                        <Edit3 size={12} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleShareNote(note)}
+                        className="p-1 h-6 w-6"
+                      >
+                        <Share2 size={12} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteNote(note.id)}
+                        className="p-1 h-6 w-6 text-red-600"
+                      >
+                        <Trash2 size={12} />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                    {note.content || 'Aucun contenu'}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {note.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
                         {tag}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
-                )}
+                  <p className="text-xs text-gray-400">
+                    {new Date(note.created_at).toLocaleDateString()}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Éditeur de note */}
+        <div className="space-y-4">
+          {isEditing && selectedNote ? (
+            <Card className="glass border-white/30 bg-white/90">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">Éditer la note</CardTitle>
+                  <div className="flex gap-2">
+                    <Button onClick={handleSaveNote} size="sm" className="spiritual-gradient text-white">
+                      <Save size={16} className="mr-1" />
+                      Sauvegarder
+                    </Button>
+                    <Button onClick={() => setIsEditing(false)} variant="outline" size="sm">
+                      <X size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Titre
+                  </label>
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Titre de la note"
+                    className="glass border-white/30 bg-white/90"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Mise en forme
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('bold')}
+                      className="font-bold"
+                    >
+                      B
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('italic')}
+                      className="italic"
+                    >
+                      I
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('underline')}
+                      className="underline"
+                    >
+                      U
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('list')}
+                    >
+                      •
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Contenu
+                  </label>
+                  <textarea
+                    id="note-content"
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    placeholder="Écrivez votre note spirituelle ici..."
+                    className="w-full h-64 p-3 rounded-lg border border-white/30 bg-white/90 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Étiquettes (séparées par des virgules)
+                  </label>
+                  <Input
+                    value={editTags}
+                    onChange={(e) => setEditTags(e.target.value)}
+                    placeholder="prière, méditation, réflexion..."
+                    className="glass border-white/30 bg-white/90"
+                  />
+                </div>
               </CardContent>
             </Card>
-          ))
-        )}
+          ) : (
+            <Card className="glass border-white/30 bg-white/90">
+              <CardContent className="p-8 text-center">
+                <MessageSquare size={48} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Sélectionnez une note à éditer
+                </h3>
+                <p className="text-gray-600">
+                  Cliquez sur l'icône d'édition d'une note pour commencer à l'éditer
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

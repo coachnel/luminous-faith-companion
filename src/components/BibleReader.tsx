@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Book, ChevronLeft, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getBooks, getChapters, getVerses, searchVerses } from '@/lib/bibleLoader';
+import { getBooks, getChapters, getVerses, searchVerses } from '@/lib/completeBibleLoader';
 import { BookInfo, Chapter, Verse } from '@/types/bible';
 import VerseCard from './VerseCard';
 import OnlineUsers from './OnlineUsers';
@@ -46,6 +47,7 @@ const BibleReader = () => {
     try {
       setLoading(true);
       const booksData = await getBooks();
+      console.log('Bible books loaded:', booksData.length);
       setBooks(booksData);
     } catch (error) {
       console.error('Erreur lors du chargement des livres:', error);
@@ -59,6 +61,7 @@ const BibleReader = () => {
     setLoading(true);
     try {
       const chaptersData = await getChapters(bookName);
+      console.log(`Chapters loaded for ${bookName}:`, chaptersData.length);
       setSelectedBook(bookName);
       setChapters(chaptersData);
       setSelectedChapter(0);
@@ -76,12 +79,19 @@ const BibleReader = () => {
     setLoading(true);
     try {
       const versesData = await getVerses(selectedBook, chapterNumber);
+      console.log(`Verses loaded for ${selectedBook} ${chapterNumber}:`, versesData.length);
       setSelectedChapter(chapterNumber);
       setVerses(versesData);
       setView('verses');
       
       // Marquer la lecture de la Bible aujourd'hui
-      localStorage.setItem('lastBibleRead', new Date().toDateString());
+      const today = new Date().toDateString();
+      const lastRead = localStorage.getItem('lastBibleRead');
+      if (lastRead !== today) {
+        localStorage.setItem('lastBibleRead', today);
+        const currentStreak = parseInt(localStorage.getItem('readingStreak') || '0');
+        localStorage.setItem('readingStreak', (currentStreak + 1).toString());
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des versets:', error);
       setVerses([]);
@@ -96,6 +106,7 @@ const BibleReader = () => {
     setLoading(true);
     try {
       const results = await searchVerses(searchQuery);
+      console.log('Search results:', results.length);
       setSearchResults(results);
       setView('search');
     } catch (error) {
@@ -246,7 +257,7 @@ const BibleReader = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Book className="text-purple-600" size={24} />
-            Bible Louis Segond
+            Bible Louis Segond - 73 livres complets
           </CardTitle>
           <div className="flex gap-2">
             <div className="relative flex-1">

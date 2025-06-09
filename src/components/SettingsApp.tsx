@@ -7,13 +7,16 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useUserPreferences } from '@/hooks/useSupabaseData';
+import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from '@/hooks/use-toast';
 import { useTranslation } from '@/lib/translations';
+import ProfilePhoto from './ProfilePhoto';
 
 const SettingsApp = () => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { preferences, updatePreferences } = useUserPreferences();
+  const { scheduleDailyReminders } = useNotifications();
   const { t } = useTranslation(preferences?.language || 'fr');
 
   const handleNotificationToggle = async (type: string, value: boolean) => {
@@ -26,6 +29,11 @@ const SettingsApp = () => {
           [type]: value,
         },
       });
+      
+      if (value) {
+        scheduleDailyReminders();
+      }
+      
       toast({
         description: "Préférences mises à jour",
       });
@@ -62,6 +70,9 @@ const SettingsApp = () => {
 
   return (
     <div className="p-4 space-y-4">
+      {/* Photo de profil */}
+      <ProfilePhoto />
+
       {/* Profile Section */}
       <Card className="glass border-white/30 bg-white/90">
         <CardHeader>
@@ -71,15 +82,26 @@ const SettingsApp = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full spiritual-gradient flex items-center justify-center">
-              <span className="text-white text-xl">
-                {profile?.name?.charAt(0)?.toUpperCase() || '👤'}
-              </span>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600">Nom</p>
+              <p className="font-medium">{profile?.name || 'Non défini'}</p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{profile?.name || 'Utilisateur'}</h3>
-              <p className="text-gray-600">{user?.email}</p>
+              <p className="text-gray-600">Email</p>
+              <p className="font-medium">{user?.email}</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Membre depuis</p>
+              <p className="font-medium">
+                {new Date(profile?.created_at || '').toLocaleDateString()}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-600">Dernière connexion</p>
+              <p className="font-medium">
+                {new Date().toLocaleDateString()}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -102,10 +124,10 @@ const SettingsApp = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="glass border-white/30 backdrop-blur-md bg-white/95">
-              <SelectItem value="fr">Français</SelectItem>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="es">Español</SelectItem>
-              <SelectItem value="de">Deutsch</SelectItem>
+              <SelectItem value="fr">🇫🇷 Français</SelectItem>
+              <SelectItem value="en">🇺🇸 English</SelectItem>
+              <SelectItem value="es">🇪🇸 Español</SelectItem>
+              <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-gray-500 mt-2">
@@ -126,7 +148,7 @@ const SettingsApp = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Verset du jour</p>
-              <p className="text-sm text-gray-600">Recevoir le verset quotidien</p>
+              <p className="text-sm text-gray-600">Recevoir le verset quotidien (7h00)</p>
             </div>
             <Switch
               checked={preferences?.notification_preferences?.dailyVerse || false}
@@ -169,9 +191,12 @@ const SettingsApp = () => {
         <CardContent>
           <div className="space-y-2 text-sm text-gray-600">
             <p>Compagnon spirituel v2.0</p>
-            <p>Une application pour accompagner votre parcours spirituel</p>
-            <p>Développé par Nel Brunel MANKOU pour la communauté chrétienne</p>
-            <p className="text-xs text-green-600 font-medium">✅ Application stabilisée et optimisée</p>
+            <p>Une application complète pour accompagner votre parcours spirituel</p>
+            <p>✅ Bible complète (73 livres)</p>
+            <p>✅ Notes enrichies avec partage</p>
+            <p>✅ Notifications en temps réel</p>
+            <p>✅ Interface multilingue</p>
+            <p className="text-xs text-green-600 font-medium">🚀 Application stabilisée et déployée</p>
           </div>
         </CardContent>
       </Card>

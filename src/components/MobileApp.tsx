@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
-import AppShell from './AppShell';
+import Navigation from './Navigation';
 import RealTimeDashboard from './RealTimeDashboard';
 import BibleReader from './BibleReader';
 import PrayerCircles from './PrayerCircles';
@@ -18,10 +19,14 @@ const MobileApp = () => {
     return <AuthPage />;
   }
 
+  const handleNavigate = (section: string) => {
+    setActiveSection(section);
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <RealTimeDashboard />;
+        return <RealTimeDashboard onNavigate={handleNavigate} />;
       case 'bible':
         return <BibleReader />;
       case 'prayer-circles':
@@ -35,19 +40,19 @@ const MobileApp = () => {
       case 'settings':
         return <SettingsApp />;
       default:
-        return <RealTimeDashboard />;
+        return <RealTimeDashboard onNavigate={handleNavigate} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      <AppShell 
-        activeSection={activeSection} 
-        setActiveSection={setActiveSection}
-      />
       <main className="pb-20">
         {renderContent()}
       </main>
+      <Navigation 
+        activeSection={activeSection} 
+        setActiveSection={setActiveSection}
+      />
     </div>
   );
 };

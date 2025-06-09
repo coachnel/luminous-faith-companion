@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Home, Heart, Settings, Bell, Edit, Calendar, Target, MessageCircle, Book, Download } from 'lucide-react';
-import Dashboard from './Dashboard';
+import RealTimeDashboard from './RealTimeDashboard';
 import FavoriteVerses from './FavoriteVerses';
 import BibleApp from './BibleApp';
-import NotesApp from './NotesApp';
+import RichTextNotesApp from './RichTextNotesApp';
 import SettingsApp from './SettingsApp';
 import AdvancedNotifications from './AdvancedNotifications';
 import ReadingPlans from './ReadingPlans';
@@ -29,10 +30,10 @@ const MobileApp = () => {
   };
 
   const tabs = [
-    { id: 'dashboard', label: 'Accueil', icon: Home, component: () => <Dashboard onNavigate={handleNavigate} /> },
+    { id: 'dashboard', label: 'Accueil', icon: Home, component: () => <RealTimeDashboard onNavigate={handleNavigate} /> },
     { id: 'bible', label: 'Bible', icon: Book, component: BibleApp },
     { id: 'favorites', label: 'Favoris', icon: Heart, component: FavoriteVerses },
-    { id: 'notes', label: 'Notes', icon: Edit, component: NotesApp },
+    { id: 'notes', label: 'Notes', icon: Edit, component: RichTextNotesApp },
     { id: 'plans', label: 'Plans', icon: Calendar, component: ReadingPlans },
     { id: 'challenges', label: 'Défis', icon: Target, component: DailyChallenges },
     { id: 'prayers', label: 'Prières', icon: MessageCircle, component: PrayerSharing },
@@ -41,7 +42,7 @@ const MobileApp = () => {
   ];
 
   const activeTabData = tabs.find(tab => tab.id === activeTab);
-  const ActiveComponent = activeTabData?.component || (() => <Dashboard onNavigate={handleNavigate} />);
+  const ActiveComponent = activeTabData?.component || (() => <RealTimeDashboard onNavigate={handleNavigate} />);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50">

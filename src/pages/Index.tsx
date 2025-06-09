@@ -34,9 +34,5 @@ export default function Index() {
     );
   }
 
-  if (!user) {
-    return <AuthPage />;
-  }
-
   return <AppShell />;
 }

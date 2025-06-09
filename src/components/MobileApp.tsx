@@ -10,6 +10,8 @@ import RichTextNotesApp from './RichTextNotesApp';
 import FavoriteVerses from './FavoriteVerses';
 import AdvancedNotifications from './AdvancedNotifications';
 import SettingsApp from './SettingsApp';
+import DailyChallenges from './DailyChallenges';
+import ReadingPlans from './ReadingPlans';
 
 const MobileApp = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -39,6 +41,10 @@ const MobileApp = () => {
         return <AdvancedNotifications />;
       case 'settings':
         return <SettingsApp />;
+      case 'challenges':
+        return <DailyChallenges />;
+      case 'reading-plans':
+        return <ReadingPlans />;
       default:
         return <RealTimeDashboard onNavigate={handleNavigate} />;
     }

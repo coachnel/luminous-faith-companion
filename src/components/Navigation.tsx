@@ -1,38 +1,45 @@
 
 import React from 'react';
-import { Book, Heart, User, Calendar } from 'lucide-react';
+import { Home, Book, Heart, Bell, Settings, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeSection: string;
+  setActiveSection: (section: string) => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
-  const tabs = [
-    { id: 'home', label: 'Accueil', icon: Calendar },
-    { id: 'bible', label: 'Bible', icon: Book },
-    { id: 'notes', label: 'Notes', icon: Heart },
-    { id: 'profile', label: 'Profil', icon: User },
+const Navigation = ({ activeSection, setActiveSection }: NavigationProps) => {
+  const navItems = [
+    { id: 'dashboard', icon: Home, label: 'Accueil' },
+    { id: 'bible', icon: Book, label: 'Bible' },
+    { id: 'prayer-circles', icon: Users, label: 'Cercles' },
+    { id: 'notes', icon: Heart, label: 'Notes' },
+    { id: 'notifications', icon: Bell, label: 'Notifications' },
+    { id: 'settings', icon: Settings, label: 'Paramètres' },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/20 px-4 py-2">
-      <div className="flex justify-around items-center max-w-md mx-auto">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-white/30 z-50">
+      <div className="flex justify-around items-center py-2 px-4">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeSection === item.id;
+          
           return (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center p-3 rounded-xl transition-all duration-300 ${
-                activeTab === tab.id
-                  ? 'bg-spiritual-500/20 text-spiritual-600 scale-110'
-                  : 'text-gray-600 hover:text-spiritual-500 hover:bg-white/10'
+            <Button
+              key={item.id}
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveSection(item.id)}
+              className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
+                isActive 
+                  ? 'text-purple-600 bg-purple-50' 
+                  : 'text-gray-600 hover:text-purple-600'
               }`}
             >
-              <Icon size={24} />
-              <span className="text-xs mt-1 font-medium">{tab.label}</span>
-            </button>
+              <Icon size={20} />
+              <span className="text-xs">{item.label}</span>
+            </Button>
           );
         })}
       </div>

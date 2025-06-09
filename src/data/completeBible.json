@@ -216,6 +216,810 @@
               "chapter": 2,
               "verse": 3,
               "text": "Dieu bénit le septième jour, et il le sanctifia, parce qu'en ce jour il se reposa de toute son œuvre qu'il avait créée en la faisant."
+            },
+            {
+              "book": "Genèse",
+              "chapter": 2,
+              "verse": 4,
+              "text": "Voici les origines des cieux et de la terre, quand ils furent créés. Lorsque l'Éternel Dieu fit une terre et des cieux,"
+            },
+            {
+              "book": "Genèse",
+              "chapter": 2,
+              "verse": 5,
+              "text": "aucun arbuste des champs n'était encore sur la terre, et aucune herbe des champs ne germait encore: car l'Éternel Dieu n'avait pas fait pleuvoir sur la terre, et il n'y avait point d'homme pour cultiver le sol."
+            },
+            {
+              "book": "Genèse",
+              "chapter": 2,
+              "verse": 6,
+              "text": "Mais une vapeur s'éleva de la terre, et arrosa toute la surface du sol."
+            },
+            {
+              "book": "Genèse",
+              "chapter": 2,
+              "verse": 7,
+              "text": "L'Éternel Dieu forma l'homme de la poussière de la terre, il souffla dans ses narines un souffle de vie et l'homme devint un être vivant."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "book": "Genèse",
+              "chapter": 3,
+              "verse": 1,
+              "text": "Le serpent était le plus rusé de tous les animaux des champs, que l'Éternel Dieu avait faits. Il dit à la femme: Dieu a-t-il réellement dit: Vous ne mangerez pas de tous les arbres du jardin?"
+            },
+            {
+              "book": "Genèse",
+              "chapter": 3,
+              "verse": 2,
+              "text": "La femme répondit au serpent: Nous mangeons du fruit des arbres du jardin."
+            },
+            {
+              "book": "Genèse",
+              "chapter": 3,
+              "verse": 3,
+              "text": "Mais quant au fruit de l'arbre qui est au milieu du jardin, Dieu a dit: Vous n'en mangerez point et vous n'y toucherez point, de peur que vous ne mouriez."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exode",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Exode",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Voici les noms des fils d'Israël, venus en Égypte avec Jacob et la famille de chacun d'eux:"
+            },
+            {
+              "book": "Exode",
+              "chapter": 1,
+              "verse": 2,
+              "text": "Ruben, Siméon, Lévi, Juda,"
+            },
+            {
+              "book": "Exode",
+              "chapter": 1,
+              "verse": 3,
+              "text": "Issacar, Zabulon, Benjamin,"
+            }
+          ]
+        },
+        {
+          "chapter": 20,
+          "verses": [
+            {
+              "book": "Exode",
+              "chapter": 20,
+              "verse": 1,
+              "text": "Alors Dieu prononça toutes ces paroles, en disant:"
+            },
+            {
+              "book": "Exode",
+              "chapter": 20,
+              "verse": 2,
+              "text": "Je suis l'Éternel, ton Dieu, qui t'ai fait sortir du pays d'Égypte, de la maison de servitude."
+            },
+            {
+              "book": "Exode",
+              "chapter": 20,
+              "verse": 3,
+              "text": "Tu n'auras pas d'autres dieux devant ma face."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lévitique",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Lévitique",
+              "chapter": 1,
+              "verse": 1,
+              "text": "L'Éternel appela Moïse; de la tente d'assignation, il lui parla et dit:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Nombres",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Nombres",
+              "chapter": 1,
+              "verse": 1,
+              "text": "L'Éternel parla à Moïse dans le désert de Sinaï, dans la tente d'assignation, le premier jour du second mois, la seconde année après leur sortie du pays d'Égypte. Il dit:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Deutéronome",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Deutéronome",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Voici les paroles que Moïse adressa à tout Israël, de l'autre côté du Jourdain, dans le désert, dans la plaine, vis-à-vis de Suph, entre Paran, Tophel, Laban, Hatséroth et Di-Zahab."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Josué",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Josué",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Après la mort de Moïse, serviteur de l'Éternel, l'Éternel dit à Josué, fils de Nun, serviteur de Moïse:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Juges",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Juges",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Après la mort de Josué, les enfants d'Israël consultèrent l'Éternel, en disant: Qui de nous montera le premier contre les Cananéens, pour les attaquer?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ruth",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Ruth",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Du temps des juges, il y eut une famine dans le pays. Un homme de Bethléhem de Juda partit, avec sa femme et ses deux fils, pour faire un séjour dans le pays de Moab."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Samuel",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Samuel",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Il y avait un homme de Ramathaïm-Tsophim, de la montagne d'Éphraïm, nommé Elkana, fils de Jeroham, fils d'Élihu, fils de Thohu, fils de Tsuph, Éphratien."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Samuel",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Samuel",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Après la mort de Saül, David, qui avait battu les Amalécites, était depuis deux jours revenu à Tsiklag."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Rois",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Rois",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Le roi David était vieux, avancé en âge; on l'entourait de vêtements, et il ne pouvait se réchauffer."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Rois",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Rois",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Moab se révolta contre Israël, après la mort d'Achab."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Chroniques",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Chroniques",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Adam, Seth, Énosch,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Chroniques",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Chroniques",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Salomon, fils de David, s'affermit dans son règne; l'Éternel, son Dieu, était avec lui, et l'éleva à un haut degré."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Esdras",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Esdras",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La première année de Cyrus, roi de Perse, afin que s'accomplît la parole de l'Éternel prononcée par la bouche de Jérémie, l'Éternel réveilla l'esprit de Cyrus, roi de Perse, qui fit faire de vive voix et par écrit cette publication dans tout son royaume:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Néhémie",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Néhémie",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paroles de Néhémie, fils de Hacalia. Au mois de Kisleu, la vingtième année, comme j'étais à Suse, dans la capitale,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Esther",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Esther",
+              "chapter": 1,
+              "verse": 1,
+              "text": "C'était du temps d'Assuérus, de cet Assuérus qui régnait depuis l'Inde jusqu'en Éthiopie sur cent vingt-sept provinces;"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Job",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Job",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Il y avait dans le pays d'Uts un homme qui s'appelait Job. Et cet homme était intègre et droit; il craignait Dieu, et se détournait du mal."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Psaumes",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Psaumes",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Heureux l'homme qui ne marche pas selon le conseil des méchants, qui ne s'arrête pas sur la voie des pécheurs, et qui ne s'assied pas en compagnie des moqueurs,"
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 1,
+              "verse": 2,
+              "text": "mais qui trouve son plaisir dans la loi de l'Éternel, et qui la médite jour et nuit!"
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 1,
+              "verse": 3,
+              "text": "Il est comme un arbre planté près d'un courant d'eau, qui donne son fruit en sa saison, et dont le feuillage ne se flétrit point: tout ce qu'il fait lui réussit."
+            }
+          ]
+        },
+        {
+          "chapter": 23,
+          "verses": [
+            {
+              "book": "Psaumes",
+              "chapter": 23,
+              "verse": 1,
+              "text": "L'Éternel est mon berger: je ne manquerai de rien."
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 23,
+              "verse": 2,
+              "text": "Il me fait reposer dans de verts pâturages, Il me dirige près des eaux paisibles."
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 23,
+              "verse": 3,
+              "text": "Il restaure mon âme, Il me conduit dans les sentiers de la justice, À cause de son nom."
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 23,
+              "verse": 4,
+              "text": "Quand je marche dans la vallée de l'ombre de la mort, Je ne crains aucun mal, car tu es avec moi: Ta houlette et ton bâton me rassurent."
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 23,
+              "verse": 5,
+              "text": "Tu dresses devant moi une table, En face de mes adversaires; Tu oins d'huile ma tête, Et ma coupe déborde."
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 23,
+              "verse": 6,
+              "text": "Oui, le bonheur et la grâce m'accompagneront Tous les jours de ma vie, Et j'habiterai dans la maison de l'Éternel Jusqu'à la fin de mes jours."
+            }
+          ]
+        },
+        {
+          "chapter": 91,
+          "verses": [
+            {
+              "book": "Psaumes",
+              "chapter": 91,
+              "verse": 1,
+              "text": "Celui qui demeure sous l'abri du Très-Haut Repose à l'ombre du Tout-Puissant."
+            },
+            {
+              "book": "Psaumes",
+              "chapter": 91,
+              "verse": 2,
+              "text": "Je dis à l'Éternel: Mon refuge et ma forteresse, Mon Dieu en qui je me confie!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Proverbes",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Proverbes",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Proverbes de Salomon, fils de David, roi d'Israël,"
+            }
+          ]
+        },
+        {
+          "chapter": 31,
+          "verses": [
+            {
+              "book": "Proverbes",
+              "chapter": 31,
+              "verse": 10,
+              "text": "Qui peut trouver une femme vertueuse? Elle a bien plus de valeur que les perles."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ecclésiaste",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Ecclésiaste",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paroles de l'Ecclésiaste, fils de David, roi à Jérusalem."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "book": "Ecclésiaste",
+              "chapter": 3,
+              "verse": 1,
+              "text": "Il y a un temps pour tout, un temps pour toute chose sous les cieux:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cantique des Cantiques",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Cantique des Cantiques",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Cantique des cantiques, de Salomon."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ésaïe",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Ésaïe",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Prophétie d'Ésaïe, fils d'Amots, sur Juda et Jérusalem, au temps d'Ozias, de Jotham, d'Achaz, d'Ézéchias, rois de Juda."
+            }
+          ]
+        },
+        {
+          "chapter": 53,
+          "verses": [
+            {
+              "book": "Ésaïe",
+              "chapter": 53,
+              "verse": 5,
+              "text": "Mais il était blessé pour nos péchés, Brisé pour nos iniquités; Le châtiment qui nous donne la paix est tombé sur lui, Et c'est par ses meurtrissures que nous sommes guéris."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Jérémie",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Jérémie",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paroles de Jérémie, fils de Hilkija, l'un des sacrificateurs d'Anathoth, dans le pays de Benjamin."
+            }
+          ]
+        },
+        {
+          "chapter": 29,
+          "verses": [
+            {
+              "book": "Jérémie",
+              "chapter": 29,
+              "verse": 11,
+              "text": "Car je connais les projets que j'ai formés sur vous, dit l'Éternel, projets de paix et non de malheur, afin de vous donner un avenir et de l'espérance."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lamentations",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Lamentations",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Eh quoi! elle est assise solitaire, cette ville si peuplée! Elle est comme une veuve, celle qui était grande entre les nations! La princesse des provinces est devenue tributaire!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ézéchiel",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Ézéchiel",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La trentième année, le cinquième jour du quatrième mois, comme j'étais parmi les captifs du fleuve du Kebar, les cieux s'ouvrirent, et j'eus des visions divines."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Daniel",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Daniel",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La troisième année du règne de Jojakim, roi de Juda, Nebucadnetsar, roi de Babylone, marcha contre Jérusalem, et l'assiégea."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Osée",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Osée",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La parole de l'Éternel qui fut adressée à Osée, fils de Beéri, au temps d'Ozias, de Jotham, d'Achaz, d'Ézéchias, rois de Juda, et au temps de Jéroboam, fils de Joas, roi d'Israël."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Joël",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Joël",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La parole de l'Éternel qui fut adressée à Joël, fils de Pethuel."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Amos",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Amos",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paroles d'Amos, l'un des bergers de Tekoa, visions qu'il eut sur Israël, au temps d'Ozias, roi de Juda, et au temps de Jéroboam, fils de Joas, roi d'Israël, deux ans avant le tremblement de terre."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Abdias",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Abdias",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Prophétie d'Abdias. Ainsi parle le Seigneur, l'Éternel, sur Édom: -Nous avons appris une nouvelle de la part de l'Éternel, Et un messager a été envoyé parmi les nations: Levez-vous, marchons contre Édom pour lui faire la guerre! -"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Jonas",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Jonas",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La parole de l'Éternel fut adressée à Jonas, fils d'Amitthaï, en ces mots:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Michée",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Michée",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La parole de l'Éternel qui fut adressée à Michée, de Moréscheth, au temps de Jotham, d'Achaz, d'Ézéchias, rois de Juda, prophétie sur Samarie et Jérusalem."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Nahum",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Nahum",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Oracle sur Ninive. Livre de la prophétie de Nahum, d'Elkosh."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Habacuc",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Habacuc",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Oracle révélé à Habacuc, le prophète."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sophonie",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Sophonie",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La parole de l'Éternel qui fut adressée à Sophonie, fils de Cuschi, fils de Guedalia, fils d'Amaria, fils d'Ézéchias, au temps de Josias, fils d'Amon, roi de Juda."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Aggée",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Aggée",
+              "chapter": 1,
+              "verse": 1,
+              "text": "La seconde année du roi Darius, le premier jour du sixième mois, la parole de l'Éternel fut adressée par Aggée, le prophète, à Zorobabel, fils de Schealthiel, gouverneur de Juda, et à Josué, fils de Jotsadak, le souverain sacrificateur, en ces mots:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Zacharie",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Zacharie",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Le huitième mois, la seconde année de Darius, la parole de l'Éternel fut adressée à Zacharie, fils de Bérékia, fils d'Iddo, le prophète, en ces mots:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Malachie",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Malachie",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Oracle, parole de l'Éternel à Israël par Malachie."
             }
           ]
         }
@@ -246,6 +1050,612 @@
               "chapter": 1,
               "verse": 3,
               "text": "Juda engendra de Thamar Pharès et Zara; Pharès engendra Esrom; Esrom engendra Aram;"
+            }
+          ]
+        },
+        {
+          "chapter": 5,
+          "verses": [
+            {
+              "book": "Matthieu",
+              "chapter": 5,
+              "verse": 3,
+              "text": "Heureux les pauvres en esprit, car le royaume des cieux est à eux!"
+            },
+            {
+              "book": "Matthieu",
+              "chapter": 5,
+              "verse": 4,
+              "text": "Heureux les affligés, car ils seront consolés!"
+            }
+          ]
+        },
+        {
+          "chapter": 6,
+          "verses": [
+            {
+              "book": "Matthieu",
+              "chapter": 6,
+              "verse": 9,
+              "text": "Voici donc comment vous devez prier: Notre Père qui es aux cieux! Que ton nom soit sanctifié;"
+            },
+            {
+              "book": "Matthieu",
+              "chapter": 6,
+              "verse": 11,
+              "text": "Donne-nous aujourd'hui notre pain quotidien;"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Marc",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Marc",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Commencement de l'Évangile de Jésus Christ, Fils de Dieu."
+            },
+            {
+              "book": "Marc",
+              "chapter": 1,
+              "verse": 15,
+              "text": "Il disait: Le temps est accompli, et le royaume de Dieu est proche. Repentez-vous, et croyez à la bonne nouvelle."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Luc",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Luc",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Plusieurs ayant entrepris de composer un récit des événements qui se sont accomplis parmi nous,"
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "book": "Luc",
+              "chapter": 2,
+              "verse": 10,
+              "text": "Mais l'ange leur dit: Ne craignez point; car je vous annonce une bonne nouvelle, qui sera pour tout le peuple le sujet d'une grande joie:"
+            },
+            {
+              "book": "Luc",
+              "chapter": 2,
+              "verse": 11,
+              "text": "c'est qu'aujourd'hui, dans la ville de David, il vous est né un Sauveur, qui est le Christ, le Seigneur."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Jean",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Jean",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Au commencement était la Parole, et la Parole était avec Dieu, et la Parole était Dieu."
+            },
+            {
+              "book": "Jean",
+              "chapter": 1,
+              "verse": 14,
+              "text": "Et la parole a été faite chair, et elle a habité parmi nous, pleine de grâce et de vérité; et nous avons contemplé sa gloire, une gloire comme la gloire du Fils unique venu du Père."
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "book": "Jean",
+              "chapter": 3,
+              "verse": 16,
+              "text": "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle."
+            }
+          ]
+        },
+        {
+          "chapter": 14,
+          "verses": [
+            {
+              "book": "Jean",
+              "chapter": 14,
+              "verse": 6,
+              "text": "Jésus lui dit: Je suis le chemin, la vérité, et la vie. Nul ne vient au Père que par moi."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Actes",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Actes",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Théophile, j'ai parlé, dans mon premier livre, de tout ce que Jésus a commencé de faire et d'enseigner dès le commencement"
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "book": "Actes",
+              "chapter": 2,
+              "verse": 38,
+              "text": "Pierre leur dit: Repentez-vous, et que chacun de vous soit baptisé au nom de Jésus Christ, pour le pardon de vos péchés; et vous recevrez le don du Saint Esprit."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Romains",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Romains",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, serviteur de Jésus Christ, appelé à être apôtre, mis à part pour annoncer l'Évangile de Dieu,"
+            }
+          ]
+        },
+        {
+          "chapter": 8,
+          "verses": [
+            {
+              "book": "Romains",
+              "chapter": 8,
+              "verse": 28,
+              "text": "Nous savons, du reste, que toutes choses concourent au bien de ceux qui aiment Dieu, de ceux qui sont appelés selon son dessein."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Corinthiens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Corinthiens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, appelé à être apôtre de Jésus Christ par la volonté de Dieu, et le frère Sosthène,"
+            }
+          ]
+        },
+        {
+          "chapter": 13,
+          "verses": [
+            {
+              "book": "1 Corinthiens",
+              "chapter": 13,
+              "verse": 4,
+              "text": "La charité est patiente, elle est pleine de bonté; la charité n'est point envieuse; la charité ne se vante point, elle ne s'enfle point d'orgueil,"
+            },
+            {
+              "book": "1 Corinthiens",
+              "chapter": 13,
+              "verse": 13,
+              "text": "Maintenant donc ces trois choses demeurent: la foi, l'espérance, la charité; mais la plus grande de ces choses, c'est la charité."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Corinthiens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Corinthiens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, apôtre de Jésus Christ par la volonté de Dieu, et le frère Timothée, à l'Église de Dieu qui est à Corinthe, et à tous les saints qui sont dans toute l'Achaïe:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Galates",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Galates",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, apôtre, non de la part des hommes, ni par un homme, mais par Jésus Christ et Dieu le Père, qui l'a ressuscité des morts,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Éphésiens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Éphésiens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, apôtre de Jésus Christ par la volonté de Dieu, aux saints qui sont à Éphèse et aux fidèles en Jésus Christ:"
+            }
+          ]
+        },
+        {
+          "chapter": 2,
+          "verses": [
+            {
+              "book": "Éphésiens",
+              "chapter": 2,
+              "verse": 8,
+              "text": "Car c'est par la grâce que vous êtes sauvés, par le moyen de la foi. Et cela ne vient pas de vous, c'est le don de Dieu."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Philippiens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Philippiens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul et Timothée, serviteurs de Jésus Christ, à tous les saints en Jésus Christ qui sont à Philippes, aux évêques et aux diacres:"
+            }
+          ]
+        },
+        {
+          "chapter": 4,
+          "verses": [
+            {
+              "book": "Philippiens",
+              "chapter": 4,
+              "verse": 13,
+              "text": "Je puis tout par celui qui me fortifie."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Colossiens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Colossiens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, apôtre de Jésus Christ par la volonté de Dieu, et le frère Timothée,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Thessaloniciens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Thessaloniciens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, Silvain et Timothée, à l'Église des Thessaloniciens, qui est en Dieu le Père et en Jésus Christ le Seigneur: que la grâce et la paix vous soient données!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Thessaloniciens",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Thessaloniciens",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, Silvain et Timothée, à l'Église des Thessaloniciens, qui est en Dieu notre Père et en Jésus Christ le Seigneur:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Timothée",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Timothée",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, apôtre de Jésus Christ, par ordre de Dieu notre Sauveur et de Jésus Christ notre espérance,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Timothée",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Timothée",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, apôtre de Jésus Christ par la volonté de Dieu, selon la promesse de la vie qui est en Jésus Christ,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tite",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Tite",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, serviteur de Dieu, et apôtre de Jésus Christ pour la foi des élus de Dieu et la connaissance de la vérité qui est selon la piété,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Philémon",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Philémon",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Paul, prisonnier de Jésus Christ, et le frère Timothée, à Philémon, notre bien-aimé et notre compagnon d'œuvre,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hébreux",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Hébreux",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Après avoir autrefois, à plusieurs reprises et de plusieurs manières, parlé à nos pères par les prophètes, Dieu,"
+            }
+          ]
+        },
+        {
+          "chapter": 11,
+          "verses": [
+            {
+              "book": "Hébreux",
+              "chapter": 11,
+              "verse": 1,
+              "text": "Or la foi est une ferme assurance des choses qu'on espère, une démonstration de celles qu'on ne voit pas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Jacques",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Jacques",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Jacques, serviteur de Dieu et du Seigneur Jésus Christ, aux douze tribus qui sont dans la dispersion, salut!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Pierre",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Pierre",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Pierre, apôtre de Jésus Christ, à ceux qui sont étrangers et dispersés dans le Pont, la Galatie, la Cappadoce, l'Asie et la Bithynie,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Pierre",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Pierre",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Simon Pierre, serviteur et apôtre de Jésus Christ, à ceux qui ont reçu en partage une foi du même prix que la nôtre, par la justice de notre Dieu et du Sauveur Jésus Christ:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Jean",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "1 Jean",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Ce qui était dès le commencement, ce que nous avons entendu, ce que nous avons vu de nos yeux, ce que nous avons contemplé et que nos mains ont touché, concernant la parole de vie,"
+            }
+          ]
+        },
+        {
+          "chapter": 4,
+          "verses": [
+            {
+              "book": "1 Jean",
+              "chapter": 4,
+              "verse": 8,
+              "text": "Celui qui n'aime pas n'a pas connu Dieu, car Dieu est amour."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Jean",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "2 Jean",
+              "chapter": 1,
+              "verse": 1,
+              "text": "L'ancien, à Kyria l'élue et à ses enfants, que j'aime dans la vérité, -et ce n'est pas moi seul qui les aime, mais aussi tous ceux qui ont connu la vérité, -"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 Jean",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "3 Jean",
+              "chapter": 1,
+              "verse": 1,
+              "text": "L'ancien, à Gaïus, le bien-aimé, que j'aime dans la vérité."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Jude",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Jude",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Jude, serviteur de Jésus Christ, et frère de Jacques, à ceux qui ont été appelés, qui sont aimés en Dieu le Père, et gardés pour Jésus Christ:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Apocalypse",
+      "chapters": [
+        {
+          "chapter": 1,
+          "verses": [
+            {
+              "book": "Apocalypse",
+              "chapter": 1,
+              "verse": 1,
+              "text": "Révélation de Jésus Christ, que Dieu lui a donnée pour montrer à ses serviteurs les choses qui doivent arriver bientôt, et qu'il a fait connaître, par l'envoi de son ange, à son serviteur Jean,"
+            }
+          ]
+        },
+        {
+          "chapter": 3,
+          "verses": [
+            {
+              "book": "Apocalypse",
+              "chapter": 3,
+              "verse": 20,
+              "text": "Voici, je me tiens à la porte, et je frappe. Si quelqu'un entend ma voix et ouvre la porte, j'entrerai chez lui, je souperai avec lui, et lui avec moi."
+            }
+          ]
+        },
+        {
+          "chapter": 21,
+          "verses": [
+            {
+              "book": "Apocalypse",
+              "chapter": 21,
+              "verse": 4,
+              "text": "Il essuiera toute larme de leurs yeux, et la mort ne sera plus, et il n'y aura plus ni deuil, ni cri, ni douleur, car les premières choses ont disparu."
             }
           ]
         }

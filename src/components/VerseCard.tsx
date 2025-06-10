@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Heart, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Verse } from '../types/bible';
+import { useBible } from '../contexts/BibleContext';
 import { toast } from '@/hooks/use-toast';
 
 interface VerseCardProps {
@@ -11,37 +12,18 @@ interface VerseCardProps {
 }
 
 const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
+  const { toggleFavorite, isFavorite } = useBible();
+  
   const verseId = `${verse.book}-${verse.chapter}-${verse.verse}`;
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  useEffect(() => {
-    // Charger l'état des favoris depuis localStorage
-    const favorites = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
-    setIsFavorite(favorites.includes(verseId));
-  }, [verseId]);
+  const isVerseInFavorites = isFavorite(verseId);
 
   const handleFavoriteToggle = () => {
-    const favorites = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
-    
-    if (isFavorite) {
-      const updated = favorites.filter((id: string) => id !== verseId);
-      localStorage.setItem('bibleFavorites', JSON.stringify(updated));
-      setIsFavorite(false);
-      toast({
-        title: "Retiré des favoris",
-        description: `${verse.book} ${verse.chapter}:${verse.verse}`,
-        duration: 2000,
-      });
-    } else {
-      const updated = [...favorites, verseId];
-      localStorage.setItem('bibleFavorites', JSON.stringify(updated));
-      setIsFavorite(true);
-      toast({
-        title: "⭐ Ajouté aux favoris",
-        description: `${verse.book} ${verse.chapter}:${verse.verse}`,
-        duration: 2000,
-      });
-    }
+    toggleFavorite(verseId);
+    toast({
+      title: isVerseInFavorites ? "Retiré des favoris" : "⭐ Ajouté aux favoris",
+      description: `${verse.book} ${verse.chapter}:${verse.verse}`,
+      duration: 2000,
+    });
   };
 
   const handleShare = async () => {
@@ -84,7 +66,7 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
     <Card className="w-full bg-white hover:shadow-lg transition-all duration-300 animate-fade-in border-purple-100 hover:border-purple-200">
       <CardHeader className="pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs sm:text-sm font-semibold text-bible-primary">
+          <h3 className="text-xs sm:text-sm font-semibold text-purple-600">
             {verse.book} {verse.chapter}:{verse.verse}
           </h3>
           <div className="flex gap-1 sm:gap-2">
@@ -93,17 +75,17 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
               size="sm"
               onClick={handleFavoriteToggle}
               className={`p-1.5 sm:p-2 hover:bg-purple-50 transition-colors ${
-                isFavorite ? 'text-yellow-500' : 'text-gray-400'
+                isVerseInFavorites ? 'text-yellow-500' : 'text-gray-400'
               }`}
-              aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+              aria-label={isVerseInFavorites ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
-              <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isFavorite ? 'fill-current' : ''}`} />
+              <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isVerseInFavorites ? 'fill-current' : ''}`} />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleShare}
-              className="p-1.5 sm:p-2 text-gray-400 hover:text-bible-primary hover:bg-purple-50 transition-colors"
+              className="p-1.5 sm:p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
               aria-label="Partager ce verset"
             >
               <Share className="h-3 w-3 sm:h-4 sm:w-4" />

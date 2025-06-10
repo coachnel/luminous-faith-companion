@@ -1,19 +1,26 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { BibleData, Verse, BookInfo } from '../types/bible';
+import { loadBibleData, getAllBooks, searchVerses, getBookChapters, getChapterVerses } from '../lib/bibleDataLoader';
 
 interface BibleContextType {
   bibleData: BibleData | null;
   books: BookInfo[];
   selectedBook: string;
   selectedChapter: number;
+  selectedVersion: string;
   searchQuery: string;
   searchResults: Verse[];
   currentVerses: Verse[];
+  favorites: Set<string>;
+  isLoading: boolean;
+  
   setSelectedBook: (book: string) => void;
   setSelectedChapter: (chapter: number) => void;
+  setSelectedVersion: (version: string) => void;
   setSearchQuery: (query: string) => void;
-  getAvailableChapters: () => number[];
   toggleFavorite: (verseId: string) => void;
+  getAvailableChapters: () => number[];
   isFavorite: (verseId: string) => boolean;
 }
 
@@ -28,13 +35,51 @@ export const BibleProvider: React.FC<BibleProviderProps> = ({ children }) => {
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [selectedBook, setSelectedBook] = useState<string>('Genèse');
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
+  const [selectedVersion, setSelectedVersion] = useState<string>('Louis Segond (1910)');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Verse[]>([]);
+  const [currentVerses, setCurrentVerses] = useState<Verse[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
 
-  const getAvailableChapters = () => {
-    const book = books.find(b => b.name === selectedBook);
-    return book ? Array.from({ length: book.chaptersCount }, (_, i) => i + 1) : [];
+  useEffect(() => {
+    const initializeBible = async () => {
+      try {
+        console.log('Chargement des données bibliques...');
+        const data = await loadBibleData();
+        setBibleData(data);
+        const allBooks = getAllBooks(data);
+        setBooks(allBooks);
+        console.log(`Bible chargée avec ${allBooks.length} livres`);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Erreur lors du chargement des données bibliques:', error);
+        setIsLoading(false);
+      }
+    };
+
+    initializeBible();
+  }, []);
+
+  useEffect(() => {
+    if (bibleData && selectedBook && selectedChapter) {
+      const verses = getChapterVerses(bibleData, selectedBook, selectedChapter);
+      setCurrentVerses(verses);
+    }
+  }, [bibleData, selectedBook, selectedChapter]);
+
+  useEffect(() => {
+    if (bibleData && searchQuery.trim()) {
+      const results = searchVerses(bibleData, searchQuery, 50);
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+    }
+  }, [bibleData, searchQuery]);
+
+  const getAvailableChapters = (): number[] => {
+    if (!bibleData || !selectedBook) return [];
+    return getBookChapters(bibleData, selectedBook);
   };
 
   const toggleFavorite = (verseId: string) => {
@@ -49,21 +94,27 @@ export const BibleProvider: React.FC<BibleProviderProps> = ({ children }) => {
     });
   };
 
-  const isFavorite = (verseId: string) => favorites.has(verseId);
+  const isFavorite = (verseId: string): boolean => {
+    return favorites.has(verseId);
+  };
 
   const value: BibleContextType = {
     bibleData,
     books,
     selectedBook,
     selectedChapter,
+    selectedVersion,
     searchQuery,
     searchResults,
-    currentVerses: [], // Placeholder, replace with actual logic
+    currentVerses,
+    favorites,
+    isLoading,
     setSelectedBook,
     setSelectedChapter,
+    setSelectedVersion,
     setSearchQuery,
-    getAvailableChapters,
     toggleFavorite,
+    getAvailableChapters,
     isFavorite,
   };
 

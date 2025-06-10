@@ -1,5 +1,4 @@
 
-
 export interface Verse {
   book: string;
   chapter: number;
@@ -9,7 +8,6 @@ export interface Verse {
 
 export interface Chapter {
   chapter: number;
-  verseCount: number;
   verses: Verse[];
 }
 
@@ -28,4 +26,3 @@ export interface BookInfo {
   testament: 'old' | 'new';
   chaptersCount: number;
 }
-

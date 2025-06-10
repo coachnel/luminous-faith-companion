@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Book, ChevronLeft, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getBooks, getChapters, getVerses, searchVerses } from '@/lib/completeBibleLoader';
+import { getBooks, getChapters, getVerses, searchVerses } from '@/lib/enhancedBibleLoader';
 import { BookInfo, Chapter, Verse } from '@/types/bible';
 import VerseCard from './VerseCard';
 import OnlineUsers from './OnlineUsers';
@@ -123,14 +122,14 @@ const BibleReader = () => {
   const renderBooks = () => (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">{t('bible')}</h2>
+        <h2 className="text-xl font-bold">Bible complète</h2>
         <OnlineUsers />
       </div>
       
       {oldTestamentBooks.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
-            {t('oldTestament')} ({oldTestamentBooks.length} livres)
+            Ancien Testament ({oldTestamentBooks.length} livres)
           </h3>
           <div className="grid gap-2">
             {oldTestamentBooks.map((book) => (
@@ -143,7 +142,7 @@ const BibleReader = () => {
                 <div className="text-left">
                   <div className="font-medium">{book.name}</div>
                   <div className="text-sm text-gray-500">
-                    {book.chaptersCount} {t('chapter')}{book.chaptersCount > 1 ? 's' : ''}
+                    {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
                   </div>
                 </div>
               </Button>
@@ -155,7 +154,7 @@ const BibleReader = () => {
       {newTestamentBooks.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-200 pb-1">
-            {t('newTestament')} ({newTestamentBooks.length} livres)
+            Nouveau Testament ({newTestamentBooks.length} livres)
           </h3>
           <div className="grid gap-2">
             {newTestamentBooks.map((book) => (
@@ -168,7 +167,7 @@ const BibleReader = () => {
                 <div className="text-left">
                   <div className="font-medium">{book.name}</div>
                   <div className="text-sm text-gray-500">
-                    {book.chaptersCount} {t('chapter')}{book.chaptersCount > 1 ? 's' : ''}
+                    {book.chaptersCount} chapitre{book.chaptersCount > 1 ? 's' : ''}
                   </div>
                 </div>
               </Button>
@@ -239,7 +238,7 @@ const BibleReader = () => {
       </div>
       {searchResults.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
-          {searchQuery ? t('noResults') : 'Saisissez votre recherche ci-dessus'}
+          {searchQuery ? 'Aucun résultat trouvé' : 'Saisissez votre recherche ci-dessus'}
         </p>
       ) : (
         <div className="space-y-3">
@@ -257,13 +256,13 @@ const BibleReader = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Book className="text-purple-600" size={24} />
-            Bible Louis Segond - 73 livres complets
+            Bible Louis Segond - Version complète
           </CardTitle>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
               <Input
-                placeholder={`${t('search')} dans la Bible...`}
+                placeholder="Rechercher dans la Bible..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 glass border-white/30 bg-white/90"
@@ -275,7 +274,7 @@ const BibleReader = () => {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p>{t('loading')}</p>
+              <p>Chargement...</p>
             </div>
           ) : (
             <>

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
-import Navigation from './Navigation';
+import ExpandedNavigation from './ExpandedNavigation';
 import RealTimeDashboard from './RealTimeDashboard';
 import BibleReader from './BibleReader';
 import PrayerCircles from './PrayerCircles';
@@ -12,6 +12,7 @@ import AdvancedNotifications from './AdvancedNotifications';
 import SettingsApp from './SettingsApp';
 import DailyChallenges from './DailyChallenges';
 import ReadingPlans from './ReadingPlans';
+import Prayer from './Prayer';
 
 const MobileApp = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -45,6 +46,8 @@ const MobileApp = () => {
         return <DailyChallenges />;
       case 'reading-plans':
         return <ReadingPlans />;
+      case 'prayer':
+        return <Prayer />;
       default:
         return <RealTimeDashboard onNavigate={handleNavigate} />;
     }
@@ -55,7 +58,7 @@ const MobileApp = () => {
       <main className="pb-20">
         {renderContent()}
       </main>
-      <Navigation 
+      <ExpandedNavigation 
         activeSection={activeSection} 
         setActiveSection={setActiveSection}
       />

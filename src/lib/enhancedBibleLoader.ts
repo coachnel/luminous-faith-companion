@@ -1,4 +1,5 @@
 
+
 import bibleData from '@/data/louis-segond.json';
 import { BookInfo, Chapter, Verse } from '@/types/bible';
 
@@ -77,7 +78,8 @@ export const getChapters = async (bookName: string): Promise<Chapter[]> => {
 
     const chapters: Chapter[] = book.chapters.map(chapter => ({
       chapter: chapter.chapter,
-      verseCount: chapter.verses.length
+      verseCount: chapter.verses.length,
+      verses: chapter.verses
     }));
 
     cache.set(cacheKey, chapters);
@@ -160,3 +162,4 @@ export const getRandomVerse = async (): Promise<Verse | null> => {
     return null;
   }
 };
+

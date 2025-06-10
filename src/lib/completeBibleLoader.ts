@@ -17,8 +17,22 @@ class CompleteBibleDataManager {
     if (this.data) return this.data;
 
     this.data = {
-      oldTestament: completeBibleData.oldTestament || [],
-      newTestament: completeBibleData.newTestament || []
+      oldTestament: (completeBibleData.oldTestament || []).map(book => ({
+        name: book.name,
+        chapters: book.chapters.map(chapter => ({
+          chapter: chapter.chapter,
+          verseCount: chapter.verses.length,
+          verses: chapter.verses
+        }))
+      })),
+      newTestament: (completeBibleData.newTestament || []).map(book => ({
+        name: book.name,
+        chapters: book.chapters.map(chapter => ({
+          chapter: chapter.chapter,
+          verseCount: chapter.verses.length,
+          verses: chapter.verses
+        }))
+      }))
     };
 
     return this.data;

@@ -1,3 +1,4 @@
+
 /* ===================================================================
    File: src/lib/bibleDataLoader.ts
    Responsibility: Centralized loader for Bible data (JSON/XML) with in-memory cache
@@ -26,6 +27,7 @@ const bibleData: BibleData = {
       chapters: [
         {
           chapter: 1,
+          verseCount: 2,
           verses: [
             { book: 'Genesis', chapter: 1, verse: 1, text: 'In the beginning God created the heaven and the earth.' },
             { book: 'Genesis', chapter: 1, verse: 2, text: 'And the earth was without form, and void; and darkness was upon the face of the deep.' },
@@ -43,6 +45,7 @@ const bibleData: BibleData = {
       chapters: [
         {
           chapter: 1,
+          verseCount: 2,
           verses: [
             { book: 'Matthew', chapter: 1, verse: 1, text: 'The book of the generation of Jesus Christ, the son of David, the son of Abraham.' },
             { book: 'Matthew', chapter: 1, verse: 2, text: 'Abraham begat Isaac; and Isaac begat Jacob; and Jacob begat Judas and his brethren;' },

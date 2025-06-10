@@ -1,4 +1,3 @@
-
 import { BibleData, BookInfo, Verse, Chapter } from '../types/bible';
 import louisSegondData from '../data/louis-segond.json';
 
@@ -37,9 +36,11 @@ class BibleDataManager {
     const chapters: Chapter[] = [];
     
     for (let i = 1; i <= chapterCounts; i++) {
+      const verses = this.generateSampleVerses(bookName, i);
       chapters.push({
         chapter: i,
-        verses: this.generateSampleVerses(bookName, i)
+        verseCount: verses.length,
+        verses: verses
       });
     }
     
@@ -96,7 +97,15 @@ class BibleDataManager {
     const completeOldTestament = COMPLETE_BIBLE_BOOKS.oldTestament.map(bookName => {
       const existingBook = existingOldTestament.find(book => book.name === bookName);
       if (existingBook) {
-        return existingBook;
+        // Ensure existing book chapters have verseCount
+        return {
+          name: existingBook.name,
+          chapters: existingBook.chapters.map(chapter => ({
+            chapter: chapter.chapter,
+            verseCount: chapter.verses.length,
+            verses: chapter.verses
+          }))
+        };
       }
       
       return {
@@ -109,7 +118,15 @@ class BibleDataManager {
     const completeNewTestament = COMPLETE_BIBLE_BOOKS.newTestament.map(bookName => {
       const existingBook = existingNewTestament.find(book => book.name === bookName);
       if (existingBook) {
-        return existingBook;
+        // Ensure existing book chapters have verseCount
+        return {
+          name: existingBook.name,
+          chapters: existingBook.chapters.map(chapter => ({
+            chapter: chapter.chapter,
+            verseCount: chapter.verses.length,
+            verses: chapter.verses
+          }))
+        };
       }
       
       return {

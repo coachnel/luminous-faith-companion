@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,6 +8,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { BibleProvider } from "./contexts/BibleContext";
 import BibleView from "./components/BibleView";
 import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import AppShell from "@/components/AppShell";
 
 const queryClient = new QueryClient();
 
@@ -20,13 +21,23 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route 
-              path="/" 
+            <Route
+              path="/*"
               element={
-                <BibleProvider>
-                  <BibleView />
-                </BibleProvider>
-              } 
+                <ErrorBoundary>
+                  <AppShell />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/bible"
+              element={
+                <ErrorBoundary>
+                  <BibleProvider>
+                    <BibleView />
+                  </BibleProvider>
+                </ErrorBoundary>
+              }
             />
             <Route path="*" element={<NotFound />} />
           </Routes>

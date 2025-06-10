@@ -1,3 +1,4 @@
+
 export interface Verse {
   book: string;
   chapter: number;
@@ -7,7 +8,7 @@ export interface Verse {
 
 export interface Chapter {
   chapter: number;
-  verses: Verse[];
+  verseCount: number;
 }
 
 export interface Book {

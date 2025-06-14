@@ -3,12 +3,11 @@
 import frApeeData from '@/data/json/fr_apee.json';
 import { NeonVerse, NeonBook, NeonBibleVersion } from './bibleClient';
 
-// Interface pour les données JSON fr_apee
-interface FrApeeEntry {
-  book: string;
-  chapter: number;
-  verse: number;
-  text: string;
+// Interface pour les données JSON fr_apee (structure réelle)
+interface FrApeeBook {
+  abbrev: string;
+  chapters: string[][];
+  name: string;
 }
 
 // Mapping des noms de livres JSON vers nos IDs
@@ -172,29 +171,42 @@ export class BibleDataLoader {
     
     const verses: NeonVerse[] = [];
     
-    // Vérifier si frApeeData est un tableau
+    // Vérifier si frApeeData est un tableau de livres
     if (Array.isArray(frApeeData)) {
-      console.log(`📊 ${frApeeData.length} versets trouvés dans fr_apee.json`);
+      console.log(`📊 ${frApeeData.length} livres trouvés dans fr_apee.json`);
       
-      frApeeData.forEach((entry: FrApeeEntry) => {
-        const bookId = BOOK_NAME_TO_ID[entry.book];
-        const bookName = ID_TO_FRENCH_NAME[bookId] || entry.book;
+      frApeeData.forEach((bookData: FrApeeBook) => {
+        // Trouver l'ID du livre
+        const bookId = BOOK_NAME_TO_ID[bookData.name] || bookData.abbrev?.toLowerCase();
+        const bookName = ID_TO_FRENCH_NAME[bookId] || bookData.name;
         
-        if (bookId && entry.text && entry.text.trim().length > 0) {
-          verses.push({
-            id: `${bookId}-${entry.chapter}-${entry.verse}`,
-            book_id: bookId,
-            book_name: bookName,
-            chapter_number: entry.chapter,
-            verse_number: entry.verse,
-            text: entry.text.trim(),
-            version_id: 'fr_apee',
-            version_name: 'Bible Française APEE'
+        if (bookId && bookData.chapters && Array.isArray(bookData.chapters)) {
+          // Parcourir les chapitres
+          bookData.chapters.forEach((chapter: string[], chapterIndex: number) => {
+            const chapterNumber = chapterIndex + 1;
+            
+            // Parcourir les versets du chapitre
+            chapter.forEach((verseText: string, verseIndex: number) => {
+              const verseNumber = verseIndex + 1;
+              
+              if (verseText && verseText.trim().length > 0) {
+                verses.push({
+                  id: `${bookId}-${chapterNumber}-${verseNumber}`,
+                  book_id: bookId,
+                  book_name: bookName,
+                  chapter_number: chapterNumber,
+                  verse_number: verseNumber,
+                  text: verseText.trim(),
+                  version_id: 'fr_apee',
+                  version_name: 'Bible Française APEE'
+                });
+              }
+            });
           });
         }
       });
     } else {
-      console.warn('Format de données fr_apee non reconnu, utilisation des données de fallback');
+      console.warn('Format de données fr_apee non reconnu, structure inattendue');
     }
     
     console.log(`✅ ${verses.length} versets réels chargés et formatés`);

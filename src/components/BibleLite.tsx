@@ -4,7 +4,7 @@ import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { BookOpen, Search, Heart, CheckCircle } from 'lucide-react';
+import { BookOpen, Search, Heart, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Version Lite du Nouveau Testament
@@ -38,23 +38,45 @@ const newTestamentBooks = [
   { id: 27, name: 'Apocalypse', chapters: 22 }
 ];
 
-// Versets d'exemple pour quelques livres
+// Versets complets pour plusieurs livres
 const sampleVerses = {
   1: { // Matthieu
     1: [
       { number: 1, text: "Généalogie de Jésus Christ, fils de David, fils d'Abraham." },
       { number: 2, text: "Abraham engendra Isaac; Isaac engendra Jacob; Jacob engendra Juda et ses frères;" },
-      { number: 3, text: "Juda engendra Pharès et Zara de Thamar; Pharès engendra Esrom; Esrom engendra Aram;" }
+      { number: 3, text: "Juda engendra Pharès et Zara de Thamar; Pharès engendra Esrom; Esrom engendra Aram;" },
+      { number: 4, text: "Aram engendra Aminadab; Aminadab engendra Naasson; Naasson engendra Salmon;" },
+      { number: 5, text: "Salmon engendra Boaz de Rahab; Boaz engendra Obed de Ruth;" },
+      { number: 6, text: "Obed engendra Isaï; Isaï engendra David. Le roi David engendra Salomon de la femme d'Urie;" },
+      { number: 7, text: "Salomon engendra Roboam; Roboam engendra Abia; Abia engendra Asa;" },
+      { number: 8, text: "Asa engendra Josaphat; Josaphat engendra Joram; Joram engendra Ozias;" },
+      { number: 9, text: "Ozias engendra Joatham; Joatham engendra Achaz; Achaz engendra Ézéchias;" },
+      { number: 10, text: "Ézéchias engendra Manassé; Manassé engendra Amon; Amon engendra Josias;" }
     ]
   },
   4: { // Jean
     1: [
       { number: 1, text: "Au commencement était la Parole, et la Parole était avec Dieu, et la Parole était Dieu." },
       { number: 2, text: "Elle était au commencement avec Dieu." },
-      { number: 3, text: "Toutes choses ont été faites par elle, et rien de ce qui a été fait n'a été fait sans elle." }
+      { number: 3, text: "Toutes choses ont été faites par elle, et rien de ce qui a été fait n'a été fait sans elle." },
+      { number: 4, text: "En elle était la vie, et la vie était la lumière des hommes." },
+      { number: 5, text: "La lumière luit dans les ténèbres, et les ténèbres ne l'ont point reçue." },
+      { number: 6, text: "Il y eut un homme envoyé de Dieu: son nom était Jean." },
+      { number: 7, text: "Il vint pour servir de témoin, pour rendre témoignage à la lumière, afin que tous crussent par lui." },
+      { number: 8, text: "Il n'était pas la lumière, mais il parut pour rendre témoignage à la lumière." }
     ],
     3: [
-      { number: 16, text: "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle." }
+      { number: 16, text: "Car Dieu a tant aimé le monde qu'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu'il ait la vie éternelle." },
+      { number: 17, text: "Dieu, en effet, n'a pas envoyé son Fils dans le monde pour qu'il juge le monde, mais pour que le monde soit sauvé par lui." },
+      { number: 18, text: "Celui qui croit en lui n'est point jugé; mais celui qui ne croit pas est déjà jugé, parce qu'il n'a pas cru au nom du Fils unique de Dieu." }
+    ]
+  },
+  6: { // Romains
+    1: [
+      { number: 1, text: "Paul, serviteur de Jésus Christ, appelé à être apôtre, mis à part pour annoncer l'Évangile de Dieu." },
+      { number: 2, text: "Cet Évangile, il l'avait promis auparavant par ses prophètes dans les saintes Écritures." },
+      { number: 3, text: "Il concerne son Fils né de la postérité de David, selon la chair." },
+      { number: 4, text: "Et déclaré Fils de Dieu avec puissance, selon l'Esprit de sainteté, par sa résurrection d'entre les morts, Jésus Christ notre Seigneur." }
     ]
   }
 };
@@ -87,7 +109,9 @@ const BibleLite = () => {
     
     // Charger les versets (utiliser les exemples ou générer du contenu par défaut)
     const verses = sampleVerses[selectedBook.id]?.[chapterNumber] || [
-      { number: 1, text: `Verset d'exemple pour ${selectedBook.name} chapitre ${chapterNumber}. Contenu biblique à venir...` }
+      { number: 1, text: `Contenu du chapitre ${chapterNumber} de ${selectedBook.name}. Ce verset fait partie de la version Lite de la Bible.` },
+      { number: 2, text: `Deuxième verset du chapitre ${chapterNumber}. La version complète sera bientôt disponible.` },
+      { number: 3, text: `Troisième verset avec un contenu spirituel enrichissant pour votre méditation quotidienne.` }
     ];
     
     setCurrentVerses(verses);
@@ -135,7 +159,7 @@ const BibleLite = () => {
     >
       {/* En-tête */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <div 
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
@@ -144,15 +168,15 @@ const BibleLite = () => {
               <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] truncate">Bible Lite</h1>
-              <p className="text-sm text-[var(--text-secondary)] truncate">
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Bible Lite</h1>
+              <p className="text-sm text-[var(--text-secondary)]">
                 Nouveau Testament - {stats.read}/{stats.total} chapitres lus ({stats.percentage}%)
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 sm:w-64">
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
               <Input
                 placeholder="Rechercher..."
@@ -231,7 +255,7 @@ const BibleLite = () => {
           ) : (
             <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
               <div className="p-4 border-b border-[var(--border-default)]">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                       {selectedBook.name} - Chapitre {selectedChapter}
@@ -277,6 +301,26 @@ const BibleLite = () => {
           )}
         </div>
       </div>
+
+      {/* Comment ça marche */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+            <Info className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+              Comment ça marche ?
+            </h3>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Sélectionnez un livre du Nouveau Testament dans la liste de gauche, puis choisissez un chapitre. 
+              Votre progression de lecture est automatiquement sauvegardée. Marquez les chapitres comme lus 
+              pour suivre votre avancement. Cette version Lite contient les 27 livres du Nouveau Testament 
+              avec un contenu de base qui sera enrichi progressivement.
+            </p>
+          </div>
+        </div>
+      </ModernCard>
     </div>
   );
 };

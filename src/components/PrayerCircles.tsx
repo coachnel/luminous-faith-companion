@@ -1,209 +1,275 @@
 
-import React, { useState } from 'react';
-import { Users, Send, Eye, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useEffect } from 'react';
+import { ModernCard } from '@/components/ui/modern-card';
+import { ModernButton } from '@/components/ui/modern-button';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Plus, Users, Lock, Globe, MessageCircle, Calendar, Info } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useNeonPrayerRequests } from '@/hooks/useNeonData';
+import { toast } from 'sonner';
 
 const PrayerCircles = () => {
-  const { toast } = useToast();
-  const [groupName, setGroupName] = useState('');
-  const [theme, setTheme] = useState('');
-  const [customMessage, setCustomMessage] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
+  const { user } = useAuth();
+  const { prayerRequests, addPrayerRequest, updatePrayerRequest } = useNeonPrayerRequests();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newRequest, setNewRequest] = useState({
+    title: '',
+    content: '',
+    isPrivate: false
+  });
 
-  const prayerThemes = [
-    'Guérison',
-    'Famille',
-    'Foi',
-    'Paix',
-    'Protection',
-    'Sagesse',
-    'Travail',
-    'Études',
-    'Santé',
-    'Réconciliation',
-    'Jeunesse',
-    'Mariage',
-    'Enfants',
-    'Finances'
-  ];
-
-  const generateMessage = () => {
-    const baseMessage = `🙏 Rejoins mon cercle de prière "${groupName}" sur le thème "${theme}".`;
-    const callToAction = "Clique ici pour nous rejoindre et prier ensemble !";
-    const personalNote = customMessage ? `\n\n${customMessage}` : '';
-    
-    return `${baseMessage}\n${callToAction}${personalNote}`;
-  };
-
-  const shareToWhatsApp = () => {
-    if (!groupName || !theme) {
-      toast({
-        title: "Informations manquantes",
-        description: "Veuillez remplir le nom du groupe et le thème.",
-        variant: "destructive"
-      });
+  const createPrayerRequest = async () => {
+    if (!newRequest.title.trim() || !newRequest.content.trim()) {
+      toast.error('Veuillez remplir tous les champs');
       return;
     }
 
-    const message = generateMessage();
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    
-    window.open(whatsappUrl, '_blank');
-    
-    toast({
-      title: "Cercle de prière créé !",
-      description: "Le message a été ouvert dans WhatsApp.",
-    });
-  };
-
-  const copyToClipboard = () => {
-    if (!groupName || !theme) {
-      toast({
-        title: "Informations manquantes",
-        description: "Veuillez remplir le nom du groupe et le thème.",
-        variant: "destructive"
+    try {
+      await addPrayerRequest({
+        title: newRequest.title,
+        content: newRequest.content,
+        is_private: newRequest.isPrivate,
+        prayer_count: 0
       });
-      return;
+
+      setNewRequest({ title: '', content: '', isPrivate: false });
+      setShowCreateForm(false);
+      toast.success('Demande de prière créée !');
+    } catch (error) {
+      toast.error('Erreur lors de la création');
     }
-
-    const message = generateMessage();
-    navigator.clipboard.writeText(message).then(() => {
-      toast({
-        title: "Message copié !",
-        description: "Vous pouvez maintenant le coller où vous voulez.",
-      });
-    });
   };
+
+  const handlePrayerToggle = async (requestId: string, currentCount: number) => {
+    try {
+      await updatePrayerRequest(requestId, {
+        prayer_count: currentCount + 1
+      });
+      toast.success('Merci pour votre prière 🙏');
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
+
+  const getVisibilityStats = () => {
+    const publicRequests = prayerRequests.filter(req => !req.is_private).length;
+    const privateRequests = prayerRequests.filter(req => req.is_private).length;
+    return { public: publicRequests, private: privateRequests };
+  };
+
+  const stats = getVisibilityStats();
 
   return (
-    <div className="p-4 max-w-4xl mx-auto space-y-6">
-      <Card className="glass border-white/30 bg-white/80">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="text-purple-600" size={24} />
-            Créer un cercle de prière
-          </CardTitle>
-          <p className="text-sm text-gray-600">
-            Invitez vos proches à vous rejoindre dans la prière via WhatsApp
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <div 
+      className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen"
+      style={{ background: 'var(--bg-primary)' }}
+    >
+      {/* En-tête */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-center gap-3">
+          <div 
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
+            style={{ background: 'var(--accent-primary)' }}
+          >
+            <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Cercles de prière</h1>
+            <p className="text-sm text-[var(--text-secondary)] break-words">
+              Partagez vos intentions et priez ensemble
+            </p>
+          </div>
+        </div>
+      </ModernCard>
+
+      {/* Statistiques */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
+          <div className="text-2xl font-bold text-blue-600">{prayerRequests.length}</div>
+          <div className="text-sm text-blue-700">Total</div>
+        </ModernCard>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+          <div className="text-2xl font-bold text-green-600">{stats.public}</div>
+          <div className="text-sm text-green-700">Publiques</div>
+        </ModernCard>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+          <div className="text-2xl font-bold text-purple-600">{stats.private}</div>
+          <div className="text-sm text-purple-700">Privées</div>
+        </ModernCard>
+      </div>
+
+      {/* Actions principales */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Nom du groupe de prière *
-            </label>
-            <Input
-              placeholder="Ex: Prière pour la paix, Groupe famille..."
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className="glass border-white/30 bg-white/90"
-            />
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">Demandes de prière</h3>
+            <p className="text-sm text-[var(--text-secondary)]">{prayerRequests.length} intention(s) partagée(s)</p>
           </div>
+          <ModernButton 
+            onClick={() => setShowCreateForm(!showCreateForm)} 
+            className="gap-2 flex-shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Créer un cercle de prière</span>
+          </ModernButton>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Thème de prière *
-            </label>
-            <Select value={theme} onValueChange={setTheme}>
-              <SelectTrigger className="glass border-white/30 bg-white/90">
-                <SelectValue placeholder="Choisissez un thème..." />
-              </SelectTrigger>
-              <SelectContent>
-                {prayerThemes.map((themeOption) => (
-                  <SelectItem key={themeOption} value={themeOption}>
-                    {themeOption}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Formulaire de création */}
+        {showCreateForm && (
+          <ModernCard className="mb-6 p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-[var(--text-primary)]">Nouvelle demande de prière</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  Titre de la demande
+                </label>
+                <input
+                  type="text"
+                  value={newRequest.title}
+                  onChange={(e) => setNewRequest({...newRequest, title: e.target.value})}
+                  placeholder="Ex: Prière pour la guérison..."
+                  className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={newRequest.content}
+                  onChange={(e) => setNewRequest({...newRequest, content: e.target.value})}
+                  placeholder="Partagez votre intention de prière..."
+                  className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] h-24 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newRequest.isPrivate}
+                    onChange={(e) => setNewRequest({...newRequest, isPrivate: e.target.checked})}
+                    className="rounded border-[var(--border-default)]"
+                  />
+                  <span className="text-sm text-[var(--text-primary)]">Garder privé</span>
+                </label>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  {newRequest.isPrivate ? 'Visible par vous uniquement' : 'Visible par la communauté'}
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <ModernButton 
+                  onClick={createPrayerRequest}
+                  disabled={!newRequest.title.trim() || !newRequest.content.trim()}
+                  className="flex-1 gap-2"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span>Créer la demande</span>
+                </ModernButton>
+                <ModernButton 
+                  onClick={() => setShowCreateForm(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Annuler
+                </ModernButton>
+              </div>
+            </div>
+          </ModernCard>
+        )}
+
+        {/* Liste des demandes */}
+        {prayerRequests.length === 0 ? (
+          <div className="text-center py-8">
+            <Heart className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
+            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Aucune demande de prière</h4>
+            <p className="text-[var(--text-secondary)] mb-4">Créez votre première intention de prière</p>
+            <ModernButton onClick={() => setShowCreateForm(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              <span>Créer une demande</span>
+            </ModernButton>
           </div>
+        ) : (
+          <div className="space-y-4">
+            {prayerRequests.map((request) => (
+              <ModernCard key={request.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-semibold text-[var(--text-primary)] break-words">{request.title}</h4>
+                        <Badge variant={request.is_private ? "secondary" : "default"} className="flex items-center gap-1 flex-shrink-0">
+                          {request.is_private ? <Lock className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
+                          <span>{request.is_private ? 'Privé' : 'Public'}</span>
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words">{request.content}</p>
+                    </div>
+                  </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Message personnalisé (optionnel)
-            </label>
-            <Textarea
-              placeholder="Ajoutez un message personnel pour encourager vos proches..."
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              className="glass border-white/30 bg-white/90 min-h-[100px]"
-            />
-          </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[var(--border-default)]">
+                    <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{new Date(request.created_at).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-4 w-4" />
+                        <span>{request.prayer_count || 0} prières</span>
+                      </div>
+                    </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={() => setShowPreview(!showPreview)}
-              variant="outline"
-              className="flex items-center gap-2"
-              disabled={!groupName || !theme}
-            >
-              <Eye size={16} />
-              {showPreview ? 'Masquer' : 'Prévisualiser'}
-            </Button>
-
-            <Button
-              onClick={shareToWhatsApp}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-              disabled={!groupName || !theme}
-            >
-              <Send size={16} />
-              Envoyer via WhatsApp
-            </Button>
-
-            <Button
-              onClick={copyToClipboard}
-              variant="outline"
-              className="flex items-center gap-2"
-              disabled={!groupName || !theme}
-            >
-              <Share2 size={16} />
-              Copier le message
-            </Button>
-          </div>
-
-          {showPreview && groupName && theme && (
-            <Card className="mt-4 border-purple-200 bg-purple-50">
-              <CardHeader>
-                <CardTitle className="text-lg">Aperçu du message</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="whitespace-pre-wrap text-sm p-3 bg-white rounded border">
-                  {generateMessage()}
+                    <div className="flex items-center gap-2">
+                      <ModernButton
+                        onClick={() => handlePrayerToggle(request.id, request.prayer_count || 0)}
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                      >
+                        <Heart className="h-4 w-4" />
+                        <span>Prier</span>
+                      </ModernButton>
+                      {!request.is_private && (
+                        <ModernButton
+                          size="sm"
+                          variant="ghost"
+                          className="gap-2"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          <span className="hidden sm:inline">Partager</span>
+                        </ModernButton>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </CardContent>
-      </Card>
+              </ModernCard>
+            ))}
+          </div>
+        )}
+      </ModernCard>
 
-      <Card className="glass border-white/30 bg-white/80">
-        <CardHeader>
-          <CardTitle className="text-lg">Comment ça marche ?</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-gray-600">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">1</div>
-            <p>Remplissez le nom de votre groupe et choisissez un thème de prière</p>
+      {/* Comment ça marche */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+            <Info className="h-6 w-6 text-white" />
           </div>
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">2</div>
-            <p>Ajoutez un message personnel si vous le souhaitez</p>
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+              Comment ça marche ?
+            </h3>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Créez des demandes de prière pour partager vos intentions avec la communauté ou les garder privées. 
+              Vous pouvez choisir si votre demande est visible par tous (publique) ou seulement par vous (privée). 
+              Cliquez sur "Prier" pour soutenir les intentions d'autres membres. 
+              Toutes vos demandes sont sauvegardées et vous pouvez suivre le nombre de personnes qui prient pour chaque intention.
+            </p>
           </div>
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">3</div>
-            <p>Prévisualisez votre message puis partagez-le via WhatsApp</p>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">4</div>
-            <p>Vos contacts pourront rejoindre votre cercle de prière en un clic</p>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </ModernCard>
     </div>
   );
 };

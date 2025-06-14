@@ -119,79 +119,72 @@ const CANONICAL_CATHOLIC_BOOKS = [
 
 // Mapping des noms de livres pour la correspondance
 const BOOK_NAME_MAPPINGS: { [key: string]: string } = {
-  'genèse': 'gen',
-  'exode': 'exo',
-  'lévitique': 'lev',
-  'nombres': 'num',
-  'deutéronome': 'deu',
-  'josué': 'jos',
-  'juges': 'jdg',
-  'ruth': 'rut',
-  '1 samuel': '1sa',
-  '2 samuel': '2sa',
-  '1 rois': '1ki',
-  '2 rois': '2ki',
-  '1 chroniques': '1ch',
-  '2 chroniques': '2ch',
-  'esdras': 'ezr',
-  'néhémie': 'neh',
-  'tobie': 'tob',
-  'judith': 'jdt',
-  'esther': 'est',
-  'job': 'job',
-  'psaumes': 'psa',
-  'proverbes': 'pro',
-  'ecclésiaste': 'ecc',
-  'cantique des cantiques': 'sng',
-  'sagesse': 'wis',
-  'siracide': 'sir',
-  'isaïe': 'isa',
-  'jérémie': 'jer',
-  'lamentations': 'lam',
-  'baruch': 'bar',
-  'ézéchiel': 'eze',
-  'daniel': 'dan',
-  'osée': 'hos',
-  'joël': 'joe',
-  'amos': 'amo',
-  'abdias': 'oba',
-  'jonas': 'jon',
-  'michée': 'mic',
-  'nahum': 'nah',
-  'habacuc': 'hab',
-  'sophonie': 'zep',
-  'aggée': 'hag',
-  'zacharie': 'zec',
-  'malachie': 'mal',
-  '1 maccabées': '1ma',
-  '2 maccabées': '2ma',
-  'matthieu': 'mat',
-  'marc': 'mar',
-  'luc': 'luk',
-  'jean': 'joh',
-  'actes': 'act',
-  'romains': 'rom',
-  '1 corinthiens': '1co',
-  '2 corinthiens': '2co',
-  'galates': 'gal',
-  'éphésiens': 'eph',
-  'philippiens': 'phi',
-  'colossiens': 'col',
-  '1 thessaloniciens': '1th',
-  '2 thessaloniciens': '2th',
-  '1 timothée': '1ti',
-  '2 timothée': '2ti',
-  'tite': 'tit',
-  'philémon': 'phm',
-  'hébreux': 'heb',
-  'jacques': 'jas',
-  '1 pierre': '1pe',
-  '2 pierre': '2pe',
-  '1 jean': '1jo',
-  '2 jean': '2jo',
-  '3 jean': '3jo',
-  'jude': 'jud',
-  'apocalypse': 'rev'
+  'genèse': 'gen', 'genesis': 'gen',
+  'exode': 'exo', 'exodus': 'exo',
+  'lévitique': 'lev', 'leviticus': 'lev',
+  'nombres': 'num', 'numbers': 'num',
+  'deutéronome': 'deu', 'deuteronomy': 'deu',
+  'josué': 'jos', 'joshua': 'jos',
+  'juges': 'jdg', 'judges': 'jdg',
+  'ruth': 'rut', 'ruth': 'rut',
+  '1 samuel': '1sa', '1samuel': '1sa',
+  '2 samuel': '2sa', '2samuel': '2sa',
+  '1 rois': '1ki', '1kings': '1ki',
+  '2 rois': '2ki', '2kings': '2ki',
+  '1 chroniques': '1ch', '1chronicles': '1ch',
+  '2 chroniques': '2ch', '2chronicles': '2ch',
+  'esdras': 'ezr', 'ezra': 'ezr',
+  'néhémie': 'neh', 'nehemiah': 'neh',
+  'esther': 'est', 'esther': 'est',
+  'job': 'job', 'job': 'job',
+  'psaumes': 'psa', 'psalms': 'psa',
+  'proverbes': 'pro', 'proverbs': 'pro',
+  'ecclésiaste': 'ecc', 'ecclesiastes': 'ecc',
+  'cantique des cantiques': 'sng', 'song of solomon': 'sng',
+  'isaïe': 'isa', 'isaiah': 'isa',
+  'jérémie': 'jer', 'jeremiah': 'jer',
+  'lamentations': 'lam', 'lamentations': 'lam',
+  'ézéchiel': 'eze', 'ezekiel': 'eze',
+  'daniel': 'dan', 'daniel': 'dan',
+  'osée': 'hos', 'hosea': 'hos',
+  'joël': 'joe', 'joel': 'joe',
+  'amos': 'amo', 'amos': 'amo',
+  'abdias': 'oba', 'obadiah': 'oba',
+  'jonas': 'jon', 'jonah': 'jon',
+  'michée': 'mic', 'micah': 'mic',
+  'nahum': 'nah', 'nahum': 'nah',
+  'habacuc': 'hab', 'habakkuk': 'hab',
+  'sophonie': 'zep', 'zephaniah': 'zep',
+  'aggée': 'hag', 'haggai': 'hag',
+  'zacharie': 'zec', 'zechariah': 'zec',
+  'malachie': 'mal', 'malachi': 'mal',
+  'matthieu': 'mat', 'matthew': 'mat',
+  'marc': 'mar', 'mark': 'mar',
+  'luc': 'luk', 'luke': 'luk',
+  'jean': 'joh', 'john': 'joh',
+  'actes': 'act', 'acts': 'act',
+  'romains': 'rom', 'romans': 'rom',
+  '1 corinthiens': '1co', '1corinthians': '1co',
+  '2 corinthiens': '2co', '2corinthians': '2co',
+  'galates': 'gal', 'galatians': 'gal',
+  'éphésiens': 'eph', 'ephesians': 'eph',
+  'philippiens': 'phi', 'philippians': 'phi',
+  'colossiens': 'col', 'colossians': 'col',
+  '1 thessaloniciens': '1th', '1thessalonians': '1th',
+  '2 thessaloniciens': '2th', '2thessalonians': '2th',
+  '1 timothée': '1ti', '1timothy': '1ti',
+  '2 timothée': '2ti', '2timothy': '2ti',
+  'tite': 'tit', 'titus': 'tit',
+  'philémon': 'phm', 'philemon': 'phm',
+  'hébreux': 'heb', 'hebrews': 'heb',
+  'jacques': 'jas', 'james': 'jas',
+  '1 pierre': '1pe', '1peter': '1pe',
+  '2 pierre': '2pe', '2peter': '2pe',
+  '1 jean': '1jo', '1john': '1jo',
+  '2 jean': '2jo', '2john': '2jo',
+  '3 jean': '3jo', '3john': '3jo',
+  'jude': 'jud', 'jude': 'jud',
+  'apocalypse': 'rev', 'revelation': 'rev'
 };
 
 export class VerseLoader {
@@ -260,28 +253,33 @@ export class VerseLoader {
     // Essayer de charger depuis louis-segond.json
     const louisSegondData = await this.tryLoadLouisSegond();
     if (louisSegondData) {
-      console.log('✅ Chargement depuis louis-segond.json...');
+      console.log('✅ Traitement des données Louis Segond...');
       this.processLouisSegondData(louisSegondData, verses);
     }
     
-    // Essayer de charger depuis fr_apee.json si disponible
+    // Essayer de charger depuis fr_apee.json
     await this.tryLoadFromJSON('fr_apee', verses);
-    
-    // Ajouter des versets minimaux pour les livres sans données
-    this.addMinimalVerses(verses);
     
     this.loadedVerses = verses;
     console.log(`📊 Total des versets chargés: ${verses.length}`);
+    
+    // Ne pas ajouter de versets minimaux si nous avons déjà du contenu réel
+    if (verses.length === 0) {
+      console.log('⚠️ Aucun verset chargé, ajout de versets minimaux...');
+      this.addMinimalVerses(verses);
+    }
   }
 
   private async tryLoadLouisSegond(): Promise<LouisSegondData | null> {
     try {
       const response = await fetch('/src/data/louis-segond.json');
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        console.log('✅ Louis Segond chargé avec succès');
+        return data;
       }
     } catch (error) {
-      console.log('⚠️ louis-segond.json non accessible');
+      console.log('⚠️ louis-segond.json non accessible:', error);
     }
     return null;
   }
@@ -295,32 +293,37 @@ export class VerseLoader {
         this.processJSONData(data, verses, filename);
       }
     } catch (error) {
-      console.log(`⚠️ ${filename}.json non accessible`);
+      console.log(`⚠️ ${filename}.json non accessible:`, error);
     }
   }
 
   private processLouisSegondData(data: LouisSegondData, verses: NeonVerse[]): void {
     try {
+      let versesAdded = 0;
+      
       // Traiter l'Ancien Testament
       if (data.oldTestament && Array.isArray(data.oldTestament)) {
         data.oldTestament.forEach(bookData => {
           const bookId = this.findBookId(bookData.name);
-          if (bookId) {
+          if (bookId && bookData.chapters && Array.isArray(bookData.chapters)) {
             bookData.chapters.forEach(chapterData => {
-              chapterData.verses.forEach(verseData => {
-                if (verseData.text && verseData.text.trim().length > 10) {
-                  verses.push({
-                    id: `${bookId}-${verseData.chapter}-${verseData.verse}`,
-                    book_id: bookId,
-                    book_name: bookData.name,
-                    chapter_number: verseData.chapter,
-                    verse_number: verseData.verse,
-                    text: verseData.text.trim(),
-                    version_id: 'lsg1910',
-                    version_name: 'Louis Segond (1910)'
-                  });
-                }
-              });
+              if (chapterData.verses && Array.isArray(chapterData.verses)) {
+                chapterData.verses.forEach(verseData => {
+                  if (verseData.text && typeof verseData.text === 'string' && verseData.text.trim().length > 10) {
+                    verses.push({
+                      id: `${bookId}-${verseData.chapter}-${verseData.verse}`,
+                      book_id: bookId,
+                      book_name: bookData.name,
+                      chapter_number: verseData.chapter,
+                      verse_number: verseData.verse,
+                      text: verseData.text.trim(),
+                      version_id: 'lsg1910',
+                      version_name: 'Louis Segond (1910)'
+                    });
+                    versesAdded++;
+                  }
+                });
+              }
             });
           }
         });
@@ -330,26 +333,31 @@ export class VerseLoader {
       if (data.newTestament && Array.isArray(data.newTestament)) {
         data.newTestament.forEach(bookData => {
           const bookId = this.findBookId(bookData.name);
-          if (bookId) {
+          if (bookId && bookData.chapters && Array.isArray(bookData.chapters)) {
             bookData.chapters.forEach(chapterData => {
-              chapterData.verses.forEach(verseData => {
-                if (verseData.text && verseData.text.trim().length > 10) {
-                  verses.push({
-                    id: `${bookId}-${verseData.chapter}-${verseData.verse}`,
-                    book_id: bookId,
-                    book_name: bookData.name,
-                    chapter_number: verseData.chapter,
-                    verse_number: verseData.verse,
-                    text: verseData.text.trim(),
-                    version_id: 'lsg1910',
-                    version_name: 'Louis Segond (1910)'
-                  });
-                }
-              });
+              if (chapterData.verses && Array.isArray(chapterData.verses)) {
+                chapterData.verses.forEach(verseData => {
+                  if (verseData.text && typeof verseData.text === 'string' && verseData.text.trim().length > 10) {
+                    verses.push({
+                      id: `${bookId}-${verseData.chapter}-${verseData.verse}`,
+                      book_id: bookId,
+                      book_name: bookData.name,
+                      chapter_number: verseData.chapter,
+                      verse_number: verseData.verse,
+                      text: verseData.text.trim(),
+                      version_id: 'lsg1910',
+                      version_name: 'Louis Segond (1910)'
+                    });
+                    versesAdded++;
+                  }
+                });
+              }
             });
           }
         });
       }
+      
+      console.log(`✅ ${versesAdded} versets Louis Segond ajoutés`);
     } catch (error) {
       console.error('❌ Erreur lors du traitement des données Louis Segond:', error);
     }
@@ -357,27 +365,35 @@ export class VerseLoader {
 
   private processJSONData(data: any, verses: NeonVerse[], version: string): void {
     try {
+      let versesAdded = 0;
+      
       if (data && typeof data === 'object') {
         Object.keys(data).forEach(bookKey => {
           const bookId = this.findBookId(bookKey);
           if (bookId) {
             const book = this.loadedBooks.find(b => b.id === bookId);
-            if (book && data[bookKey]) {
+            if (book && data[bookKey] && typeof data[bookKey] === 'object') {
               Object.keys(data[bookKey]).forEach(chapterKey => {
                 const chapterNum = parseInt(chapterKey);
-                if (data[bookKey][chapterKey] && Array.isArray(data[bookKey][chapterKey])) {
-                  data[bookKey][chapterKey].forEach((text: string, index: number) => {
-                    if (text && text.trim().length > 10) {
-                      verses.push({
-                        id: `${bookId}-${chapterNum}-${index + 1}`,
-                        book_id: bookId,
-                        book_name: book.name,
-                        chapter_number: chapterNum,
-                        verse_number: index + 1,
-                        text: text.trim(),
-                        version_id: version,
-                        version_name: version === 'fr_apee' ? 'Bible Française APEE' : version
-                      });
+                if (!isNaN(chapterNum) && data[bookKey][chapterKey] && Array.isArray(data[bookKey][chapterKey])) {
+                  data[bookKey][chapterKey].forEach((verseText: any, index: number) => {
+                    // Vérification robuste du type de verset
+                    if (verseText && typeof verseText === 'string' && verseText.trim().length > 10) {
+                      const verseId = `${bookId}-${chapterNum}-${index + 1}`;
+                      // Éviter les doublons
+                      if (!verses.find(v => v.id === verseId)) {
+                        verses.push({
+                          id: verseId,
+                          book_id: bookId,
+                          book_name: book.name,
+                          chapter_number: chapterNum,
+                          verse_number: index + 1,
+                          text: verseText.trim(),
+                          version_id: version,
+                          version_name: version === 'fr_apee' ? 'Bible Française APEE' : version
+                        });
+                        versesAdded++;
+                      }
                     }
                   });
                 }
@@ -386,12 +402,16 @@ export class VerseLoader {
           }
         });
       }
+      
+      console.log(`✅ ${versesAdded} versets ${version} ajoutés`);
     } catch (error) {
       console.error(`❌ Erreur lors du traitement de ${version}:`, error);
     }
   }
 
   private findBookId(bookName: string): string | null {
+    if (!bookName || typeof bookName !== 'string') return null;
+    
     const normalized = bookName.toLowerCase().trim();
     
     // Recherche directe dans le mapping

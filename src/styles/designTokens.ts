@@ -64,20 +64,20 @@ export const designTokens = {
     }
   },
   
-  // Dark theme colors (Crypto App inspiration)
+  // Dark theme colors (Crypto App inspiration) - CORRIGÉ pour lisibilité
   dark: {
     background: {
-      primary: '#0f172a',
-      secondary: '#1e293b',
-      tertiary: '#334155',
-      card: '#1e293b',
-      overlay: 'rgba(15, 23, 42, 0.95)',
+      primary: '#0a0e1a',        // Noir profond mais pas total
+      secondary: '#1a1f35',      // Bleu très foncé
+      tertiary: '#252b47',       // Bleu foncé plus clair
+      card: '#1e2642',           // Cartes en bleu foncé
+      overlay: 'rgba(10, 14, 26, 0.95)',
     },
     text: {
-      primary: '#f8fafc',
-      secondary: '#cbd5e1',
-      tertiary: '#94a3b8',
-      inverse: '#0f172a',
+      primary: '#f8fafc',        // Blanc presque pur
+      secondary: '#e2e8f0',      // Gris très clair
+      tertiary: '#cbd5e1',       // Gris clair
+      inverse: '#0a0e1a',
     },
     border: {
       default: '#334155',
@@ -85,17 +85,17 @@ export const designTokens = {
       medium: '#64748b',
     },
     accent: {
-      primary: '#3b82f6',
-      secondary: '#8b5cf6',
-      success: '#10b981',
-      warning: '#f59e0b',
-      error: '#ef4444',
+      primary: '#60a5fa',        // Bleu électrique plus visible
+      secondary: '#a78bfa',      // Violet électrique
+      success: '#34d399',        // Vert crypto
+      warning: '#fbbf24',        // Orange électrique
+      error: '#f87171',          // Rouge électrique
     },
     spiritual: {
-      primary: '#6366f1',
-      secondary: '#8b5cf6',
-      tertiary: '#a78bfa',
-      background: 'linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%)',
+      primary: '#818cf8',        // Indigo électrique
+      secondary: '#a78bfa',      // Violet électrique
+      tertiary: '#c4b5fd',       // Violet clair
+      background: 'linear-gradient(135deg, #312e81 0%, #1e1b4b 100%)',
     }
   }
 };

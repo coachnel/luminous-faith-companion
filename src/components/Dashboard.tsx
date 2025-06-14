@@ -2,8 +2,8 @@
 // Dashboard component with all features integrated
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ModernButton } from '@/components/ui/modern-button';
+import { ModernCard } from '@/components/ui/modern-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useSupabaseData';
@@ -13,12 +13,15 @@ import { useNeonNotes } from '@/hooks/useNeonData';
 import { EnhancedReadingProgress } from './EnhancedReadingProgress';
 import { EnhancedChallengesSection } from './EnhancedChallengesSection';
 import { ThemeSettings } from './ThemeSettings';
+import { ThemeToggle } from './ThemeToggle';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { notes } = useNeonNotes();
   const { books, totalBooks } = useNeonBible();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const handleSignOut = async () => {
@@ -26,28 +29,37 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">BibleApp</span>
+    <div className="min-h-screen" style={{ background: `var(--bg-primary)` }}>
+      <header className="border-b border-[var(--border-default)] bg-[var(--bg-card)] backdrop-blur-lg">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <span className="font-bold text-xl text-[var(--text-primary)]">BibleApp</span>
+              <p className="text-xs text-[var(--text-secondary)]">Votre compagnon spirituel</p>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-2">
+            <ThemeToggle />
+            
+            <ModernButton variant="ghost" size="sm" onClick={handleSignOut} className="gap-2">
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Déconnexion</span>
-            </Button>
+            </ModernButton>
             
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <div className="font-medium">{profile?.name || user?.email}</div>
-                <div className="text-xs text-gray-500">Connecté</div>
+                <div className="font-medium text-[var(--text-primary)]">{profile?.name || user?.email}</div>
+                <div className="text-xs text-[var(--text-tertiary)]">Connecté</div>
               </div>
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-9 w-9 ring-2 ring-[var(--border-default)]">
                 <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback>{(profile?.name || user?.email || '?').charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="bg-[var(--spiritual-primary)] text-white">
+                  {(profile?.name || user?.email || '?').charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -56,217 +68,221 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-            <TabsTrigger value="bible">Bible</TabsTrigger>
-            <TabsTrigger value="reading">Lecture</TabsTrigger>
-            <TabsTrigger value="challenges">Défis</TabsTrigger>
-            <TabsTrigger value="prayer">Prière</TabsTrigger>
-            <TabsTrigger value="settings">Réglages</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 bg-[var(--bg-card)] border border-[var(--border-default)]">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Tableau de bord</TabsTrigger>
+            <TabsTrigger value="bible" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Bible</TabsTrigger>
+            <TabsTrigger value="reading" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Lecture</TabsTrigger>
+            <TabsTrigger value="challenges" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Défis</TabsTrigger>
+            <TabsTrigger value="prayer" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Prière</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Réglages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">
             <div className="space-y-6">
               {/* Explication */}
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    Comment ça marche ?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-700">
-                    Bienvenue sur votre tableau de bord spirituel ! Explorez la Bible, suivez vos plans de lecture, 
-                    créez des défis personnels et partagez vos intentions de prière avec la communauté. 
-                    Chaque section vous aide à enrichir votre vie spirituelle de manière organisée et motivante.
-                  </p>
-                </CardContent>
-              </Card>
+              <ModernCard variant="glass" className="border-[var(--accent-primary)]/20 animate-slide-up">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+                    <Info className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+                      Comment ça marche ?
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      Bienvenue sur votre tableau de bord spirituel ! Explorez la Bible, suivez vos plans de lecture, 
+                      créez des défis personnels et partagez vos intentions de prière avec la communauté. 
+                      Chaque section vous aide à enrichir votre vie spirituelle de manière organisée et motivante.
+                    </p>
+                  </div>
+                </div>
+              </ModernCard>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Bible
-                    </CardTitle>
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{totalBooks} livres</div>
-                    <p className="text-xs text-muted-foreground">
-                      {books.filter(b => b.testament === 'old').length} AT + {books.filter(b => b.testament === 'new').length} NT
-                    </p>
-                  </CardContent>
-                </Card>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <ModernCard variant="elevated" className="animate-slide-up">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+                      <BookOpen className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-[var(--text-primary)]">{totalBooks}</div>
+                      <div className="text-sm text-[var(--text-secondary)]">livres</div>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-[var(--text-primary)] mb-1">Bible complète</h3>
+                  <p className="text-xs text-[var(--text-tertiary)]">
+                    {books.filter(b => b.testament === 'old').length} AT + {books.filter(b => b.testament === 'new').length} NT
+                  </p>
+                </ModernCard>
                 
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Notes
-                    </CardTitle>
-                    <PenSquare className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{notes.length}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Notes personnelles
-                    </p>
-                  </CardContent>
-                </Card>
+                <ModernCard variant="elevated" className="animate-slide-up">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
+                      <PenSquare className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-[var(--text-primary)]">{notes.length}</div>
+                      <div className="text-sm text-[var(--text-secondary)]">notes</div>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-[var(--text-primary)] mb-1">Notes personnelles</h3>
+                  <p className="text-xs text-[var(--text-tertiary)]">
+                    Vos réflexions spirituelles
+                  </p>
+                </ModernCard>
                 
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Activité
-                    </CardTitle>
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">Aujourd'hui</div>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </p>
-                  </CardContent>
-                </Card>
+                <ModernCard variant="elevated" className="animate-slide-up">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-[var(--text-primary)]">Aujourd'hui</div>
+                      <div className="text-sm text-[var(--text-secondary)]">activité</div>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-[var(--text-primary)] mb-1">Votre journée</h3>
+                  <p className="text-xs text-[var(--text-tertiary)]">
+                    {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </p>
+                </ModernCard>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="bible">
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Explication */}
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    Comment ça marche ?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-700">
-                    Explorez l'ensemble des livres bibliques organisés par testament. 
-                    Cliquez sur un livre pour commencer votre lecture et découvrir les richesses de la Parole de Dieu. 
-                    Votre progression est automatiquement sauvegardée.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Explorer la Bible</CardTitle>
-                  <CardDescription>
-                    Parcourez les livres et chapitres de la Bible
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {books.slice(0, 8).map((book) => (
-                      <Button key={book.id} variant="outline" className="justify-start">
-                        <BookMarked className="mr-2 h-4 w-4" />
-                        {book.name}
-                      </Button>
-                    ))}
-                    <Button variant="secondary">
-                      Voir tous les livres
-                    </Button>
+              <ModernCard variant="glass" className="border-indigo-500/20 animate-slide-up">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                    <Info className="h-6 w-6 text-white" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+                      Comment ça marche ?
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      Explorez l'ensemble des livres bibliques organisés par testament. 
+                      Cliquez sur un livre pour commencer votre lecture et découvrir les richesses de la Parole de Dieu. 
+                      Votre progression est automatiquement sauvegardée.
+                    </p>
+                  </div>
+                </div>
+              </ModernCard>
+
+              <ModernCard variant="elevated" className="animate-slide-up">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+                    <BookOpen className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Explorer la Bible</h3>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Parcourez les livres et chapitres de la Bible
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {books.slice(0, 8).map((book) => (
+                    <ModernButton key={book.id} variant="outline" className="justify-start h-auto p-3">
+                      <BookMarked className="mr-2 h-4 w-4 text-[var(--accent-primary)]" />
+                      <span className="text-sm">{book.name}</span>
+                    </ModernButton>
+                  ))}
+                  <ModernButton variant="secondary" className="h-auto p-3">
+                    <span className="text-sm">Voir tous les livres</span>
+                  </ModernButton>
+                </div>
+              </ModernCard>
             </div>
           </TabsContent>
 
           <TabsContent value="reading">
-            <EnhancedReadingProgress />
+            <div className="animate-slide-up">
+              <EnhancedReadingProgress />
+            </div>
           </TabsContent>
 
           <TabsContent value="challenges">
-            <EnhancedChallengesSection />
+            <div className="animate-slide-up">
+              <EnhancedChallengesSection />
+            </div>
           </TabsContent>
 
           <TabsContent value="prayer">
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Explication */}
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    Comment ça marche ?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-700">
-                    Créez et gérez vos demandes de prière personnelles. Partagez vos intentions avec la communauté 
-                    ou gardez-les privées. Suivez l'évolution de vos prières et encouragez d'autres croyants 
-                    en priant pour leurs demandes.
-                  </p>
-                </CardContent>
-              </Card>
+              <ModernCard variant="glass" className="border-green-500/20 animate-slide-up">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <Info className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+                      Comment ça marche ?
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      Créez et gérez vos demandes de prière personnelles. Partagez vos intentions avec la communauté 
+                      ou gardez-les privées. Suivez l'évolution de vos prières et encouragez d'autres croyants 
+                      en priant pour leurs demandes.
+                    </p>
+                  </div>
+                </div>
+              </ModernCard>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Demandes de prière</CardTitle>
-                  <CardDescription>
-                    Gérez vos demandes de prière personnelles
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>Contenu des prières à venir...</p>
-                </CardContent>
-              </Card>
+              <ModernCard variant="elevated" className="animate-slide-up">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-success)] flex items-center justify-center">
+                    <Heart className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Demandes de prière</h3>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Gérez vos demandes de prière personnelles
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[var(--text-secondary)]">Contenu des prières à venir...</p>
+              </ModernCard>
             </div>
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="space-y-6">
-              {/* Explication */}
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    Comment ça marche ?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-700">
-                    Personnalisez votre expérience spirituelle en configurant vos préférences de lecture, 
-                    votre thème visuel et vos informations de profil. Adaptez l'application à vos besoins 
-                    pour une utilisation optimale.
-                  </p>
-                </CardContent>
-              </Card>
-
+            <div className="space-y-6 animate-slide-up">
               <ThemeSettings />
               
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Profil utilisateur
-                  </CardTitle>
-                  <CardDescription>
-                    Gérez vos informations personnelles
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage src={profile?.avatar_url || ''} />
-                        <AvatarFallback>{(profile?.name || user?.email || '?').charAt(0).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium text-lg">{profile?.name || 'Utilisateur'}</div>
-                        <div className="text-sm text-gray-500">{user?.email}</div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline">Modifier le profil</Button>
-                      <Button variant="outline">Changer le mot de passe</Button>
+              <ModernCard variant="elevated">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-secondary)] flex items-center justify-center">
+                    <User className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)]">Profil utilisateur</h3>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Gérez vos informations personnelles
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16 ring-2 ring-[var(--border-default)]">
+                      <AvatarImage src={profile?.avatar_url || ''} />
+                      <AvatarFallback className="bg-[var(--spiritual-primary)] text-white text-xl">
+                        {(profile?.name || user?.email || '?').charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium text-lg text-[var(--text-primary)]">{profile?.name || 'Utilisateur'}</div>
+                      <div className="text-sm text-[var(--text-tertiary)]">{user?.email}</div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex gap-3">
+                    <ModernButton variant="outline" size="sm">Modifier le profil</ModernButton>
+                    <ModernButton variant="outline" size="sm">Changer le mot de passe</ModernButton>
+                  </div>
+                </div>
+              </ModernCard>
             </div>
           </TabsContent>
         </Tabs>

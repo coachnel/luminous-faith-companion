@@ -14,6 +14,8 @@ import SettingsApp from './SettingsApp';
 import DailyChallenges from './DailyChallenges';
 import ReadingPlans from './ReadingPlans';
 import Prayer from './Prayer';
+import { ThemeToggle } from './ThemeToggle';
+import { BookOpen } from 'lucide-react';
 
 const MobileApp = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -57,20 +59,34 @@ const MobileApp = () => {
 
   return (
     <div 
-      className={`min-h-screen transition-all duration-300 ${
-        theme === 'dark' 
-          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
-          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
-      }`}
+      className="min-h-screen transition-all duration-300"
       style={{ 
-        background: theme === 'dark' 
-          ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
-          : 'linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)'
+        background: `var(--bg-primary)`
       }}
     >
-      <main className="pb-20">
-        {renderContent()}
+      {/* Header moderne avec toggle de thème */}
+      <header className="sticky top-0 z-40 bg-[var(--bg-card)] border-b border-[var(--border-default)] backdrop-blur-lg">
+        <div className="px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg text-[var(--text-primary)]">BibleApp</h1>
+              <p className="text-xs text-[var(--text-tertiary)]">Compagnon spirituel</p>
+            </div>
+          </div>
+          
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <main className="pb-20 min-h-[calc(100vh-80px)]">
+        <div className="animate-slide-up">
+          {renderContent()}
+        </div>
       </main>
+      
       <ExpandedNavigation 
         activeSection={activeSection} 
         setActiveSection={setActiveSection}

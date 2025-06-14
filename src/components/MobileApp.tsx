@@ -4,8 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useChallengeCleanup } from '@/hooks/useChallengeCleanup';
 import AuthPage from './AuthPage';
-import ExpandedNavigation from './ExpandedNavigation';
-import RealTimeDashboard from './RealTimeDashboard';
+import ModernFinanceNavigation from './ModernFinanceNavigation';
+import ModernDashboard from './ModernDashboard';
 import EnhancedBibleView from './EnhancedBibleView';
 import PrayerCircles from './PrayerCircles';
 import RichTextNotesApp from './RichTextNotesApp';
@@ -37,7 +37,7 @@ const MobileApp = () => {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <RealTimeDashboard onNavigate={handleNavigate} />;
+        return <ModernDashboard onNavigate={handleNavigate} />;
       case 'bible':
         return <EnhancedBibleView />;
       case 'prayer-circles':
@@ -57,62 +57,58 @@ const MobileApp = () => {
       case 'prayer':
         return <Prayer />;
       default:
-        return <RealTimeDashboard onNavigate={handleNavigate} />;
+        return <ModernDashboard onNavigate={handleNavigate} />;
     }
   };
 
   return (
     <div 
-      className="min-h-screen transition-all duration-300"
+      className="min-h-screen transition-all duration-300 relative"
       style={{ 
-        background: 'var(--bg-primary)',
+        background: theme === 'dark'
+          ? 'linear-gradient(135deg, #12121A 0%, #1E1E2A 50%, #2A2A3F 100%)'
+          : 'linear-gradient(135deg, #FFFFFF 0%, #F5F5F7 50%, #F0F0F2 100%)',
         color: 'var(--text-primary)'
       }}
     >
-      {/* Header avec contraste optimal */}
-      <header 
-        className="sticky top-0 z-40 backdrop-blur-lg header-primary"
-        style={{
-          background: 'var(--bg-card)',
-          borderBottom: '1px solid var(--border-default)',
-          color: 'var(--text-primary)'
-        }}
-      >
-        <div className="px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'var(--accent-primary)' }}
-            >
-              <BookOpen className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 
-                className="font-bold text-lg"
-                style={{ color: 'var(--text-primary)' }}
+      {/* Header moderne simplifié */}
+      {activeSection !== 'dashboard' && (
+        <header 
+          className="sticky top-0 z-40 backdrop-blur-lg"
+          style={{
+            background: theme === 'dark' 
+              ? 'rgba(30, 30, 42, 0.9)' 
+              : 'rgba(255, 255, 255, 0.9)',
+            borderBottom: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
+          }}
+        >
+          <div className="px-4 py-3 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #0066FF, #0052CC)' }}
               >
-                BibleApp
-              </h1>
-              <p 
-                className="text-xs"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                Compagnon spirituel
-              </p>
+                <BookOpen className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-sm text-[var(--text-primary)]">
+                  BibleApp
+                </h1>
+              </div>
             </div>
+            
+            <ThemeToggle />
           </div>
-          
-          <ThemeToggle />
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="pb-20 min-h-[calc(100vh-80px)]">
+      <main className={`${activeSection !== 'dashboard' ? 'pb-20' : 'pb-24'} min-h-screen`}>
         <div className="animate-slide-up">
           {renderContent()}
         </div>
       </main>
       
-      <ExpandedNavigation 
+      <ModernFinanceNavigation 
         activeSection={activeSection} 
         setActiveSection={setActiveSection}
       />

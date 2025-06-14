@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ModernNavigation from './ModernNavigation';
+import ModernFinanceNavigation from './ModernFinanceNavigation';
 
 interface ExpandedNavigationProps {
   activeSection: string;
@@ -8,7 +8,7 @@ interface ExpandedNavigationProps {
 }
 
 const ExpandedNavigation = ({ activeSection, setActiveSection }: ExpandedNavigationProps) => {
-  return <ModernNavigation activeSection={activeSection} setActiveSection={setActiveSection} />;
+  return <ModernFinanceNavigation activeSection={activeSection} setActiveSection={setActiveSection} />;
 };
 
 export default ExpandedNavigation;

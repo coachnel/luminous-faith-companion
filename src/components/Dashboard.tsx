@@ -1,3 +1,4 @@
+
 // Dashboard component with all features integrated
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,10 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useSupabaseData';
 import { useNeonBible } from '@/hooks/useNeonBible';
-import { BookOpen, Settings, LogOut, User, Home, BookMarked, PenSquare, Heart, PieChart, Calendar } from 'lucide-react';
+import { BookOpen, Settings, LogOut, User, Home, BookMarked, PenSquare, Heart, PieChart, Calendar, Info } from 'lucide-react';
 import { useNeonNotes } from '@/hooks/useNeonData';
-import { ReadingProgress } from './ReadingProgress';
-import { ChallengesSection } from './ChallengesSection';
+import { EnhancedReadingProgress } from './EnhancedReadingProgress';
+import { EnhancedChallengesSection } from './EnhancedChallengesSection';
 import { ThemeSettings } from './ThemeSettings';
 
 export default function Dashboard() {
@@ -65,56 +66,92 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Bible
+            <div className="space-y-6">
+              {/* Explication */}
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    Comment ça marche ?
                   </CardTitle>
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalBooks} livres</div>
-                  <p className="text-xs text-muted-foreground">
-                    {books.filter(b => b.testament === 'old').length} AT + {books.filter(b => b.testament === 'new').length} NT
+                  <p className="text-sm text-gray-700">
+                    Bienvenue sur votre tableau de bord spirituel ! Explorez la Bible, suivez vos plans de lecture, 
+                    créez des défis personnels et partagez vos intentions de prière avec la communauté. 
+                    Chaque section vous aide à enrichir votre vie spirituelle de manière organisée et motivante.
                   </p>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Notes
-                  </CardTitle>
-                  <PenSquare className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{notes.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Notes personnelles
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Activité
-                  </CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Aujourd'hui</div>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </p>
-                </CardContent>
-              </Card>
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Bible
+                    </CardTitle>
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totalBooks} livres</div>
+                    <p className="text-xs text-muted-foreground">
+                      {books.filter(b => b.testament === 'old').length} AT + {books.filter(b => b.testament === 'new').length} NT
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Notes
+                    </CardTitle>
+                    <PenSquare className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{notes.length}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Notes personnelles
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      Activité
+                    </CardTitle>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">Aujourd'hui</div>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="bible">
             <div className="space-y-4">
+              {/* Explication */}
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    Comment ça marche ?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-700">
+                    Explorez l'ensemble des livres bibliques organisés par testament. 
+                    Cliquez sur un livre pour commencer votre lecture et découvrir les richesses de la Parole de Dieu. 
+                    Votre progression est automatiquement sauvegardée.
+                  </p>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Explorer la Bible</CardTitle>
@@ -140,15 +177,32 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="reading">
-            <ReadingProgress />
+            <EnhancedReadingProgress />
           </TabsContent>
 
           <TabsContent value="challenges">
-            <ChallengesSection />
+            <EnhancedChallengesSection />
           </TabsContent>
 
           <TabsContent value="prayer">
             <div className="space-y-4">
+              {/* Explication */}
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    Comment ça marche ?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-700">
+                    Créez et gérez vos demandes de prière personnelles. Partagez vos intentions avec la communauté 
+                    ou gardez-les privées. Suivez l'évolution de vos prières et encouragez d'autres croyants 
+                    en priant pour leurs demandes.
+                  </p>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Demandes de prière</CardTitle>
@@ -165,7 +219,25 @@ export default function Dashboard() {
 
           <TabsContent value="settings">
             <div className="space-y-6">
+              {/* Explication */}
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    Comment ça marche ?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-700">
+                    Personnalisez votre expérience spirituelle en configurant vos préférences de lecture, 
+                    votre thème visuel et vos informations de profil. Adaptez l'application à vos besoins 
+                    pour une utilisation optimale.
+                  </p>
+                </CardContent>
+              </Card>
+
               <ThemeSettings />
+              
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">

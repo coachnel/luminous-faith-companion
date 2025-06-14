@@ -31,32 +31,18 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     
-    /* Variables personnalisées pour le mode clair */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-tertiary: #f1f5f9;
-    --bg-card: #ffffff;
-    --bg-overlay: rgba(255, 255, 255, 0.95);
+    /* Variables personnalisées pour le mode clair - Travel App Style */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F5F5F7;
+    --bg-card: #F5F5F7;
     
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #64748b;
-    --text-inverse: #ffffff;
+    --text-primary: #1C1C1E;
+    --text-secondary: rgba(60, 60, 67, 0.6);
+    --text-inverse: #FFFFFF;
     
-    --border-default: #e2e8f0;
-    --border-light: #f1f5f9;
-    --border-medium: #cbd5e1;
-    
-    --accent-primary: #3b82f6;
-    --accent-secondary: #8b5cf6;
-    --accent-success: #10b981;
-    --accent-warning: #f59e0b;
-    --accent-error: #ef4444;
-    
-    --spiritual-primary: #6366f1;
-    --spiritual-secondary: #8b5cf6;
-    --spiritual-tertiary: #a78bfa;
-    --spiritual-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-default: #E0E0E5;
+    --accent-primary: #0066FF;
+    --shadow: rgba(0, 0, 0, 0.05);
   }
 
   .dark {
@@ -85,32 +71,18 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     
-    /* Variables corrigées pour le mode sombre - LISIBILITÉ MAXIMALE */
-    --bg-primary: #0a0e1a;
-    --bg-secondary: #1a1f35;
-    --bg-tertiary: #252b47;
-    --bg-card: #1e2642;
-    --bg-overlay: rgba(10, 14, 26, 0.95);
+    /* Variables personnalisées pour le mode sombre - Crypto App Style */
+    --bg-primary: #12121A;
+    --bg-secondary: #1E1E2A;
+    --bg-card: #1E1E2A;
     
-    --text-primary: #f8fafc;
-    --text-secondary: #e2e8f0;
-    --text-tertiary: #cbd5e1;
-    --text-inverse: #0a0e1a;
+    --text-primary: #F2F2F7;
+    --text-secondary: rgba(209, 209, 224, 0.8);
+    --text-inverse: #12121A;
     
-    --border-default: #475569;
-    --border-light: #64748b;
-    --border-medium: #94a3b8;
-    
-    --accent-primary: #60a5fa;
-    --accent-secondary: #a78bfa;
-    --accent-success: #34d399;
-    --accent-warning: #fbbf24;
-    --accent-error: #f87171;
-    
-    --spiritual-primary: #818cf8;
-    --spiritual-secondary: #a78bfa;
-    --spiritual-tertiary: #c4b5fd;
-    --spiritual-background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+    --border-default: #2A2A3F;
+    --accent-primary: #0066FF;
+    --shadow: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -123,7 +95,7 @@
     background: var(--bg-primary);
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
   
   /* Styles pour les cartes modernes */
@@ -131,38 +103,44 @@
     background: var(--bg-card);
     border: 1px solid var(--border-default);
     border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--shadow);
     transition: all 0.2s ease;
   }
   
   .modern-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow);
   }
-  
-  /* Effet glass pour le mode sombre - CORRIGÉ */
-  .glass-dark {
-    background: rgba(30, 38, 66, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(116, 129, 178, 0.3);
-  }
-  
-  .glass-light {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-  }
-}
 
-/* Styles spécifiques pour la lecture - AMÉLIORATION LISIBILITÉ */
-.reading-text {
-  color: var(--text-primary);
-  line-height: 1.7;
-}
+  /* Boutons primaires */
+  .button-primary {
+    background-color: var(--accent-primary);
+    color: var(--text-inverse);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
 
-.dark .reading-text {
-  color: var(--text-primary);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  .button-primary:hover {
+    background-color: var(--accent-primary);
+    opacity: 0.9;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-default);
+    backdrop-filter: blur(20px);
+  }
+
+  .bottom-nav .item-active {
+    color: var(--accent-primary);
+  }
+
+  .bottom-nav .item-inactive {
+    color: var(--text-secondary);
+  }
 }
 
 /* Transitions fluides pour les changements de thème */
@@ -170,7 +148,7 @@
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Scrollbar personnalisée - AMÉLIORATION MODE SOMBRE */
+/* Scrollbar personnalisée */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -180,12 +158,22 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-medium);
+  background: var(--border-default);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary);
+  background: var(--text-secondary);
+}
+
+/* Classes utilitaires pour le scrollbar masqué */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* Animations d'entrée */
@@ -202,37 +190,4 @@
 
 .animate-slide-up {
   animation: slideUp 0.3s ease-out;
-}
-
-/* Gradient spirituel */
-.spiritual-gradient {
-  background: var(--spiritual-background);
-}
-
-/* Classes utilitaires pour le nouveau design */
-.travel-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
-}
-
-.travel-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.crypto-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 0.75rem;
-  backdrop-filter: blur(8px);
-}
-
-/* Navigation moderne */
-.modern-nav {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  backdrop-filter: blur(20px);
 }

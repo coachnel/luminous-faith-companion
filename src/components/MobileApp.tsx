@@ -64,16 +64,16 @@ const MobileApp = () => {
         background: `var(--bg-primary)`
       }}
     >
-      {/* Header moderne avec toggle de thème */}
+      {/* Header moderne */}
       <header className="sticky top-0 z-40 bg-[var(--bg-card)] border-b border-[var(--border-default)] backdrop-blur-lg">
         <div className="px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
             <div>
               <h1 className="font-bold text-lg text-[var(--text-primary)]">BibleApp</h1>
-              <p className="text-xs text-[var(--text-tertiary)]">Compagnon spirituel</p>
+              <p className="text-xs text-[var(--text-secondary)]">Compagnon spirituel</p>
             </div>
           </div>
           

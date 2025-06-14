@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Palette, Sun, Moon, Monitor } from 'lucide-react';
+import { Palette, Sun, Moon } from 'lucide-react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { Label } from '@/components/ui/label';
@@ -24,7 +24,7 @@ export function ThemeSettings() {
 
   if (loading) {
     return (
-      <ModernCard variant="glass">
+      <ModernCard>
         <div className="animate-pulse space-y-4">
           <div className="h-4 bg-[var(--border-default)] rounded w-1/4"></div>
           <div className="h-20 bg-[var(--border-default)] rounded"></div>
@@ -36,7 +36,7 @@ export function ThemeSettings() {
   return (
     <ModernCard variant="elevated" className="animate-slide-up">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
           <Palette className="h-5 w-5 text-white" />
         </div>
         <div>
@@ -61,12 +61,12 @@ export function ThemeSettings() {
             <div className="flex items-center space-x-4 p-4 border border-[var(--border-default)] rounded-xl hover:bg-[var(--bg-secondary)] transition-all duration-200 cursor-pointer">
               <RadioGroupItem value="light" id="light" />
               <Label htmlFor="light" className="flex items-center gap-4 cursor-pointer flex-1">
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-xl shadow-sm">
-                  <Sun className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center justify-center w-12 h-12 bg-white border-2 border-gray-200 rounded-xl shadow-sm">
+                  <Sun className="h-5 w-5 text-[var(--accent-primary)]" />
                 </div>
                 <div>
                   <div className="font-medium text-[var(--text-primary)]">Mode clair</div>
-                  <div className="text-sm text-[var(--text-secondary)]">Interface lumineuse et moderne</div>
+                  <div className="text-sm text-[var(--text-secondary)]">Interface lumineuse et épurée</div>
                 </div>
               </Label>
             </div>
@@ -75,8 +75,8 @@ export function ThemeSettings() {
             <div className="flex items-center space-x-4 p-4 border border-[var(--border-default)] rounded-xl hover:bg-[var(--bg-secondary)] transition-all duration-200 cursor-pointer">
               <RadioGroupItem value="dark" id="dark" />
               <Label htmlFor="dark" className="flex items-center gap-4 cursor-pointer flex-1">
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-600 rounded-xl shadow-sm">
-                  <Moon className="h-5 w-5 text-blue-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-gray-900 border-2 border-gray-700 rounded-xl shadow-sm">
+                  <Moon className="h-5 w-5 text-[var(--accent-primary)]" />
                 </div>
                 <div>
                   <div className="font-medium text-[var(--text-primary)]">Mode sombre</div>
@@ -90,7 +90,7 @@ export function ThemeSettings() {
         {/* Aperçu du thème */}
         <div className="space-y-3">
           <Label className="text-base font-medium text-[var(--text-primary)]">Aperçu</Label>
-          <ModernCard variant="glass" padding="md">
+          <ModernCard padding="md">
             <div className="space-y-3">
               <div className="font-medium text-[var(--text-primary)]">Exemple de contenu</div>
               <div className="text-sm text-[var(--text-secondary)]">
@@ -100,13 +100,13 @@ export function ThemeSettings() {
               <div className="flex gap-2">
                 <ModernButton size="sm" variant="primary">Principal</ModernButton>
                 <ModernButton size="sm" variant="secondary">Secondaire</ModernButton>
-                <ModernButton size="sm" variant="spiritual">Spirituel</ModernButton>
+                <ModernButton size="sm" variant="outline">Outline</ModernButton>
               </div>
             </div>
           </ModernCard>
         </div>
 
-        <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-light)]">
+        <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-default)]">
           <div className="flex items-start gap-3">
             <div className="w-6 h-6 rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0 mt-0.5">
               <span className="text-white text-xs">💡</span>

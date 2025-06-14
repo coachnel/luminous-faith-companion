@@ -14,89 +14,58 @@ export const designTokens = {
   // Border radius
   radius: {
     sm: '0.375rem',   // 6px
-    md: '0.5rem',     // 8px
-    lg: '0.75rem',    // 12px
-    xl: '1rem',       // 16px
-    '2xl': '1.5rem',  // 24px
+    md: '0.75rem',    // 12px
+    lg: '1rem',       // 16px
+    xl: '1.5rem',     // 24px
     full: '9999px',
   },
   
   // Shadows
   shadows: {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    light: '0 2px 4px rgba(0, 0, 0, 0.05)',
+    dark: '0 2px 4px rgba(0, 0, 0, 0.2)',
   },
   
   // Light theme colors (Travel App inspiration)
   light: {
     background: {
-      primary: '#ffffff',
-      secondary: '#f8fafc',
-      tertiary: '#f1f5f9',
-      card: '#ffffff',
-      overlay: 'rgba(255, 255, 255, 0.95)',
+      primary: '#FFFFFF',
+      secondary: '#F5F5F7',
+      card: '#F5F5F7',
     },
     text: {
-      primary: '#0f172a',
-      secondary: '#475569',
-      tertiary: '#64748b',
-      inverse: '#ffffff',
+      primary: '#1C1C1E',
+      secondary: 'rgba(60, 60, 67, 0.6)',
+      inverse: '#FFFFFF',
     },
     border: {
-      default: '#e2e8f0',
-      light: '#f1f5f9',
-      medium: '#cbd5e1',
+      default: '#E0E0E5',
     },
     accent: {
-      primary: '#3b82f6',
-      secondary: '#8b5cf6',
-      success: '#10b981',
-      warning: '#f59e0b',
-      error: '#ef4444',
+      primary: '#0066FF',
     },
-    spiritual: {
-      primary: '#6366f1',
-      secondary: '#8b5cf6',
-      tertiary: '#a78bfa',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    }
+    shadow: 'rgba(0, 0, 0, 0.05)',
   },
   
-  // Dark theme colors (Crypto App inspiration) - CORRIGÉ pour lisibilité
+  // Dark theme colors (Crypto App inspiration)
   dark: {
     background: {
-      primary: '#0a0e1a',        // Noir profond mais pas total
-      secondary: '#1a1f35',      // Bleu très foncé
-      tertiary: '#252b47',       // Bleu foncé plus clair
-      card: '#1e2642',           // Cartes en bleu foncé
-      overlay: 'rgba(10, 14, 26, 0.95)',
+      primary: '#12121A',
+      secondary: '#1E1E2A',
+      card: '#1E1E2A',
     },
     text: {
-      primary: '#f8fafc',        // Blanc presque pur
-      secondary: '#e2e8f0',      // Gris très clair
-      tertiary: '#cbd5e1',       // Gris clair
-      inverse: '#0a0e1a',
+      primary: '#F2F2F7',
+      secondary: 'rgba(209, 209, 224, 0.8)',
+      inverse: '#12121A',
     },
     border: {
-      default: '#334155',
-      light: '#475569',
-      medium: '#64748b',
+      default: '#2A2A3F',
     },
     accent: {
-      primary: '#60a5fa',        // Bleu électrique plus visible
-      secondary: '#a78bfa',      // Violet électrique
-      success: '#34d399',        // Vert crypto
-      warning: '#fbbf24',        // Orange électrique
-      error: '#f87171',          // Rouge électrique
+      primary: '#0066FF',
     },
-    spiritual: {
-      primary: '#818cf8',        // Indigo électrique
-      secondary: '#a78bfa',      // Violet électrique
-      tertiary: '#c4b5fd',       // Violet clair
-      background: 'linear-gradient(135deg, #312e81 0%, #1e1b4b 100%)',
-    }
+    shadow: 'rgba(0, 0, 0, 0.2)',
   }
 };
 

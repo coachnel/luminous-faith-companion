@@ -33,7 +33,7 @@ export default function Dashboard() {
       <header className="border-b border-[var(--border-default)] bg-[var(--bg-card)] backdrop-blur-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -53,11 +53,11 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
                 <div className="font-medium text-[var(--text-primary)]">{profile?.name || user?.email}</div>
-                <div className="text-xs text-[var(--text-tertiary)]">Connecté</div>
+                <div className="text-xs text-[var(--text-secondary)]">Connecté</div>
               </div>
               <Avatar className="h-9 w-9 ring-2 ring-[var(--border-default)]">
                 <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-[var(--spiritual-primary)] text-white">
+                <AvatarFallback className="bg-[var(--accent-primary)] text-white">
                   {(profile?.name || user?.email || '?').charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -69,7 +69,7 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-6 bg-[var(--bg-card)] border border-[var(--border-default)]">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Tableau de bord</TabsTrigger>
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Accueil</TabsTrigger>
             <TabsTrigger value="bible" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Bible</TabsTrigger>
             <TabsTrigger value="reading" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Lecture</TabsTrigger>
             <TabsTrigger value="challenges" className="data-[state=active]:bg-[var(--accent-primary)] data-[state=active]:text-white">Défis</TabsTrigger>
@@ -80,7 +80,7 @@ export default function Dashboard() {
           <TabsContent value="dashboard">
             <div className="space-y-6">
               {/* Explication */}
-              <ModernCard variant="glass" className="border-[var(--accent-primary)]/20 animate-slide-up">
+              <ModernCard variant="elevated" className="border-[var(--accent-primary)]/20 animate-slide-up">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
                     <Info className="h-6 w-6 text-white" />
@@ -101,7 +101,7 @@ export default function Dashboard() {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <ModernCard variant="elevated" className="animate-slide-up">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
                       <BookOpen className="h-6 w-6 text-white" />
                     </div>
                     <div className="text-right">
@@ -110,14 +110,14 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <h3 className="font-semibold text-[var(--text-primary)] mb-1">Bible complète</h3>
-                  <p className="text-xs text-[var(--text-tertiary)]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     {books.filter(b => b.testament === 'old').length} AT + {books.filter(b => b.testament === 'new').length} NT
                   </p>
                 </ModernCard>
                 
                 <ModernCard variant="elevated" className="animate-slide-up">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
                       <PenSquare className="h-6 w-6 text-white" />
                     </div>
                     <div className="text-right">
@@ -126,14 +126,14 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <h3 className="font-semibold text-[var(--text-primary)] mb-1">Notes personnelles</h3>
-                  <p className="text-xs text-[var(--text-tertiary)]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Vos réflexions spirituelles
                   </p>
                 </ModernCard>
                 
                 <ModernCard variant="elevated" className="animate-slide-up">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
                       <Calendar className="h-6 w-6 text-white" />
                     </div>
                     <div className="text-right">
@@ -142,7 +142,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <h3 className="font-semibold text-[var(--text-primary)] mb-1">Votre journée</h3>
-                  <p className="text-xs text-[var(--text-tertiary)]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </p>
                 </ModernCard>
@@ -153,9 +153,9 @@ export default function Dashboard() {
           <TabsContent value="bible">
             <div className="space-y-6">
               {/* Explication */}
-              <ModernCard variant="glass" className="border-indigo-500/20 animate-slide-up">
+              <ModernCard variant="elevated" className="border-[var(--accent-primary)]/20 animate-slide-up">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
                     <Info className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -173,7 +173,7 @@ export default function Dashboard() {
 
               <ModernCard variant="elevated" className="animate-slide-up">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
                     <BookOpen className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -213,9 +213,9 @@ export default function Dashboard() {
           <TabsContent value="prayer">
             <div className="space-y-6">
               {/* Explication */}
-              <ModernCard variant="glass" className="border-green-500/20 animate-slide-up">
+              <ModernCard variant="elevated" className="border-[var(--accent-primary)]/20 animate-slide-up">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
                     <Info className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
 
               <ModernCard variant="elevated" className="animate-slide-up">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-success)] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
                     <Heart className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -254,7 +254,7 @@ export default function Dashboard() {
               
               <ModernCard variant="elevated">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-secondary)] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
                     <User className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -268,13 +268,13 @@ export default function Dashboard() {
                   <div className="flex items-center gap-4">
                     <Avatar className="h-16 w-16 ring-2 ring-[var(--border-default)]">
                       <AvatarImage src={profile?.avatar_url || ''} />
-                      <AvatarFallback className="bg-[var(--spiritual-primary)] text-white text-xl">
+                      <AvatarFallback className="bg-[var(--accent-primary)] text-white text-xl">
                         {(profile?.name || user?.email || '?').charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="font-medium text-lg text-[var(--text-primary)]">{profile?.name || 'Utilisateur'}</div>
-                      <div className="text-sm text-[var(--text-tertiary)]">{user?.email}</div>
+                      <div className="text-sm text-[var(--text-secondary)]">{user?.email}</div>
                     </div>
                   </div>
                   <div className="flex gap-3">

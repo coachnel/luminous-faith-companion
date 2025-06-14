@@ -1,4 +1,3 @@
-
 // Système de chargement intelligent des versets bibliques
 import { NeonVerse, NeonBook, NeonBibleVersion } from './bibleClient';
 
@@ -117,7 +116,7 @@ const CANONICAL_CATHOLIC_BOOKS = [
   { id: 'rev', name: 'Apocalypse', chapters: 22, testament: 'new' }
 ];
 
-// Mapping des noms de livres pour la correspondance
+// Mapping des noms de livres pour la correspondance (corrigé sans doublons)
 const BOOK_NAME_MAPPINGS: { [key: string]: string } = {
   'genèse': 'gen', 'genesis': 'gen',
   'exode': 'exo', 'exodus': 'exo',
@@ -126,7 +125,7 @@ const BOOK_NAME_MAPPINGS: { [key: string]: string } = {
   'deutéronome': 'deu', 'deuteronomy': 'deu',
   'josué': 'jos', 'joshua': 'jos',
   'juges': 'jdg', 'judges': 'jdg',
-  'ruth': 'rut', 'ruth': 'rut',
+  'ruth': 'rut',
   '1 samuel': '1sa', '1samuel': '1sa',
   '2 samuel': '2sa', '2samuel': '2sa',
   '1 rois': '1ki', '1kings': '1ki',
@@ -135,24 +134,24 @@ const BOOK_NAME_MAPPINGS: { [key: string]: string } = {
   '2 chroniques': '2ch', '2chronicles': '2ch',
   'esdras': 'ezr', 'ezra': 'ezr',
   'néhémie': 'neh', 'nehemiah': 'neh',
-  'esther': 'est', 'esther': 'est',
-  'job': 'job', 'job': 'job',
+  'esther': 'est',
+  'job': 'job',
   'psaumes': 'psa', 'psalms': 'psa',
   'proverbes': 'pro', 'proverbs': 'pro',
   'ecclésiaste': 'ecc', 'ecclesiastes': 'ecc',
   'cantique des cantiques': 'sng', 'song of solomon': 'sng',
   'isaïe': 'isa', 'isaiah': 'isa',
   'jérémie': 'jer', 'jeremiah': 'jer',
-  'lamentations': 'lam', 'lamentations': 'lam',
+  'lamentations': 'lam',
   'ézéchiel': 'eze', 'ezekiel': 'eze',
-  'daniel': 'dan', 'daniel': 'dan',
+  'daniel': 'dan',
   'osée': 'hos', 'hosea': 'hos',
   'joël': 'joe', 'joel': 'joe',
-  'amos': 'amo', 'amos': 'amo',
+  'amos': 'amo',
   'abdias': 'oba', 'obadiah': 'oba',
   'jonas': 'jon', 'jonah': 'jon',
   'michée': 'mic', 'micah': 'mic',
-  'nahum': 'nah', 'nahum': 'nah',
+  'nahum': 'nah',
   'habacuc': 'hab', 'habakkuk': 'hab',
   'sophonie': 'zep', 'zephaniah': 'zep',
   'aggée': 'hag', 'haggai': 'hag',
@@ -183,7 +182,7 @@ const BOOK_NAME_MAPPINGS: { [key: string]: string } = {
   '1 jean': '1jo', '1john': '1jo',
   '2 jean': '2jo', '2john': '2jo',
   '3 jean': '3jo', '3john': '3jo',
-  'jude': 'jud', 'jude': 'jud',
+  'jude': 'jud',
   'apocalypse': 'rev', 'revelation': 'rev'
 };
 

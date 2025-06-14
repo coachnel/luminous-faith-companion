@@ -24,6 +24,156 @@ export type Database = {
         }
         Relationships: []
       }
+      community_comments: {
+        Row: {
+          author_name: string
+          comment: string
+          content_id: string | null
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          author_name: string
+          comment: string
+          content_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string
+          comment?: string
+          content_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "community_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_content: {
+        Row: {
+          author_name: string
+          comments_count: number
+          content: string
+          created_at: string
+          id: string
+          is_public: boolean
+          likes_count: number
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          comments_count?: number
+          content: string
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          likes_count?: number
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          comments_count?: number
+          content?: string
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          likes_count?: number
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      community_likes: {
+        Row: {
+          content_id: string | null
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_likes_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "community_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_notifications: {
+        Row: {
+          content_id: string | null
+          email_sent: boolean
+          id: string
+          is_read: boolean
+          message: string
+          sent_at: string
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          content_id?: string | null
+          email_sent?: boolean
+          id?: string
+          is_read?: boolean
+          message: string
+          sent_at?: string
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          content_id?: string | null
+          email_sent?: boolean
+          id?: string
+          is_read?: boolean
+          message?: string
+          sent_at?: string
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_notifications_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "community_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorite_verses: {
         Row: {
           book: string

@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 export interface SpiritualChallenge {
@@ -43,29 +42,18 @@ export function useSupabaseChallenges() {
       // Nettoyer les défis expirés avant de les récupérer
       await cleanupExpiredChallenges();
 
-      // Récupérer les défis de l'utilisateur
-      const { data: userChallenges, error: userError } = await supabase
-        .from('spiritual_challenges')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+      // Utiliser localStorage temporairement
+      const storedChallenges = localStorage.getItem(`challenges_${user.id}`);
+      if (storedChallenges) {
+        const userChallenges = JSON.parse(storedChallenges).filter((c: SpiritualChallenge) => c.is_active);
+        setChallenges(userChallenges);
+      }
 
-      if (userError) throw userError;
-
-      // Récupérer les défis publics
-      const { data: publicChallengesData, error: publicError } = await supabase
-        .from('spiritual_challenges')
-        .select('*')
-        .eq('is_public', true)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (publicError) throw publicError;
-
-      setChallenges(userChallenges || []);
-      setPublicChallenges(publicChallengesData || []);
+      const storedPublicChallenges = localStorage.getItem('public_challenges');
+      if (storedPublicChallenges) {
+        const publicData = JSON.parse(storedPublicChallenges).filter((c: SpiritualChallenge) => c.is_active);
+        setPublicChallenges(publicData.slice(0, 10));
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des défis:', error);
       setChallenges([]);
@@ -77,10 +65,33 @@ export function useSupabaseChallenges() {
 
   const cleanupExpiredChallenges = async () => {
     try {
-      await supabase
-        .from('spiritual_challenges')
-        .update({ is_active: false })
-        .lt('expires_at', new Date().toISOString());
+      // Nettoyer localStorage des défis expirés
+      if (user) {
+        const storedChallenges = localStorage.getItem(`challenges_${user.id}`);
+        if (storedChallenges) {
+          const challenges = JSON.parse(storedChallenges);
+          const activeChallenges = challenges.map((challenge: SpiritualChallenge) => {
+            if (new Date(challenge.expires_at) < new Date()) {
+              return { ...challenge, is_active: false };
+            }
+            return challenge;
+          });
+          localStorage.setItem(`challenges_${user.id}`, JSON.stringify(activeChallenges));
+        }
+      }
+
+      // Nettoyer les défis publics expirés
+      const storedPublicChallenges = localStorage.getItem('public_challenges');
+      if (storedPublicChallenges) {
+        const publicChallenges = JSON.parse(storedPublicChallenges);
+        const activePublicChallenges = publicChallenges.map((challenge: SpiritualChallenge) => {
+          if (new Date(challenge.expires_at) < new Date()) {
+            return { ...challenge, is_active: false };
+          }
+          return challenge;
+        });
+        localStorage.setItem('public_challenges', JSON.stringify(activePublicChallenges));
+      }
     } catch (error) {
       console.error('Erreur lors du nettoyage des défis expirés:', error);
     }
@@ -102,15 +113,30 @@ export function useSupabaseChallenges() {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + challengeData.target_days);
 
-      const { error } = await supabase
-        .from('spiritual_challenges')
-        .insert([{
-          ...challengeData,
-          user_id: user.id,
-          expires_at: expiresAt.toISOString()
-        }]);
+      const newChallenge: SpiritualChallenge = {
+        id: Date.now().toString(),
+        ...challengeData,
+        user_id: user.id,
+        expires_at: expiresAt.toISOString(),
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      // Sauvegarder le défi personnel
+      const storedChallenges = localStorage.getItem(`challenges_${user.id}`);
+      const currentChallenges = storedChallenges ? JSON.parse(storedChallenges) : [];
+      const updatedChallenges = [...currentChallenges, newChallenge];
+      localStorage.setItem(`challenges_${user.id}`, JSON.stringify(updatedChallenges));
+
+      // Si public, l'ajouter aux défis publics
+      if (challengeData.is_public) {
+        const storedPublicChallenges = localStorage.getItem('public_challenges');
+        const currentPublicChallenges = storedPublicChallenges ? JSON.parse(storedPublicChallenges) : [];
+        const updatedPublicChallenges = [...currentPublicChallenges, newChallenge];
+        localStorage.setItem('public_challenges', JSON.stringify(updatedPublicChallenges));
+      }
+
       await fetchChallenges();
     } catch (error) {
       console.error('Erreur lors de la création du défi:', error);
@@ -124,18 +150,24 @@ export function useSupabaseChallenges() {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      const { error } = await supabase
-        .from('challenge_progress')
-        .upsert([{
-          challenge_id: challengeId,
-          user_id: user.id,
-          completed_date: today,
-          notes: notes
-        }], {
-          onConflict: 'challenge_id,user_id,completed_date'
-        });
+      const newProgress: ChallengeProgress = {
+        id: Date.now().toString(),
+        challenge_id: challengeId,
+        user_id: user.id,
+        completed_date: today,
+        notes: notes,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      const storedProgress = localStorage.getItem(`challenge_progress_${challengeId}`);
+      const currentProgress: ChallengeProgress[] = storedProgress ? JSON.parse(storedProgress) : [];
+      
+      // Vérifier si déjà marqué aujourd'hui
+      const alreadyCompleted = currentProgress.some(p => p.completed_date === today);
+      if (!alreadyCompleted) {
+        const updatedProgress = [...currentProgress, newProgress];
+        localStorage.setItem(`challenge_progress_${challengeId}`, JSON.stringify(updatedProgress));
+      }
     } catch (error) {
       console.error('Erreur lors de la validation du défi:', error);
       throw error;
@@ -166,15 +198,11 @@ export function useSupabaseChallengeProgress(challengeId: string) {
       }
 
       try {
-        const { data, error } = await supabase
-          .from('challenge_progress')
-          .select('*')
-          .eq('challenge_id', challengeId)
-          .eq('user_id', user.id)
-          .order('completed_date', { ascending: false });
-
-        if (error) throw error;
-        setProgress(data || []);
+        const storedProgress = localStorage.getItem(`challenge_progress_${challengeId}`);
+        if (storedProgress) {
+          const progressData = JSON.parse(storedProgress);
+          setProgress(progressData.filter((p: ChallengeProgress) => p.user_id === user.id));
+        }
       } catch (error) {
         console.error('Erreur lors du chargement de la progression:', error);
         setProgress([]);

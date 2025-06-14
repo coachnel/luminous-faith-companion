@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -10,11 +11,11 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Plus, Target, Users, Lock, CheckCircle, Flame, Info, Calendar, Trophy } from 'lucide-react';
-import { useChallenges, useChallengeProgress } from '@/hooks/useChallenges';
+import { useSupabaseChallenges, useSupabaseChallengeProgress } from '@/hooks/useSupabaseChallenges';
 import { toast } from 'sonner';
 
 export function EnhancedChallengesSection() {
-  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted } = useChallenges();
+  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted } = useSupabaseChallenges();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newChallenge, setNewChallenge] = useState({
     title: '',
@@ -218,7 +219,7 @@ function ChallengeCard({ challenge, onMarkCompleted }: {
   challenge: any; 
   onMarkCompleted: (id: string) => void;
 }) {
-  const { progress, getStats } = useChallengeProgress(challenge.id);
+  const { progress, getStats } = useSupabaseChallengeProgress(challenge.id);
   const stats = getStats();
   const progressPercentage = Math.round((stats.completedDays / challenge.target_days) * 100);
 

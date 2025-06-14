@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Book, Heart, Calendar, Target, PenTool, Users } from 'lucide-react';
+import { Book, Heart, Calendar, Target, PenTool, Users, Star } from 'lucide-react';
 import { getDailyVerse } from '@/lib/dailyVerse';
 import QuickActions from './QuickActions';
 import ProfilePhoto from './ProfilePhoto';

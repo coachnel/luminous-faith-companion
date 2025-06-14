@@ -240,9 +240,9 @@ const RichTextNotesApp = () => {
                         {note.title}
                       </CardTitle>
                       {note.is_public ? (
-                        <Users className="h-4 w-4 text-green-600" title="Partagée avec la communauté" />
+                        <Users className="h-4 w-4 text-green-600" />
                       ) : (
-                        <Lock className="h-4 w-4 text-gray-400" title="Note privée" />
+                        <Lock className="h-4 w-4 text-gray-400" />
                       )}
                     </div>
                     <div className="flex gap-1">

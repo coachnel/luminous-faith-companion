@@ -77,37 +77,79 @@ const DiscoverPage = () => {
 
       if (communityError) throw communityError;
 
-      // Récupérer les notes publiques
-      const { data: publicNotes, error: notesError } = await supabase
-        .from('notes')
-        .select(`
-          id,
-          title,
-          content,
-          links,
-          created_at,
-          profiles!inner(name)
-        `)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false });
+      // Récupérer les notes publiques avec gestion d'erreur
+      let publicNotes: any[] = [];
+      try {
+        const { data: notesData, error: notesError } = await supabase
+          .from('notes')
+          .select(`
+            id,
+            title,
+            content,
+            links,
+            created_at,
+            user_id
+          `)
+          .eq('is_public', true)
+          .order('created_at', { ascending: false });
 
-      if (notesError) throw notesError;
+        if (notesError) {
+          console.warn('Erreur lors de la récupération des notes:', notesError);
+        } else {
+          // Récupérer les profils séparément
+          const userIds = [...new Set(notesData?.map(note => note.user_id) || [])];
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, name')
+            .in('id', userIds);
 
-      // Récupérer les défis publics
-      const { data: publicChallenges, error: challengesError } = await supabase
-        .from('challenges')
-        .select(`
-          id,
-          title,
-          description,
-          target_days,
-          created_at,
-          profiles!inner(name)
-        `)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false });
+          const profileMap = new Map(profiles?.map(p => [p.id, p.name]) || []);
+          
+          publicNotes = notesData?.map(note => ({
+            ...note,
+            author_name: profileMap.get(note.user_id) || 'Utilisateur'
+          })) || [];
+        }
+      } catch (error) {
+        console.warn('Erreur lors du traitement des notes:', error);
+      }
 
-      if (challengesError) throw challengesError;
+      // Récupérer les défis publics avec gestion d'erreur
+      let publicChallenges: any[] = [];
+      try {
+        const { data: challengesData, error: challengesError } = await supabase
+          .from('challenges')
+          .select(`
+            id,
+            title,
+            description,
+            target_days,
+            created_at,
+            user_id
+          `)
+          .eq('is_public', true)
+          .order('created_at', { ascending: false });
+
+        if (challengesError) {
+          console.warn('Erreur lors de la récupération des défis:', challengesError);
+        } else {
+          // Récupérer les profils séparément
+          const userIds = [...new Set(challengesData?.map(challenge => challenge.user_id) || [])];
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, name')
+            .in('id', userIds);
+
+          const profileMap = new Map(profiles?.map(p => [p.id, p.name]) || []);
+          
+          publicChallenges = challengesData?.map(challenge => ({
+            ...challenge,
+            author_name: profileMap.get(challenge.user_id) || 'Utilisateur'
+          })) || [];
+        }
+      } catch (error) {
+        console.warn('Erreur lors du traitement des défis:', error);
+      }
 
       // Combiner tout le contenu
       const allItems: CommunityItem[] = [
@@ -121,23 +163,23 @@ const DiscoverPage = () => {
           likes_count: item.likes_count,
           comments_count: item.comments_count
         })),
-        ...(publicNotes || []).map(note => ({
+        ...publicNotes.map(note => ({
           id: note.id,
           type: 'note' as const,
           title: note.title,
           content: note.content,
-          author_name: note.profiles?.name || 'Utilisateur',
+          author_name: note.author_name,
           created_at: note.created_at,
           likes_count: 0,
           comments_count: 0,
           links: note.links
         })),
-        ...(publicChallenges || []).map(challenge => ({
+        ...publicChallenges.map(challenge => ({
           id: challenge.id,
           type: 'challenge' as const,
           title: challenge.title,
           content: challenge.description || '',
-          author_name: challenge.profiles?.name || 'Utilisateur',
+          author_name: challenge.author_name,
           created_at: challenge.created_at,
           likes_count: 0,
           comments_count: 0,

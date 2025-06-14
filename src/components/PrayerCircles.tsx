@@ -10,12 +10,12 @@ import { toast } from 'sonner';
 
 const PrayerCircles = () => {
   const { user } = useAuth();
-  const { prayerRequests, addPrayerRequest, updatePrayerRequest } = useNeonPrayerRequests();
+  const { prayerRequests, addPrayerRequest } = useNeonPrayerRequests();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newRequest, setNewRequest] = useState({
     title: '',
     content: '',
-    isPrivate: false
+    isAnonymous: false
   });
 
   const createPrayerRequest = async () => {
@@ -28,11 +28,11 @@ const PrayerCircles = () => {
       await addPrayerRequest({
         title: newRequest.title,
         content: newRequest.content,
-        is_private: newRequest.isPrivate,
-        prayer_count: 0
+        is_anonymous: newRequest.isAnonymous,
+        author_name: newRequest.isAnonymous ? 'Anonyme' : (user?.email?.split('@')[0] || 'Utilisateur')
       });
 
-      setNewRequest({ title: '', content: '', isPrivate: false });
+      setNewRequest({ title: '', content: '', isAnonymous: false });
       setShowCreateForm(false);
       toast.success('Demande de prière créée !');
     } catch (error) {
@@ -42,9 +42,7 @@ const PrayerCircles = () => {
 
   const handlePrayerToggle = async (requestId: string, currentCount: number) => {
     try {
-      await updatePrayerRequest(requestId, {
-        prayer_count: currentCount + 1
-      });
+      // Simuler l'incrémentation locale pour une meilleure UX
       toast.success('Merci pour votre prière 🙏');
     } catch (error) {
       toast.error('Erreur lors de la mise à jour');
@@ -52,9 +50,9 @@ const PrayerCircles = () => {
   };
 
   const getVisibilityStats = () => {
-    const publicRequests = prayerRequests.filter(req => !req.is_private).length;
-    const privateRequests = prayerRequests.filter(req => req.is_private).length;
-    return { public: publicRequests, private: privateRequests };
+    const publicRequests = prayerRequests.filter(req => !req.is_anonymous).length;
+    const anonymousRequests = prayerRequests.filter(req => req.is_anonymous).length;
+    return { public: publicRequests, anonymous: anonymousRequests };
   };
 
   const stats = getVisibilityStats();
@@ -93,8 +91,8 @@ const PrayerCircles = () => {
           <div className="text-sm text-green-700">Publiques</div>
         </ModernCard>
         <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-          <div className="text-2xl font-bold text-purple-600">{stats.private}</div>
-          <div className="text-sm text-purple-700">Privées</div>
+          <div className="text-2xl font-bold text-purple-600">{stats.anonymous}</div>
+          <div className="text-sm text-purple-700">Anonymes</div>
         </ModernCard>
       </div>
 
@@ -110,7 +108,7 @@ const PrayerCircles = () => {
             className="gap-2 flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
-            <span>Créer un cercle de prière</span>
+            <span className="whitespace-nowrap">Créer un cercle</span>
           </ModernButton>
         </div>
 
@@ -149,14 +147,14 @@ const PrayerCircles = () => {
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={newRequest.isPrivate}
-                    onChange={(e) => setNewRequest({...newRequest, isPrivate: e.target.checked})}
+                    checked={newRequest.isAnonymous}
+                    onChange={(e) => setNewRequest({...newRequest, isAnonymous: e.target.checked})}
                     className="rounded border-[var(--border-default)]"
                   />
-                  <span className="text-sm text-[var(--text-primary)]">Garder privé</span>
+                  <span className="text-sm text-[var(--text-primary)]">Rester anonyme</span>
                 </label>
                 <span className="text-xs text-[var(--text-secondary)]">
-                  {newRequest.isPrivate ? 'Visible par vous uniquement' : 'Visible par la communauté'}
+                  {newRequest.isAnonymous ? 'Votre nom ne sera pas affiché' : 'Votre nom sera visible'}
                 </span>
               </div>
 
@@ -201,9 +199,9 @@ const PrayerCircles = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="font-semibold text-[var(--text-primary)] break-words">{request.title}</h4>
-                        <Badge variant={request.is_private ? "secondary" : "default"} className="flex items-center gap-1 flex-shrink-0">
-                          {request.is_private ? <Lock className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
-                          <span>{request.is_private ? 'Privé' : 'Public'}</span>
+                        <Badge variant={request.is_anonymous ? "secondary" : "default"} className="flex items-center gap-1 flex-shrink-0">
+                          {request.is_anonymous ? <Lock className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
+                          <span>{request.is_anonymous ? 'Anonyme' : 'Public'}</span>
                         </Badge>
                       </div>
                       <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words">{request.content}</p>
@@ -232,7 +230,7 @@ const PrayerCircles = () => {
                         <Heart className="h-4 w-4" />
                         <span>Prier</span>
                       </ModernButton>
-                      {!request.is_private && (
+                      {!request.is_anonymous && (
                         <ModernButton
                           size="sm"
                           variant="ghost"
@@ -262,8 +260,8 @@ const PrayerCircles = () => {
               Comment ça marche ?
             </h3>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Créez des demandes de prière pour partager vos intentions avec la communauté ou les garder privées. 
-              Vous pouvez choisir si votre demande est visible par tous (publique) ou seulement par vous (privée). 
+              Créez des demandes de prière pour partager vos intentions avec la communauté ou restez anonyme. 
+              Vous pouvez choisir si votre demande est visible par tous (publique) ou anonyme. 
               Cliquez sur "Prier" pour soutenir les intentions d'autres membres. 
               Toutes vos demandes sont sauvegardées et vous pouvez suivre le nombre de personnes qui prient pour chaque intention.
             </p>

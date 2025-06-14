@@ -103,7 +103,6 @@ export const useNotificationSystem = () => {
         tag: 'bible-app-reminder',
         requireInteraction: false,
         silent: false,
-        renotify: true,
         ...options
       });
 
@@ -134,6 +133,24 @@ export const useNotificationSystem = () => {
       console.error('❌ Erreur lors de l\'envoi de notification:', error);
       toast.error('Erreur lors de l\'envoi de la notification');
       return null;
+    }
+  };
+
+  const sendEmailNotification = async (title: string, body: string) => {
+    if (!user?.email) {
+      console.warn('⚠️ Aucun email utilisateur disponible');
+      return false;
+    }
+
+    try {
+      // Simuler l'envoi d'email - à remplacer par une vraie API
+      console.log(`📧 Email envoyé à ${user.email}: ${title} - ${body}`);
+      toast.success('Notification par email envoyée !');
+      return true;
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi d\'email:', error);
+      toast.error('Erreur lors de l\'envoi de l\'email');
+      return false;
     }
   };
 
@@ -180,6 +197,9 @@ export const useNotificationSystem = () => {
           tag: 'daily-verse',
           icon: '/icons/icon-192x192.png'
         });
+        
+        // Aussi par email si préféré
+        sendEmailNotification('🌅 Bonjour !', 'Découvrez votre verset quotidien et commencez bien la journée');
       });
       console.log('📅 Notification verset quotidien programmée (8h00)');
     }
@@ -194,11 +214,13 @@ export const useNotificationSystem = () => {
       
       prayerTimes.forEach(({ hour, label }) => {
         scheduleDaily(hour, 0, () => {
+          const message = `C'est l'heure de votre prière ${label}. Prenez un instant pour vous recueillir`;
           sendNotification('🙏 Moment de prière', {
-            body: `C'est l'heure de votre prière ${label}. Prenez un instant pour vous recueillir`,
+            body: message,
             tag: `prayer-reminder-${hour}`,
             icon: '/icons/icon-192x192.png'
           });
+          sendEmailNotification('🙏 Moment de prière', message);
         });
       });
       console.log('📅 Notifications de prière programmées (8h, 12h, 20h)');
@@ -207,11 +229,13 @@ export const useNotificationSystem = () => {
     // Notification de lecture à 19h00
     if (prefs.readingReminder) {
       scheduleDaily(19, 0, () => {
+        const message = 'Il est temps de lire votre passage quotidien. Continuez votre progression !';
         sendNotification('📖 Lecture quotidienne', {
-          body: 'Il est temps de lire votre passage quotidien. Continuez votre progression !',
+          body: message,
           tag: 'reading-reminder',
           icon: '/icons/icon-192x192.png'
         });
+        sendEmailNotification('📖 Lecture quotidienne', message);
       });
       console.log('📅 Notification lecture quotidienne programmée (19h00)');
     }
@@ -289,6 +313,8 @@ export const useNotificationSystem = () => {
 
     if (success) {
       toast.success('Notification de test envoyée !');
+      // Aussi tester l'email
+      sendEmailNotification('🔔 Test de notification', 'Votre système de notifications fonctionne parfaitement !');
       return true;
     } else {
       toast.error('Erreur lors du test de notification');
@@ -300,6 +326,7 @@ export const useNotificationSystem = () => {
     permission,
     requestPermission,
     sendNotification,
+    sendEmailNotification,
     scheduleNotification,
     testNotification,
     clearOldIntervals

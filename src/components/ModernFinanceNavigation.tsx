@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, BookOpen, Calendar, Users, Target, MessageSquare, Bell, Settings, User, Heart, Edit3 } from 'lucide-react';
+import { Home, Calendar, Users, Target, MessageSquare, Edit3, Compass } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface ModernFinanceNavigationProps {
@@ -13,12 +13,11 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
   
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Accueil' },
-    { id: 'bible', icon: BookOpen, label: 'Bible' },
+    { id: 'discover', icon: Compass, label: 'Découvrir' },
     { id: 'reading-plans', icon: Calendar, label: 'Plans' },
     { id: 'challenges', icon: Target, label: 'Défis' },
     { id: 'prayer-circles', icon: Users, label: 'Prières' },
-    { id: 'notes', icon: Edit3, label: 'Notes' },
-    { id: 'favorites', icon: Heart, label: 'Favoris' },
+    { id: 'notes', icon: Edit3, label: 'Journal' },
   ];
 
   return (

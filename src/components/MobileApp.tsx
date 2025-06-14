@@ -6,16 +6,14 @@ import { useChallengeCleanup } from '@/hooks/useChallengeCleanup';
 import AuthPage from './AuthPage';
 import ModernFinanceNavigation from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
-import EnhancedBibleView from './EnhancedBibleView';
+import Discover from './Discover';
 import PrayerCircles from './PrayerCircles';
-import RichTextNotesApp from './RichTextNotesApp';
-import FavoriteVerses from './FavoriteVerses';
+import NotesApp from './NotesApp';
 import AdvancedNotifications from './AdvancedNotifications';
 import SettingsApp from './SettingsApp';
 import DailyChallenges from './DailyChallenges';
 import ReadingPlans from './ReadingPlans';
 import Prayer from './Prayer';
-import NotesApp from './NotesApp';
 import PWAUpdatePrompt from './PWAUpdatePrompt';
 import { ThemeToggle } from './ThemeToggle';
 import { BookOpen } from 'lucide-react';
@@ -40,14 +38,12 @@ const MobileApp = () => {
     switch (activeSection) {
       case 'dashboard':
         return <ModernDashboard onNavigate={handleNavigate} />;
-      case 'bible':
-        return <EnhancedBibleView />;
+      case 'discover':
+        return <Discover />;
       case 'prayer-circles':
         return <PrayerCircles />;
       case 'notes':
         return <NotesApp />;
-      case 'favorites':
-        return <FavoriteVerses />;
       case 'notifications':
         return <AdvancedNotifications />;
       case 'settings':

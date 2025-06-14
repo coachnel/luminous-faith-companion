@@ -47,7 +47,7 @@ export function useCommunityContent() {
         .limit(50);
 
       if (fetchError) throw fetchError;
-      setContent(data || []);
+      setContent((data || []) as CommunityContent[]);
     } catch (err) {
       console.error('Error fetching community content:', err);
       setError('Erreur lors du chargement du contenu');
@@ -149,7 +149,7 @@ export function useCommunityContent() {
 
       await fetchContent();
       toast.success('✨ Contenu publié avec succès !');
-      return data;
+      return data as CommunityContent;
     } catch (err) {
       console.error('Error publishing content:', err);
       setError('Erreur lors de la publication');
@@ -236,7 +236,7 @@ export function useCommunityNotifications() {
 
       if (error) throw error;
       
-      setNotifications(data || []);
+      setNotifications((data || []) as CommunityNotification[]);
       setUnreadCount(data?.filter(n => !n.is_read).length || 0);
     } catch (err) {
       console.error('Error fetching notifications:', err);

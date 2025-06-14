@@ -30,19 +30,6 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    
-    /* Variables personnalisées pour le mode clair - Travel App Style */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F5F5F7;
-    --bg-card: #F5F5F7;
-    
-    --text-primary: #1C1C1E;
-    --text-secondary: rgba(60, 60, 67, 0.6);
-    --text-inverse: #FFFFFF;
-    
-    --border-default: #E0E0E5;
-    --accent-primary: #0066FF;
-    --shadow: rgba(0, 0, 0, 0.05);
   }
 
   .dark {
@@ -70,19 +57,6 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    
-    /* Variables personnalisées pour le mode sombre - Crypto App Style */
-    --bg-primary: #12121A;
-    --bg-secondary: #1E1E2A;
-    --bg-card: #1E1E2A;
-    
-    --text-primary: #F2F2F7;
-    --text-secondary: rgba(209, 209, 224, 0.8);
-    --text-inverse: #12121A;
-    
-    --border-default: #2A2A3F;
-    --accent-primary: #0066FF;
-    --shadow: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -98,13 +72,14 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
   
-  /* Styles pour les cartes modernes */
+  /* Composants modernes avec contraste garanti */
   .modern-card {
     background: var(--bg-card);
     border: 1px solid var(--border-default);
     border-radius: 1rem;
     box-shadow: 0 2px 4px var(--shadow);
     transition: all 0.2s ease;
+    color: var(--text-primary);
   }
   
   .modern-card:hover {
@@ -112,7 +87,7 @@
     box-shadow: 0 4px 8px var(--shadow);
   }
 
-  /* Boutons primaires */
+  /* Boutons avec contraste optimal */
   .button-primary {
     background-color: var(--accent-primary);
     color: var(--text-inverse);
@@ -120,6 +95,7 @@
     padding: 0.75rem 1rem;
     font-weight: 500;
     transition: all 0.2s ease;
+    border: none;
   }
 
   .button-primary:hover {
@@ -127,7 +103,21 @@
     opacity: 0.9;
   }
 
-  /* Bottom navigation */
+  .button-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .button-secondary:hover {
+    background-color: var(--border-default);
+  }
+
+  /* Navigation avec contraste parfait */
   .bottom-nav {
     background: var(--bg-card);
     border-top: 1px solid var(--border-default);
@@ -136,19 +126,66 @@
 
   .bottom-nav .item-active {
     color: var(--accent-primary);
+    background-color: rgba(0, 102, 255, 0.1);
   }
 
   .bottom-nav .item-inactive {
     color: var(--text-secondary);
   }
+
+  .bottom-nav .item-inactive:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  /* Headers et titres */
+  .header-primary {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+
+  /* Cartes avec texte contrasté */
+  .card-content {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+  }
+
+  .card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .card-description {
+    color: var(--text-secondary);
+  }
+
+  /* Inputs et formulaires */
+  .input-field {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    border-radius: 0.5rem;
+  }
+
+  .input-field::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .input-field:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+  }
 }
 
-/* Transitions fluides pour les changements de thème */
+/* Transitions fluides sans flash */
 * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
 }
 
-/* Scrollbar personnalisée */
+/* Scrollbar personnalisée avec thème */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -166,7 +203,6 @@
   background: var(--text-secondary);
 }
 
-/* Classes utilitaires pour le scrollbar masqué */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -176,7 +212,7 @@
   display: none;
 }
 
-/* Animations d'entrée */
+/* Animations fluides */
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -190,4 +226,48 @@
 
 .animate-slide-up {
   animation: slideUp 0.3s ease-out;
+}
+
+/* États de focus visibles pour accessibilité */
+.focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Loading états avec thème */
+.loading-spinner {
+  border: 2px solid var(--border-default);
+  border-top: 2px solid var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Alertes et notifications */
+.alert-info {
+  background: rgba(0, 102, 255, 0.1);
+  border: 1px solid var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.alert-success {
+  background: rgba(52, 199, 89, 0.1);
+  border: 1px solid var(--accent-success);
+  color: var(--text-primary);
+}
+
+.alert-warning {
+  background: rgba(255, 149, 0, 0.1);
+  border: 1px solid var(--accent-warning);
+  color: var(--text-primary);
+}
+
+.alert-error {
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid var(--accent-error);
+  color: var(--text-primary);
 }

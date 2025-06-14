@@ -8,10 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useNeonPrayerRequests } from '@/hooks/useNeonData';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
 import PrayerReminder from './PrayerReminder';
 
 const Prayer = () => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const { prayerRequests, loading, addPrayerRequest } = useNeonPrayerRequests();
   const [newPrayer, setNewPrayer] = useState('');
   const [newTitle, setNewTitle] = useState('');
@@ -69,8 +71,11 @@ const Prayer = () => {
     return (
       <div className="p-4 space-y-6 max-w-4xl mx-auto">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Chargement...</p>
+          <div 
+            className="animate-spin w-8 h-8 border-4 border-t-transparent rounded-full mx-auto mb-4 loading-spinner"
+            style={{ borderColor: 'var(--border-default)', borderTopColor: 'var(--accent-primary)' }}
+          ></div>
+          <p style={{ color: 'var(--text-secondary)' }}>Chargement...</p>
         </div>
       </div>
     );
@@ -79,11 +84,21 @@ const Prayer = () => {
   return (
     <div className="p-4 space-y-6 max-w-4xl mx-auto">
       {/* En-tête */}
-      <Card className="glass border-white/30">
+      <Card 
+        className="modern-card"
+        style={{ 
+          background: 'var(--bg-card)', 
+          borderColor: 'var(--border-default)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="text-red-500" size={24} />
-            Centre de Prière (Neon)
+          <CardTitle 
+            className="flex items-center gap-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <Heart style={{ color: 'var(--accent-primary)' }} size={24} />
+            Centre de Prière
           </CardTitle>
         </CardHeader>
       </Card>
@@ -95,10 +110,20 @@ const Prayer = () => {
       />
 
       {/* Nouvelle demande de prière */}
-      <Card className="glass border-white/30">
+      <Card 
+        className="modern-card"
+        style={{ 
+          background: 'var(--bg-card)', 
+          borderColor: 'var(--border-default)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="text-purple-600" size={20} />
+          <CardTitle 
+            className="flex items-center gap-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <Plus style={{ color: 'var(--accent-primary)' }} size={20} />
             Nouvelle demande de prière
           </CardTitle>
         </CardHeader>
@@ -107,13 +132,23 @@ const Prayer = () => {
             placeholder="Titre de votre demande..."
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            className="glass border-white/30 bg-white/90"
+            className="input-field"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
           />
           <Textarea
             placeholder="Partagez votre demande de prière..."
             value={newPrayer}
             onChange={(e) => setNewPrayer(e.target.value)}
-            className="min-h-[100px] glass border-white/30 bg-white/90"
+            className="min-h-[100px] input-field"
+            style={{
+              background: 'var(--bg-secondary)',
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
           />
           <div className="flex items-center gap-2">
             <input
@@ -123,14 +158,22 @@ const Prayer = () => {
               onChange={(e) => setIsAnonymous(e.target.checked)}
               className="rounded"
             />
-            <label htmlFor="anonymous" className="text-sm text-gray-600">
+            <label 
+              htmlFor="anonymous" 
+              className="text-sm"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Poster de manière anonyme
             </label>
           </div>
           <Button 
             onClick={handleAddPrayer}
-            className="w-full bg-purple-600 hover:bg-purple-700"
+            className="w-full button-primary"
             disabled={!newTitle.trim() || !newPrayer.trim()}
+            style={{
+              background: 'var(--accent-primary)',
+              color: 'var(--text-inverse)'
+            }}
           >
             <Send size={16} className="mr-2" />
             Ajouter ma demande
@@ -139,16 +182,29 @@ const Prayer = () => {
       </Card>
 
       {/* Liste des demandes de prière */}
-      <Card className="glass border-white/30">
+      <Card 
+        className="modern-card"
+        style={{ 
+          background: 'var(--bg-card)', 
+          borderColor: 'var(--border-default)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="text-blue-600" size={20} />
+          <CardTitle 
+            className="flex items-center gap-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <Users style={{ color: 'var(--accent-primary)' }} size={20} />
             Mes demandes de prière ({prayerRequests.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {prayerRequests.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">
+            <p 
+              className="text-center py-8"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Aucune demande de prière pour le moment
             </p>
           ) : (
@@ -156,24 +212,56 @@ const Prayer = () => {
               {prayerRequests.map((request) => (
                 <div
                   key={request.id}
-                  className="p-4 rounded-lg border bg-white border-gray-200"
+                  className="p-4 rounded-lg border card-content"
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{request.author_name}</span>
-                      <span className="text-xs text-gray-500">
+                      <span 
+                        className="font-medium text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {request.author_name}
+                      </span>
+                      <span 
+                        className="text-xs"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
                         {new Date(request.created_at).toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                     {request.is_anonymous && (
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                      <span 
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{
+                          background: 'var(--bg-tertiary)',
+                          color: 'var(--text-secondary)'
+                        }}
+                      >
                         Anonyme
                       </span>
                     )}
                   </div>
-                  <h4 className="font-semibold text-purple-700 mb-2">{request.title}</h4>
-                  <p className="text-gray-700 mb-3">{request.content}</p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <h4 
+                    className="font-semibold mb-2"
+                    style={{ color: 'var(--accent-primary)' }}
+                  >
+                    {request.title}
+                  </h4>
+                  <p 
+                    className="mb-3"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {request.content}
+                  </p>
+                  <div 
+                    className="flex items-center gap-2 text-sm"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
                     <Heart size={14} />
                     <span>{request.prayer_count} prière(s)</span>
                   </div>

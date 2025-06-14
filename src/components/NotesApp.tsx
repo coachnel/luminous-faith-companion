@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useNeonNotes } from '@/hooks/useNeonData';
 import { toast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const NotesApp = () => {
   const { notes, loading, addNote, deleteNote } = useNeonNotes();
+  const { theme } = useTheme();
   const [isAdding, setIsAdding] = useState(false);
   const [newNote, setNewNote] = useState({ title: '', content: '', tags: [] });
 
@@ -57,7 +59,10 @@ const NotesApp = () => {
   if (loading) {
     return (
       <div className="p-4 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-spiritual-500 border-t-transparent rounded-full mx-auto"></div>
+        <div 
+          className="animate-spin w-8 h-8 border-4 border-t-transparent rounded-full mx-auto loading-spinner"
+          style={{ borderColor: 'var(--border-default)', borderTopColor: 'var(--accent-primary)' }}
+        ></div>
       </div>
     );
   }
@@ -65,40 +70,90 @@ const NotesApp = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <Card className="glass border-white/30">
+      <Card 
+        className="modern-card"
+        style={{ 
+          background: 'var(--bg-card)', 
+          borderColor: 'var(--border-default)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle 
+            className="flex items-center gap-2 card-title"
+            style={{ color: 'var(--text-primary)' }}
+          >
             <span>📝</span>
-            Journal spirituel (Neon)
+            Journal spirituel
           </CardTitle>
           <Dialog open={isAdding} onOpenChange={setIsAdding}>
             <DialogTrigger asChild>
-              <Button className="floating-button spiritual-gradient" size="sm">
+              <Button 
+                className="button-primary" 
+                size="sm"
+                style={{
+                  background: 'var(--accent-primary)',
+                  color: 'var(--text-inverse)'
+                }}
+              >
                 <Plus size={18} />
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass border-white/30 backdrop-blur-md">
+            <DialogContent 
+              className="modern-card"
+              style={{ 
+                background: 'var(--bg-card)', 
+                borderColor: 'var(--border-default)',
+                color: 'var(--text-primary)'
+              }}
+            >
               <DialogHeader>
-                <DialogTitle>Nouvelle note</DialogTitle>
+                <DialogTitle style={{ color: 'var(--text-primary)' }}>Nouvelle note</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <Input
                   placeholder="Titre de votre note..."
                   value={newNote.title}
                   onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                  className="glass border-white/30"
+                  className="input-field"
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }}
                 />
                 <Textarea
                   placeholder="Écrivez vos réflexions spirituelles..."
                   value={newNote.content}
                   onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                  className="glass border-white/30 min-h-[120px]"
+                  className="input-field min-h-[120px]"
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }}
                 />
                 <div className="flex gap-2">
-                  <Button onClick={handleSubmit} className="spiritual-gradient">
+                  <Button 
+                    onClick={handleSubmit} 
+                    className="button-primary"
+                    style={{
+                      background: 'var(--accent-primary)',
+                      color: 'var(--text-inverse)'
+                    }}
+                  >
                     Sauvegarder
                   </Button>
-                  <Button variant="outline" onClick={() => setIsAdding(false)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsAdding(false)}
+                    className="button-secondary"
+                    style={{
+                      background: 'var(--bg-secondary)',
+                      borderColor: 'var(--border-default)',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
                     Annuler
                   </Button>
                 </div>
@@ -111,16 +166,35 @@ const NotesApp = () => {
       {/* Notes List */}
       <div className="space-y-4">
         {notes.length === 0 ? (
-          <Card className="glass border-white/30">
+          <Card 
+            className="modern-card"
+            style={{ 
+              background: 'var(--bg-card)', 
+              borderColor: 'var(--border-default)',
+              color: 'var(--text-primary)'
+            }}
+          >
             <CardContent className="p-8 text-center">
               <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold mb-2">Aucune note pour le moment</h3>
-              <p className="text-gray-600 mb-4">
-                Commencez à écrire vos réflexions spirituelles sur Neon
+              <h3 
+                className="text-xl font-semibold mb-2"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                Aucune note pour le moment
+              </h3>
+              <p 
+                className="mb-4"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Commencez à écrire vos réflexions spirituelles
               </p>
               <Button 
                 onClick={() => setIsAdding(true)}
-                className="spiritual-gradient"
+                className="button-primary"
+                style={{
+                  background: 'var(--accent-primary)',
+                  color: 'var(--text-inverse)'
+                }}
               >
                 Créer ma première note
               </Button>
@@ -128,37 +202,58 @@ const NotesApp = () => {
           </Card>
         ) : (
           notes.map((note) => (
-            <Card key={note.id} className="glass border-white/30">
+            <Card 
+              key={note.id} 
+              className="modern-card"
+              style={{ 
+                background: 'var(--bg-card)', 
+                borderColor: 'var(--border-default)',
+                color: 'var(--text-primary)'
+              }}
+            >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg text-spiritual-700">
+                  <CardTitle 
+                    className="text-lg"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
                     {note.title}
                   </CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDelete(note.id)}
-                    className="text-red-400 hover:text-red-600 hover:scale-110 transition-all"
+                    style={{ color: 'var(--accent-error)' }}
                   >
                     <Trash2 size={16} />
                   </Button>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div 
+                  className="flex items-center gap-2 text-sm"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
                   <Calendar size={14} />
                   {formatDate(note.created_at)}
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <p 
+                  className="leading-relaxed whitespace-pre-wrap"
+                  style={{ color: 'var(--text-primary)' }}
+                >
                   {note.content}
                 </p>
                 {note.tags && note.tags.length > 0 && (
                   <div className="flex items-center gap-2 mt-3">
-                    <Tag size={14} className="text-gray-400" />
+                    <Tag size={14} style={{ color: 'var(--text-tertiary)' }} />
                     {note.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="bg-spiritual-100 text-spiritual-700 px-2 py-1 rounded-full text-xs"
+                        className="px-2 py-1 rounded-full text-xs"
+                        style={{
+                          background: 'rgba(0, 102, 255, 0.1)',
+                          color: 'var(--accent-primary)'
+                        }}
                       >
                         {tag}
                       </span>

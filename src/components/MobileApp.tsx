@@ -61,19 +61,40 @@ const MobileApp = () => {
     <div 
       className="min-h-screen transition-all duration-300"
       style={{ 
-        background: `var(--bg-primary)`
+        background: 'var(--bg-primary)',
+        color: 'var(--text-primary)'
       }}
     >
-      {/* Header moderne */}
-      <header className="sticky top-0 z-40 bg-[var(--bg-card)] border-b border-[var(--border-default)] backdrop-blur-lg">
+      {/* Header avec contraste optimal */}
+      <header 
+        className="sticky top-0 z-40 backdrop-blur-lg header-primary"
+        style={{
+          background: 'var(--bg-card)',
+          borderBottom: '1px solid var(--border-default)',
+          color: 'var(--text-primary)'
+        }}
+      >
         <div className="px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'var(--accent-primary)' }}
+            >
               <BookOpen className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg text-[var(--text-primary)]">BibleApp</h1>
-              <p className="text-xs text-[var(--text-secondary)]">Compagnon spirituel</p>
+              <h1 
+                className="font-bold text-lg"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                BibleApp
+              </h1>
+              <p 
+                className="text-xs"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Compagnon spirituel
+              </p>
             </div>
           </div>
           

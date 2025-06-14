@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
-import { neonSql } from '@/integrations/neon/client';
+import { neonClient } from '@/integrations/neon/restClient';
 
 // Types pour les données métier sur Neon
 export interface NeonNote {
@@ -68,12 +68,8 @@ export function useNeonNotes() {
 
     try {
       console.log('Fetching notes from Neon for user:', user.id);
-      const result = await neonSql`
-        SELECT * FROM notes 
-        WHERE user_id = ${user.id} 
-        ORDER BY created_at DESC
-      `;
-      setNotes(result as unknown as NeonNote[]);
+      const result = await neonClient.select<NeonNote>('notes', { user_id: user.id });
+      setNotes(result);
     } catch (error) {
       console.error('Error fetching notes from Neon:', error);
       setNotes([]);
@@ -91,10 +87,10 @@ export function useNeonNotes() {
 
     try {
       console.log('Adding note to Neon:', noteData);
-      await neonSql`
-        INSERT INTO notes (user_id, title, content, tags)
-        VALUES (${user.id}, ${noteData.title}, ${noteData.content}, ${noteData.tags})
-      `;
+      await neonClient.insert<NeonNote>('notes', {
+        ...noteData,
+        user_id: user.id,
+      });
       await fetchNotes();
     } catch (error) {
       console.error('Error adding note to Neon:', error);
@@ -107,35 +103,8 @@ export function useNeonNotes() {
 
     try {
       console.log('Updating note in Neon:', id, noteData);
-      
-      const setParts: string[] = [];
-      const values: any[] = [];
-      
-      if (noteData.title !== undefined) {
-        setParts.push('title = $' + (values.length + 1));
-        values.push(noteData.title);
-      }
-      if (noteData.content !== undefined) {
-        setParts.push('content = $' + (values.length + 1));
-        values.push(noteData.content);
-      }
-      if (noteData.tags !== undefined) {
-        setParts.push('tags = $' + (values.length + 1));
-        values.push(noteData.tags);
-      }
-      
-      setParts.push('updated_at = NOW()');
-      
-      if (setParts.length > 1) {
-        values.push(id, user.id);
-        
-        await neonSql`
-          UPDATE notes 
-          SET ${neonSql.unsafe(setParts.join(', '))}
-          WHERE id = ${id} AND user_id = ${user.id}
-        `;
-        await fetchNotes();
-      }
+      await neonClient.update<NeonNote>('notes', id, noteData);
+      await fetchNotes();
     } catch (error) {
       console.error('Error updating note in Neon:', error);
       throw error;
@@ -147,10 +116,7 @@ export function useNeonNotes() {
 
     try {
       console.log('Deleting note from Neon:', id);
-      await neonSql`
-        DELETE FROM notes 
-        WHERE id = ${id} AND user_id = ${user.id}
-      `;
+      await neonClient.delete('notes', id);
       await fetchNotes();
     } catch (error) {
       console.error('Error deleting note from Neon:', error);
@@ -176,12 +142,8 @@ export function useNeonFavoriteVerses() {
 
     try {
       console.log('Fetching favorite verses from Neon for user:', user.id);
-      const result = await neonSql`
-        SELECT * FROM favorite_verses 
-        WHERE user_id = ${user.id} 
-        ORDER BY created_at DESC
-      `;
-      setFavoriteVerses(result as unknown as NeonFavoriteVerse[]);
+      const result = await neonClient.select<NeonFavoriteVerse>('favorite_verses', { user_id: user.id });
+      setFavoriteVerses(result);
     } catch (error) {
       console.error('Error fetching favorite verses from Neon:', error);
       setFavoriteVerses([]);
@@ -199,15 +161,16 @@ export function useNeonFavoriteVerses() {
 
     try {
       console.log('Adding favorite verse to Neon:', verse);
-      await neonSql`
-        INSERT INTO favorite_verses (
-          user_id, verse_id, book, chapter, verse, text, version, language
-        ) VALUES (
-          ${user.id}, ${verse.id || `${verse.book}-${verse.chapter}-${verse.verse}`}, 
-          ${verse.book}, ${verse.chapter}, ${verse.verse}, ${verse.text}, 
-          ${verse.version || 'LSG'}, ${verse.language || 'fr'}
-        )
-      `;
+      await neonClient.insert<NeonFavoriteVerse>('favorite_verses', {
+        user_id: user.id,
+        verse_id: verse.id || `${verse.book}-${verse.chapter}-${verse.verse}`,
+        book: verse.book,
+        chapter: verse.chapter,
+        verse: verse.verse,
+        text: verse.text,
+        version: verse.version || 'LSG',
+        language: verse.language || 'fr',
+      });
       await fetchFavoriteVerses();
     } catch (error) {
       console.error('Error adding favorite verse to Neon:', error);
@@ -220,11 +183,15 @@ export function useNeonFavoriteVerses() {
 
     try {
       console.log('Removing favorite verse from Neon:', verseId);
-      await neonSql`
-        DELETE FROM favorite_verses 
-        WHERE verse_id = ${verseId} AND user_id = ${user.id}
-      `;
-      await fetchFavoriteVerses();
+      const verses = await neonClient.select<NeonFavoriteVerse>('favorite_verses', { 
+        user_id: user.id, 
+        verse_id: verseId 
+      });
+      
+      if (verses.length > 0) {
+        await neonClient.delete('favorite_verses', verses[0].id);
+        await fetchFavoriteVerses();
+      }
     } catch (error) {
       console.error('Error removing favorite verse from Neon:', error);
       throw error;
@@ -249,12 +216,8 @@ export function useNeonPrayerRequests() {
 
     try {
       console.log('Fetching prayer requests from Neon for user:', user.id);
-      const result = await neonSql`
-        SELECT * FROM prayer_requests 
-        WHERE user_id = ${user.id} 
-        ORDER BY created_at DESC
-      `;
-      setPrayerRequests(result as unknown as NeonPrayerRequest[]);
+      const result = await neonClient.select<NeonPrayerRequest>('prayer_requests', { user_id: user.id });
+      setPrayerRequests(result);
     } catch (error) {
       console.error('Error fetching prayer requests from Neon:', error);
       setPrayerRequests([]);
@@ -272,10 +235,11 @@ export function useNeonPrayerRequests() {
 
     try {
       console.log('Adding prayer request to Neon:', requestData);
-      await neonSql`
-        INSERT INTO prayer_requests (user_id, title, content, author_name, is_anonymous)
-        VALUES (${user.id}, ${requestData.title}, ${requestData.content}, ${requestData.author_name}, ${requestData.is_anonymous})
-      `;
+      await neonClient.insert<NeonPrayerRequest>('prayer_requests', {
+        ...requestData,
+        user_id: user.id,
+        prayer_count: 0,
+      });
       await fetchPrayerRequests();
     } catch (error) {
       console.error('Error adding prayer request to Neon:', error);

@@ -3,60 +3,43 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Trash2, Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Verse } from '@/types/bible';
-import { getVerses } from '@/lib/bibleLoader';
+import { useNeonFavoriteVerses } from '@/hooks/useNeonData';
 import VerseCard from './VerseCard';
+import { toast } from '@/hooks/use-toast';
 
 const FavoriteVerses = () => {
-  const [favorites, setFavorites] = useState<Verse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { favoriteVerses, loading, removeFavoriteVerse } = useNeonFavoriteVerses();
 
-  useEffect(() => {
-    loadFavorites();
-  }, []);
-
-  const loadFavorites = async () => {
+  const handleRemoveFavorite = async (verseId: string) => {
     try {
-      const favoriteIds = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
-      const favoriteVerses: Verse[] = [];
+      await removeFavoriteVerse(verseId);
+      toast({
+        description: "Verset supprimé des favoris",
+      });
+    } catch (error) {
+      toast({
+        description: "Erreur lors de la suppression",
+        variant: "destructive",
+      });
+    }
+  };
 
-      // Charger chaque verset favori
-      for (const verseId of favoriteIds) {
-        const [book, chapter, verse] = verseId.split('-');
-        try {
-          const verses = await getVerses(book, parseInt(chapter));
-          const favoriteVerse = verses.find(v => v.verse === parseInt(verse));
-          if (favoriteVerse) {
-            favoriteVerses.push(favoriteVerse);
-          }
-        } catch (error) {
-          console.error(`Erreur lors du chargement du verset favori ${verseId}:`, error);
-        }
+  const clearAllFavorites = async () => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer tous vos favoris ?')) return;
+    
+    try {
+      for (const verse of favoriteVerses) {
+        await removeFavoriteVerse(verse.verse_id);
       }
-
-      setFavorites(favoriteVerses);
+      toast({
+        description: "Tous les favoris ont été supprimés",
+      });
     } catch (error) {
-      console.error('Erreur lors du chargement des favoris:', error);
-      setFavorites([]);
-    } finally {
-      setLoading(false);
+      toast({
+        description: "Erreur lors de la suppression",
+        variant: "destructive",
+      });
     }
-  };
-
-  const removeFavorite = (verseId: string) => {
-    try {
-      const favoriteIds = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
-      const updatedIds = favoriteIds.filter((id: string) => id !== verseId);
-      localStorage.setItem('bibleFavorites', JSON.stringify(updatedIds));
-      loadFavorites();
-    } catch (error) {
-      console.error('Erreur lors de la suppression du favori:', error);
-    }
-  };
-
-  const clearAllFavorites = () => {
-    localStorage.removeItem('bibleFavorites');
-    setFavorites([]);
   };
 
   if (loading) {
@@ -79,12 +62,12 @@ const FavoriteVerses = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Heart className="text-red-500" size={24} />
-              Versets favoris
+              Versets favoris (Neon)
               <span className="text-sm bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                {favorites.length}
+                {favoriteVerses.length}
               </span>
             </CardTitle>
-            {favorites.length > 0 && (
+            {favoriteVerses.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
@@ -99,7 +82,7 @@ const FavoriteVerses = () => {
         </CardHeader>
       </Card>
 
-      {favorites.length === 0 ? (
+      {favoriteVerses.length === 0 ? (
         <Card className="glass border-white/30">
           <CardContent className="p-8 text-center">
             <Heart className="mx-auto mb-4 text-gray-400" size={48} />
@@ -111,19 +94,28 @@ const FavoriteVerses = () => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {favorites.map((verse, index) => (
-            <div key={`${verse.book}-${verse.chapter}-${verse.verse}-${index}`} className="relative">
-              <VerseCard verse={verse} />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFavorite(`${verse.book}-${verse.chapter}-${verse.verse}`)}
-                className="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          ))}
+          {favoriteVerses.map((favoriteVerse, index) => {
+            const verse = {
+              book: favoriteVerse.book,
+              chapter: favoriteVerse.chapter,
+              verse: favoriteVerse.verse,
+              text: favoriteVerse.text
+            };
+            
+            return (
+              <div key={`${favoriteVerse.id}-${index}`} className="relative">
+                <VerseCard verse={verse} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveFavorite(favoriteVerse.verse_id)}
+                  className="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

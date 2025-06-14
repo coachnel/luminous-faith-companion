@@ -34,5 +34,8 @@ export function getTablesBySource(source: DataSource): string[] {
 export function logDataRoutingConfig() {
   console.log('🔄 Configuration du routage des données:');
   console.log('📊 Supabase (Auth):', getTablesBySource('supabase'));
-  console.log('🗄️ Neon (Data):', getTablesBySource('neon'));
+  console.log('🗄️ Neon (Data - localStorage en développement):', getTablesBySource('neon'));
 }
+
+// Initialiser la configuration au chargement
+logDataRoutingConfig();

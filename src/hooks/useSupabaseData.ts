@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -95,33 +94,82 @@ export function useProfile() {
   }, [user]);
 
   const fetchProfile = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log('Récupération du profil pour user ID:', user.id);
+      
+      // D'abord, vérifier si le profil existe
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user?.id)
-        .single();
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
-      setProfile(data);
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erreur lors de la récupération du profil:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log('Aucun profil trouvé, création d\'un nouveau profil...');
+        // Créer un nouveau profil si il n'existe pas
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: user.id,
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'Utilisateur',
+            email: user.email
+          }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Erreur lors de la création du profil:', createError);
+          throw createError;
+        }
+
+        console.log('Nouveau profil créé:', newProfile);
+        setProfile(newProfile);
+      } else {
+        console.log('Profil trouvé:', data);
+        setProfile(data);
+      }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('Erreur dans fetchProfile:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user?.id) {
+      throw new Error('Utilisateur non connecté');
+    }
+
     try {
-      const { error } = await supabase
+      console.log('Mise à jour du profil avec:', updates);
+      
+      const { data, error } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('id', user?.id);
+        .eq('id', user.id)
+        .select()
+        .single();
 
-      if (error) throw error;
-      await fetchProfile();
+      if (error) {
+        console.error('Erreur lors de la mise à jour du profil:', error);
+        throw error;
+      }
+
+      console.log('Profil mis à jour avec succès:', data);
+      setProfile(data);
+      return data;
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('Erreur dans updateProfile:', error);
       throw error;
     }
   };

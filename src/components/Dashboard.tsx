@@ -90,17 +90,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center mx-auto`}>
                     <feature.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
-                  <div className="text-center space-y-1 sm:space-y-2">
-                    <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-tight px-2">
+                  <div className="text-center space-y-2">
+                    <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-tight">
                       {feature.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-snug px-1 min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center">
+                    <p className="text-xs sm:text-sm text-gray-600 leading-snug px-1 h-10 sm:h-12 flex items-center justify-center">
                       {feature.description}
                     </p>
                   </div>
                   <Button 
                     onClick={feature.action}
-                    className="w-full text-xs sm:text-sm py-2 sm:py-2.5 mt-auto"
+                    className="w-full text-xs sm:text-sm py-2 sm:py-2.5"
                     variant="outline"
                   >
                     Découvrir

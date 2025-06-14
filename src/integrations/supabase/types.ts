@@ -206,6 +206,7 @@ export type Database = {
           notification_preferences: Json | null
           reminder_times: Json | null
           theme: string | null
+          theme_mode: string | null
           updated_at: string
           user_id: string
         }
@@ -216,6 +217,7 @@ export type Database = {
           notification_preferences?: Json | null
           reminder_times?: Json | null
           theme?: string | null
+          theme_mode?: string | null
           updated_at?: string
           user_id: string
         }
@@ -226,6 +228,7 @@ export type Database = {
           notification_preferences?: Json | null
           reminder_times?: Json | null
           theme?: string | null
+          theme_mode?: string | null
           updated_at?: string
           user_id?: string
         }

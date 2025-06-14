@@ -179,7 +179,7 @@ const BibleLite = () => {
                 {newTestamentBooks.map((book) => (
                   <ModernButton
                     key={book.id}
-                    variant={selectedBook?.id === book.id ? "default" : "ghost"}
+                    variant={selectedBook?.id === book.id ? "primary" : "ghost"}
                     className="w-full justify-start text-sm"
                     onClick={() => selectBook(book)}
                   >
@@ -250,7 +250,7 @@ const BibleLite = () => {
                       Retour
                     </ModernButton>
                     <ModernButton
-                      variant={isChapterRead(selectedBook.id, selectedChapter) ? "secondary" : "default"}
+                      variant={isChapterRead(selectedBook.id, selectedChapter) ? "secondary" : "primary"}
                       size="sm"
                       onClick={markChapterAsRead}
                     >

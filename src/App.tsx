@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { BibleProvider } from "./contexts/BibleContext";
 import BibleView from "./components/BibleView";
 import EnhancedBibleView from "./components/EnhancedBibleView";
@@ -23,43 +24,45 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <ErrorBoundary>
-                  <Index />
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/bible"
-              element={
-                <ErrorBoundary>
-                  <BibleProvider>
-                    <BibleView />
-                  </BibleProvider>
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/bible-neon"
-              element={
-                <ErrorBoundary>
-                  <EnhancedBibleView />
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/confirm"
-              element={
-                <ErrorBoundary>
-                  <EmailConfirmation />
-                </ErrorBoundary>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <ThemeProvider>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ErrorBoundary>
+                    <Index />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/bible"
+                element={
+                  <ErrorBoundary>
+                    <BibleProvider>
+                      <BibleView />
+                    </BibleProvider>
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/bible-neon"
+                element={
+                  <ErrorBoundary>
+                    <EnhancedBibleView />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/confirm"
+                element={
+                  <ErrorBoundary>
+                    <EmailConfirmation />
+                  </ErrorBoundary>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

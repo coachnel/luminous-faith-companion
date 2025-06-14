@@ -1,19 +1,21 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Palette, Sun, Moon, Monitor } from 'lucide-react';
+import { ModernCard } from '@/components/ui/modern-card';
+import { ModernButton } from '@/components/ui/modern-button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Palette, Sun, Moon, Coffee } from 'lucide-react';
 import { useUserPreferences } from '@/hooks/useSupabaseData';
+import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
 
 export function ThemeSettings() {
   const { preferences, loading, updatePreferences } = useUserPreferences();
+  const { theme, setTheme } = useTheme();
 
-  const handleThemeChange = async (newTheme: 'light' | 'dark' | 'sepia') => {
+  const handleThemeChange = async (newTheme: 'light' | 'dark') => {
     try {
-      await updatePreferences({ theme_mode: newTheme });
+      await setTheme(newTheme);
       toast.success('Thème mis à jour !');
     } catch (error) {
       toast.error('Erreur lors de la mise à jour du thème');
@@ -22,104 +24,103 @@ export function ThemeSettings() {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <ModernCard variant="glass">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-[var(--border-default)] rounded w-1/4"></div>
+          <div className="h-20 bg-[var(--border-default)] rounded"></div>
+        </div>
+      </ModernCard>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Palette className="h-5 w-5" />
-          Apparence et thème
-        </CardTitle>
-        <CardDescription>
-          Personnalisez l'apparence de l'application selon vos préférences
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <div>
-            <Label className="text-base font-medium">Mode d'affichage</Label>
-            <RadioGroup 
-              value={preferences?.theme_mode || 'light'} 
-              onValueChange={(value) => handleThemeChange(value as 'light' | 'dark' | 'sepia')}
-              className="mt-3"
-            >
-              <div className="space-y-3">
-                {/* Mode clair */}
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <RadioGroupItem value="light" id="light" />
-                  <Label htmlFor="light" className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="flex items-center justify-center w-8 h-8 bg-white border rounded shadow-sm">
-                      <Sun className="h-4 w-4 text-yellow-500" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Mode clair</div>
-                      <div className="text-sm text-gray-600">Interface lumineuse classique</div>
-                    </div>
-                  </Label>
-                </div>
+    <ModernCard variant="elevated" className="animate-slide-up">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-[var(--spiritual-primary)] flex items-center justify-center">
+          <Palette className="h-5 w-5 text-white" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">Apparence</h3>
+          <p className="text-sm text-[var(--text-secondary)]">
+            Personnalisez l'apparence de l'application
+          </p>
+        </div>
+      </div>
 
-                {/* Mode sombre */}
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <RadioGroupItem value="dark" id="dark" />
-                  <Label htmlFor="dark" className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="flex items-center justify-center w-8 h-8 bg-gray-900 border rounded shadow-sm">
-                      <Moon className="h-4 w-4 text-blue-400" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Mode sombre</div>
-                      <div className="text-sm text-gray-600">Idéal pour la lecture en soirée</div>
-                    </div>
-                  </Label>
+      <div className="space-y-6">
+        <div>
+          <Label className="text-base font-medium text-[var(--text-primary)] mb-4 block">
+            Mode d'affichage
+          </Label>
+          <RadioGroup 
+            value={theme} 
+            onValueChange={(value) => handleThemeChange(value as 'light' | 'dark')}
+            className="space-y-3"
+          >
+            {/* Mode clair */}
+            <div className="flex items-center space-x-4 p-4 border border-[var(--border-default)] rounded-xl hover:bg-[var(--bg-secondary)] transition-all duration-200 cursor-pointer">
+              <RadioGroupItem value="light" id="light" />
+              <Label htmlFor="light" className="flex items-center gap-4 cursor-pointer flex-1">
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-xl shadow-sm">
+                  <Sun className="h-5 w-5 text-blue-600" />
                 </div>
+                <div>
+                  <div className="font-medium text-[var(--text-primary)]">Mode clair</div>
+                  <div className="text-sm text-[var(--text-secondary)]">Interface lumineuse et moderne</div>
+                </div>
+              </Label>
+            </div>
 
-                {/* Mode sépia */}
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <RadioGroupItem value="sepia" id="sepia" />
-                  <Label htmlFor="sepia" className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="flex items-center justify-center w-8 h-8 bg-amber-100 border rounded shadow-sm">
-                      <Coffee className="h-4 w-4 text-amber-700" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Mode lecture douce</div>
-                      <div className="text-sm text-gray-600">Ton sépia, reposant pour les yeux</div>
-                    </div>
-                  </Label>
+            {/* Mode sombre */}
+            <div className="flex items-center space-x-4 p-4 border border-[var(--border-default)] rounded-xl hover:bg-[var(--bg-secondary)] transition-all duration-200 cursor-pointer">
+              <RadioGroupItem value="dark" id="dark" />
+              <Label htmlFor="dark" className="flex items-center gap-4 cursor-pointer flex-1">
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-600 rounded-xl shadow-sm">
+                  <Moon className="h-5 w-5 text-blue-400" />
                 </div>
+                <div>
+                  <div className="font-medium text-[var(--text-primary)]">Mode sombre</div>
+                  <div className="text-sm text-[var(--text-secondary)]">Interface élégante pour la soirée</div>
+                </div>
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        {/* Aperçu du thème */}
+        <div className="space-y-3">
+          <Label className="text-base font-medium text-[var(--text-primary)]">Aperçu</Label>
+          <ModernCard variant="glass" padding="md">
+            <div className="space-y-3">
+              <div className="font-medium text-[var(--text-primary)]">Exemple de contenu</div>
+              <div className="text-sm text-[var(--text-secondary)]">
+                Voici comment apparaîtra le texte avec le thème sélectionné. 
+                L'interface s'adapte automatiquement pour une expérience optimale.
               </div>
-            </RadioGroup>
-          </div>
-
-          {/* Aperçu du thème */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Aperçu</Label>
-            <div className="p-4 border rounded-lg bg-card text-card-foreground">
-              <div className="space-y-2">
-                <div className="font-medium">Exemple de texte</div>
-                <div className="text-sm text-muted-foreground">
-                  Voici comment apparaîtra le texte avec le thème sélectionné. 
-                  Ce mode d'affichage sera appliqué à toute l'application.
-                </div>
-                <Button size="sm" variant="outline">Bouton d'exemple</Button>
+              <div className="flex gap-2">
+                <ModernButton size="sm" variant="primary">Principal</ModernButton>
+                <ModernButton size="sm" variant="secondary">Secondaire</ModernButton>
+                <ModernButton size="sm" variant="spiritual">Spirituel</ModernButton>
               </div>
             </div>
-          </div>
+          </ModernCard>
+        </div>
 
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-            💡 <strong>Conseil:</strong> Le mode sombre réduit la fatigue oculaire dans des environnements peu éclairés, 
-            tandis que le mode lecture douce utilise des tons chauds pour une lecture prolongée plus confortable.
+        <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-light)]">
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-full bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-white text-xs">💡</span>
+            </div>
+            <div className="text-sm">
+              <strong className="text-[var(--text-primary)]">Conseil :</strong>
+              <span className="text-[var(--text-secondary)] ml-1">
+                Le mode sombre réduit la fatigue oculaire dans des environnements peu éclairés, 
+                parfait pour la méditation et la lecture spirituelle nocturne.
+              </span>
+            </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </ModernCard>
   );
 }

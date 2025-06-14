@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 import AuthPage from './AuthPage';
 import ExpandedNavigation from './ExpandedNavigation';
 import RealTimeDashboard from './RealTimeDashboard';
@@ -17,6 +18,7 @@ import Prayer from './Prayer';
 const MobileApp = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   if (!user) {
     return <AuthPage />;
@@ -54,7 +56,18 @@ const MobileApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    <div 
+      className={`min-h-screen transition-all duration-300 ${
+        theme === 'dark' 
+          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+      }`}
+      style={{ 
+        background: theme === 'dark' 
+          ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
+          : 'linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%)'
+      }}
+    >
       <main className="pb-20">
         {renderContent()}
       </main>

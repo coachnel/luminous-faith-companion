@@ -1,3 +1,4 @@
+
 // Client API pour les données bibliques stockées dans Neon
 import { neonClient } from './restClient';
 import { BibleDataLoader } from './bibleDataLoader';
@@ -143,6 +144,12 @@ class NeonBibleClient {
       // Charger les versets réels - FIXED: await the promise
       const realVerses = await BibleDataLoader.loadRealVerses();
       
+      // Vérifier que nous avons des données réelles
+      if (!realVerses || realVerses.length === 0) {
+        console.warn('⚠️ Aucun verset réel chargé, tentative de chargement alternatif...');
+        throw new Error('Échec du chargement des versets réels');
+      }
+      
       // Initialiser les versions
       const versions: NeonBibleVersion[] = [
         { id: 'fr_apee', name: 'Bible Française APEE', abbreviation: 'APEE', language: 'fr', year: 2000 },
@@ -233,7 +240,11 @@ class NeonBibleClient {
       // Utiliser directement le loader pour les versets réels
       const verses = BibleDataLoader.getVersesForChapter(bookId, chapterNumber);
       
-      console.log(`✅ ${verses.length} versets réels chargés pour ${bookId} ${chapterNumber}`);
+      if (verses.length === 0) {
+        console.warn(`⚠️ Aucun verset trouvé pour ${bookId} chapitre ${chapterNumber}`);
+      } else {
+        console.log(`✅ ${verses.length} versets réels chargés pour ${bookId} ${chapterNumber}`);
+      }
       
       return verses;
     } catch (error) {
@@ -318,13 +329,26 @@ class NeonBibleClient {
       // FIXED: await the promise to get the actual array
       const allVerses = await BibleDataLoader.loadRealVerses();
       const totalVerses = allVerses.length;
-      const realVerses = totalVerses; // Tous les versets du loader sont réels
+      
+      // Analyser la qualité réelle des versets
+      const realVerses = allVerses.filter(verse => {
+        const isReal = !verse.text.includes('Texte à compléter') && 
+                      !verse.text.includes('Verset') && 
+                      !verse.text.includes('chapitre') &&
+                      verse.text.length > 20 &&
+                      !verse.text.includes('Parole divine pour nourrir');
+        return isReal;
+      }).length;
+      
+      const qualityPercentage = totalVerses > 0 ? Math.round((realVerses / totalVerses) * 100) : 0;
+      
+      console.log(`📊 Rapport qualité: ${realVerses}/${totalVerses} versets réels (${qualityPercentage}%)`);
       
       return {
         totalVerses,
         realVerses,
-        placeholders: 0,
-        qualityPercentage: 100
+        placeholders: totalVerses - realVerses,
+        qualityPercentage
       };
     } catch (error) {
       console.error('❌ Erreur lors de la génération du rapport qualité:', error);

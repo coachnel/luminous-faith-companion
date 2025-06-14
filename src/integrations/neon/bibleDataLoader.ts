@@ -8,22 +8,40 @@ export class BibleDataLoader {
   static async loadRealVerses(): Promise<NeonVerse[]> {
     console.log('🔄 Chargement des versets via le système optimisé...');
     
-    // Utiliser le nouveau système de chargement
-    await verseLoader.loadAllBibleData();
-    
-    // Récupérer tous les versets chargés
-    const books = verseLoader.getBooks();
-    const allVerses: NeonVerse[] = [];
-    
-    for (const book of books) {
-      for (let chapter = 1; chapter <= book.chapters_count; chapter++) {
-        const verses = verseLoader.getVerses(book.id, chapter);
-        allVerses.push(...verses);
+    try {
+      // Utiliser le nouveau système de chargement
+      await verseLoader.loadAllBibleData();
+      
+      // Récupérer tous les versets chargés
+      const books = verseLoader.getBooks();
+      const allVerses: NeonVerse[] = [];
+      
+      for (const book of books) {
+        for (let chapter = 1; chapter <= book.chapters_count; chapter++) {
+          const verses = verseLoader.getVerses(book.id, chapter);
+          allVerses.push(...verses);
+        }
       }
+      
+      console.log(`✅ ${allVerses.length} versets chargés via le système optimisé`);
+      
+      // Vérifier la qualité des données
+      const realVerses = allVerses.filter(verse => {
+        const isReal = !verse.text.includes('Texte à compléter') && 
+                      !verse.text.includes('Verset') && 
+                      !verse.text.includes('chapitre') &&
+                      verse.text.length > 20 &&
+                      !verse.text.includes('Parole divine pour nourrir');
+        return isReal;
+      });
+      
+      console.log(`📊 Qualité des données: ${realVerses.length}/${allVerses.length} versets réels`);
+      
+      return allVerses;
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des versets:', error);
+      return [];
     }
-    
-    console.log(`✅ ${allVerses.length} versets chargés via le système optimisé`);
-    return allVerses;
   }
   
   static getAvailableBooks(): string[] {

@@ -9,7 +9,6 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, name?: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -59,8 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Erreur lors de la confirmation:', error);
           } else {
             console.log('Email confirmé avec succès:', data.user?.email);
-            // Nettoyer l'URL
-            window.history.replaceState(null, '', window.location.pathname);
+            // Nettoyer l'URL et rediriger vers l'application
+            window.history.replaceState(null, '', '/');
+            // Forcer un rechargement pour s'assurer que l'utilisateur est connecté
+            window.location.reload();
           }
         } catch (error) {
           console.error('Erreur inattendue lors de la confirmation:', error);
@@ -80,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('Utilisateur connecté:', session.user.email);
           
-          // Si l'utilisateur vient de confirmer son email, le rediriger
+          // Si l'utilisateur vient de confirmer son email, le rediriger vers l'app
           const urlParams = new URLSearchParams(window.location.search);
           if (urlParams.get('type') === 'email') {
             console.log('Redirection après confirmation d\'email');
@@ -104,12 +105,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // D'abord, gérer une éventuelle confirmation d'email
         await handleEmailConfirmation();
         
-        // Ensuite, vérifier la session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        console.log('Session initiale:', session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
+        // Ensuite, vérifier la session seulement si pas de confirmation en cours
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('token_hash')) {
+          const { data: { session } } = await supabase.auth.getSession();
+          console.log('Session initiale:', session?.user?.email);
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation:', error);
       } finally {
@@ -154,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Tentative d\'inscription pour:', email);
       
-      // URL de redirection après confirmation d'email
+      // URL de redirection après confirmation d'email - directement vers l'app
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -174,27 +177,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Inscription réussie:', data.user?.email);
+      console.log('Email de confirmation envoyé');
       return { error: null };
       
     } catch (error) {
       console.error('Erreur inattendue lors de l\'inscription:', error);
-      return { error };
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl
-        }
-      });
-      
-      return { error };
-    } catch (error) {
       return { error };
     }
   };
@@ -222,7 +209,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signIn,
     signUp,
-    signInWithGoogle,
     signOut,
   };
 

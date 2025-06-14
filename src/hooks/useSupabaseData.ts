@@ -17,6 +17,9 @@ export interface Note {
   title: string;
   content: string;
   tags: string[];
+  links?: string[];
+  is_public?: boolean;
+  shared_at?: string;
   created_at: string;
   updated_at: string;
 }

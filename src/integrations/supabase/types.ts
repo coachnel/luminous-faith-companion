@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      challenges: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          shared_at: string | null
+          target_days: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          shared_at?: string | null
+          target_days?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          shared_at?: string | null
+          target_days?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       Chrétien: {
         Row: {
           created_at: string
@@ -218,6 +254,9 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          is_public: boolean | null
+          links: string[] | null
+          shared_at: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -227,6 +266,9 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_public?: boolean | null
+          links?: string[] | null
+          shared_at?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -236,6 +278,9 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_public?: boolean | null
+          links?: string[] | null
+          shared_at?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string

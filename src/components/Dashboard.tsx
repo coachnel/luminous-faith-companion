@@ -39,6 +39,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       description: 'Partagez avec d\'autres croyants',
       action: () => onNavigate('community'),
       color: 'from-purple-500 to-pink-500'
+    },
+    {
+      icon: Star,
+      title: 'Découvrir',
+      description: 'Explorez le contenu partagé',
+      action: () => onNavigate('discover'),
+      color: 'from-blue-500 to-cyan-500'
     }
   ];
 

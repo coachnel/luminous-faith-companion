@@ -41,7 +41,8 @@ const EnhancedBibleView: React.FC = () => {
     currentVersesCount,
     currentVersesStats,
     hasRealVerses,
-    isFullyReal
+    isFullyReal,
+    overallQualityPercentage
   } = useNeonBible();
 
   const oldTestamentBooksFiltered = books.filter(book => book.testament === 'old');
@@ -56,6 +57,7 @@ const EnhancedBibleView: React.FC = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-purple-600 text-sm sm:text-base mb-2">Chargement de la Bible complète...</p>
           <p className="text-purple-500 text-xs">Initialisation des 73 livres bibliques catholiques avec versets réels</p>
+          <p className="text-purple-400 text-xs mt-1">Cette opération peut prendre quelques instants...</p>
         </div>
       </div>
     );
@@ -76,13 +78,15 @@ const EnhancedBibleView: React.FC = () => {
               </p>
               {dataQuality && (
                 <div className="flex items-center gap-2 mt-1">
-                  {dataQuality.qualityPercentage === 100 ? (
+                  {dataQuality.qualityPercentage >= 90 ? (
                     <CheckCircle className="h-3 w-3 text-green-500" />
-                  ) : (
+                  ) : dataQuality.qualityPercentage >= 70 ? (
                     <AlertCircle className="h-3 w-3 text-amber-500" />
+                  ) : (
+                    <AlertCircle className="h-3 w-3 text-red-500" />
                   )}
                   <span className="text-xs text-gray-500">
-                    {dataQuality.qualityPercentage}% versets réels ({dataQuality.realVerses.toLocaleString()})
+                    {dataQuality.qualityPercentage}% versets réels ({dataQuality.realVerses.toLocaleString()}/{dataQuality.totalVerses.toLocaleString()})
                   </span>
                 </div>
               )}
@@ -91,10 +95,14 @@ const EnhancedBibleView: React.FC = () => {
 
           {/* Alerte qualité des données si nécessaire */}
           {dataQuality && dataQuality.qualityPercentage < 100 && (
-            <Alert className="mb-4 border-amber-200 bg-amber-50">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-800 text-sm">
-                Certains versets sont encore en cours de chargement. {dataQuality.placeholders.toLocaleString()} versets seront complétés progressivement.
+            <Alert className={`mb-4 ${dataQuality.qualityPercentage >= 70 ? 'border-amber-200 bg-amber-50' : 'border-red-200 bg-red-50'}`}>
+              <AlertCircle className={`h-4 w-4 ${dataQuality.qualityPercentage >= 70 ? 'text-amber-600' : 'text-red-600'}`} />
+              <AlertDescription className={`${dataQuality.qualityPercentage >= 70 ? 'text-amber-800' : 'text-red-800'} text-sm`}>
+                {dataQuality.qualityPercentage >= 70 ? (
+                  <>Données bibliques en cours de finalisation. {dataQuality.placeholders.toLocaleString()} versets seront complétés progressivement.</>
+                ) : (
+                  <>Base biblique en cours d'importation. {dataQuality.placeholders.toLocaleString()} versets restent à charger depuis les sources authentiques.</>
+                )}
               </AlertDescription>
             </Alert>
           )}
@@ -245,13 +253,19 @@ const EnhancedBibleView: React.FC = () => {
                     {isFullyReal && (
                       <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Texte complet
+                        Texte authentique
                       </Badge>
                     )}
                     {hasRealVerses && !isFullyReal && (
                       <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">
                         <AlertCircle className="h-3 w-3 mr-1" />
-                        {currentVersesStats.real}/{currentVersesStats.total} versets
+                        {currentVersesStats.real}/{currentVersesStats.total} réels
+                      </Badge>
+                    )}
+                    {!hasRealVerses && currentVersesStats.total > 0 && (
+                      <Badge variant="secondary" className="bg-red-100 text-red-700 text-xs">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        En cours de chargement
                       </Badge>
                     )}
                   </div>
@@ -261,7 +275,7 @@ const EnhancedBibleView: React.FC = () => {
                   {selectedBook.testament === 'old' ? ' Ancien Testament' : ' Nouveau Testament'}
                   {currentVersesStats.real > 0 && (
                     <span className="ml-2 text-green-600">
-                      • {currentVersesStats.real} texte{currentVersesStats.real !== 1 ? 's' : ''} réel{currentVersesStats.real !== 1 ? 's' : ''}
+                      • {currentVersesStats.real} texte{currentVersesStats.real !== 1 ? 's' : ''} authentique{currentVersesStats.real !== 1 ? 's' : ''}
                     </span>
                   )}
                 </p>
@@ -306,7 +320,7 @@ const EnhancedBibleView: React.FC = () => {
                         {selectedBook ? 'Versets en cours de chargement...' : 'Sélectionnez un livre pour commencer.'}
                       </p>
                       <p className="text-gray-400 text-xs sm:text-sm mt-2">
-                        Bible complète • {totalBooks} livres disponibles
+                        Bible complète • {totalBooks} livres disponibles • {overallQualityPercentage}% de contenu authentique
                       </p>
                     </>
                   )}

@@ -43,7 +43,7 @@ export function useNeonBible() {
         console.log(`✅ Bible complète chargée: ${booksData.length} livres, ${versionsData.length} versions`);
         console.log(`📚 Ancien Testament: ${booksData.filter(b => b.testament === 'old').length} livres`);
         console.log(`📖 Nouveau Testament: ${booksData.filter(b => b.testament === 'new').length} livres`);
-        console.log(`📊 Qualité des données: ${quality.qualityPercentage}% de versets réels (${quality.realVerses}/${quality.totalVerses})`);
+        console.log(`📊 Qualité des données: ${quality.qualityPercentage}% de versets réels (${quality.realVerses.toLocaleString()}/${quality.totalVerses.toLocaleString()})`);
         
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la Bible:', error);
@@ -69,17 +69,16 @@ export function useNeonBible() {
         );
         setCurrentVerses(verses);
         
-        // Compter les versets réels vs placeholders
+        // Analyser la qualité des versets chargés
         const realVerses = verses.filter(v => 
-          !v.text.includes('[') && !v.text.includes('à compléter')
+          !v.text.includes('[') && 
+          !v.text.includes('à compléter') &&
+          !v.text.includes('Texte à compléter') &&
+          v.text.length > 10
         );
-        const placeholders = verses.length - realVerses.length;
+        const qualityPercentage = verses.length > 0 ? Math.round((realVerses.length / verses.length) * 100) : 0;
         
-        if (placeholders > 0) {
-          console.log(`⚠️ ${realVerses.length} versets réels, ${placeholders} placeholders pour ${selectedBook.name} ${selectedChapter}`);
-        } else {
-          console.log(`✅ ${verses.length} versets réels chargés pour ${selectedBook.name} ${selectedChapter}`);
-        }
+        console.log(`✅ ${verses.length} versets chargés (${qualityPercentage}% réels) pour ${selectedBook.name} ${selectedChapter}`);
       } catch (error) {
         console.error('Erreur lors du chargement des versets:', error);
         setCurrentVerses([]);
@@ -165,8 +164,18 @@ export function useNeonBible() {
   // Calculer les statistiques des versets actuels
   const currentVersesStats = {
     total: currentVerses.length,
-    real: currentVerses.filter(v => !v.text.includes('[') && !v.text.includes('à compléter')).length,
-    placeholders: currentVerses.filter(v => v.text.includes('[') || v.text.includes('à compléter')).length
+    real: currentVerses.filter(v => 
+      !v.text.includes('[') && 
+      !v.text.includes('à compléter') &&
+      !v.text.includes('Texte à compléter') &&
+      v.text.length > 10
+    ).length,
+    placeholders: currentVerses.filter(v => 
+      v.text.includes('[') || 
+      v.text.includes('à compléter') ||
+      v.text.includes('Texte à compléter') ||
+      v.text.length <= 10
+    ).length
   };
 
   return {
@@ -206,6 +215,7 @@ export function useNeonBible() {
     
     // Indicateurs de qualité
     hasRealVerses: currentVersesStats.real > 0,
-    isFullyReal: currentVersesStats.placeholders === 0 && currentVersesStats.real > 0
+    isFullyReal: currentVersesStats.placeholders === 0 && currentVersesStats.real > 0,
+    overallQualityPercentage: dataQuality?.qualityPercentage || 0
   };
 }

@@ -10,6 +10,7 @@ export function usePWAPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
     // Vérifier si l'app est déjà installée
@@ -23,15 +24,45 @@ export function usePWAPrompt() {
       
       console.log('PWA: Status d\'installation vérifié', { installed, isStandalone, isInWebAppiOS, isInWebAppChrome });
       
-      // Autoriser l'installation si pas encore installé
-      if (!installed) {
-        setCanInstall(true);
+      return installed;
+    };
+
+    const installed = checkInstallStatus();
+
+    // Vérifier les mises à jour du service worker immédiatement
+    const checkForUpdates = async () => {
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            // Forcer la vérification des mises à jour
+            await registration.update();
+            
+            // Vérifier s'il y a un service worker en attente
+            if (registration.waiting) {
+              console.log('PWA: Mise à jour détectée (service worker en attente)');
+              setUpdateAvailable(true);
+              window.dispatchEvent(new CustomEvent('pwa-update-available'));
+            }
+            
+            // Vérifier s'il y a un nouveau service worker en cours d'installation
+            if (registration.installing) {
+              console.log('PWA: Nouveau service worker en cours d\'installation');
+              registration.installing.addEventListener('statechange', () => {
+                if (registration.installing?.state === 'installed' && navigator.serviceWorker.controller) {
+                  setUpdateAvailable(true);
+                  window.dispatchEvent(new CustomEvent('pwa-update-available'));
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Erreur lors de la vérification des mises à jour:', error);
+        }
       }
     };
 
-    checkInstallStatus();
-
-    // Écouter l'événement beforeinstallprompt (principalement Chrome/Edge)
+    // Écouter l'événement beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       const event = e as BeforeInstallPromptEvent;
@@ -61,6 +92,16 @@ export function usePWAPrompt() {
       checkInstallStatus();
     };
 
+    // Écouter les messages du service worker
+    const handleSWMessage = (event: MessageEvent) => {
+      console.log('PWA: Message reçu du service worker:', event.data);
+      
+      if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+        setUpdateAvailable(true);
+        window.dispatchEvent(new CustomEvent('pwa-update-available'));
+      }
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
     
@@ -68,31 +109,35 @@ export function usePWAPrompt() {
       mq.addEventListener('change', handleDisplayModeChange);
     });
 
-    // Configuration spécifique par type d'appareil
-    const userAgent = navigator.userAgent;
-    const isDesktop = window.innerWidth >= 1024;
-    const isChrome = userAgent.includes('Chrome') && !userAgent.includes('Edg');
-    const isEdge = userAgent.includes('Edg');
-    const isFirefox = userAgent.includes('Firefox');
-    const isSafari = userAgent.includes('Safari') && !userAgent.includes('Chrome');
-    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-    const isAndroid = userAgent.includes('Android');
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleSWMessage);
+      // Vérifier immédiatement les mises à jour
+      checkForUpdates();
+    }
 
-    console.log('PWA: Détection appareil', { 
-      isDesktop, isChrome, isEdge, isFirefox, isSafari, 
-      isIOS, isAndroid, isMobile, userAgent 
-    });
-
-    // Activer l'installation pour tous les navigateurs compatibles
-    if (!isInstalled) {
+    // Autoriser l'installation si pas encore installé (avec délai pour laisser le temps aux événements)
+    if (!installed) {
       const timer = setTimeout(() => {
-        if ((isChrome || isEdge || isFirefox || (isSafari && isIOS) || isAndroid) && !deferredPrompt && !isInstalled) {
+        const userAgent = navigator.userAgent;
+        const isChrome = userAgent.includes('Chrome') && !userAgent.includes('Edg');
+        const isEdge = userAgent.includes('Edg');
+        const isFirefox = userAgent.includes('Firefox');
+        const isSafari = userAgent.includes('Safari') && !userAgent.includes('Chrome');
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+        const isAndroid = userAgent.includes('Android');
+
+        console.log('PWA: Détection appareil', { 
+          isChrome, isEdge, isFirefox, isSafari, 
+          isIOS, isAndroid, userAgent 
+        });
+
+        // Activer l'installation pour tous les navigateurs compatibles
+        if (isChrome || isEdge || isFirefox || (isSafari && isIOS) || isAndroid) {
           setCanInstall(true);
           window.dispatchEvent(new CustomEvent("pwa-install-available"));
           console.log('PWA: Installation activée pour ce navigateur');
         }
-      }, 2000);
+      }, 1000);
 
       return () => {
         clearTimeout(timer);
@@ -101,6 +146,9 @@ export function usePWAPrompt() {
         mediaQueries.forEach(mq => {
           mq.removeEventListener('change', handleDisplayModeChange);
         });
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.removeEventListener('message', handleSWMessage);
+        }
       };
     }
 
@@ -110,8 +158,11 @@ export function usePWAPrompt() {
       mediaQueries.forEach(mq => {
         mq.removeEventListener('change', handleDisplayModeChange);
       });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleSWMessage);
+      }
     };
-  }, [deferredPrompt, isInstalled]);
+  }, []);
 
   // Fonction pour déclencher l'installation
   const promptInstall = useCallback(async () => {
@@ -188,6 +239,7 @@ export function usePWAPrompt() {
     promptInstall, 
     isAvailable: canInstall && !isInstalled,
     isInstalled,
-    canInstall
+    canInstall,
+    updateAvailable
   };
 }

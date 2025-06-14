@@ -1,7 +1,7 @@
 
-const CACHE_NAME = 'luminous-faith-v1.2.0';
-const STATIC_CACHE = 'luminous-faith-static-v1.2.0';
-const DYNAMIC_CACHE = 'luminous-faith-dynamic-v1.2.0';
+const CACHE_NAME = 'luminous-faith-v1.3.0';
+const STATIC_CACHE = 'luminous-faith-static-v1.3.0';
+const DYNAMIC_CACHE = 'luminous-faith-dynamic-v1.3.0';
 
 const STATIC_ASSETS = [
   '/',
@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
 
 // Installation du service worker
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installation en cours...');
+  console.log('Service Worker v1.3.0: Installation en cours...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => {
@@ -31,7 +31,7 @@ self.addEventListener('install', (event) => {
 
 // Activation du service worker
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activation en cours...');
+  console.log('Service Worker v1.3.0: Activation en cours...');
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
@@ -46,6 +46,19 @@ self.addEventListener('activate', (event) => {
       })
       .then(() => {
         console.log('Service Worker: Prise de contrôle des clients');
+        
+        // Notifier tous les clients qu'une mise à jour est disponible
+        return self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            console.log('Service Worker: Notification de mise à jour envoyée au client');
+            client.postMessage({
+              type: 'UPDATE_AVAILABLE',
+              message: 'Une nouvelle version est disponible'
+            });
+          });
+        });
+      })
+      .then(() => {
         return self.clients.claim();
       })
       .catch(error => {
@@ -141,25 +154,36 @@ self.addEventListener('fetch', (event) => {
 
 // Gestion des messages depuis l'application
 self.addEventListener('message', (event) => {
+  console.log('Service Worker: Message reçu', event.data);
+  
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Service Worker: SKIP_WAITING reçu, activation immédiate');
     self.skipWaiting();
   }
   
   if (event.data && event.data.type === 'CACHE_UPDATE') {
-    // Forcer la mise à jour du cache
-    caches.delete(DYNAMIC_CACHE);
-    caches.delete(STATIC_CACHE);
-    console.log('Service Worker: Cache mis à jour');
+    console.log('Service Worker: Nettoyage du cache demandé');
+    // Nettoyer les anciens caches
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    });
   }
 });
 
-// Notification de mise à jour disponible
+// Notification de changement de contrôleur
 self.addEventListener('controllerchange', () => {
+  console.log('Service Worker: Changement de contrôleur détecté');
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
       client.postMessage({
-        type: 'UPDATE_AVAILABLE',
-        message: 'Une nouvelle version est disponible'
+        type: 'CONTROLLER_CHANGED',
+        message: 'Nouveau service worker actif'
       });
     });
   });

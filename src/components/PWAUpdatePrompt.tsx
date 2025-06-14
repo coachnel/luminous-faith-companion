@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Download, RefreshCw, X, Monitor, Smartphone, Tablet } from 'lucide-react';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -7,38 +8,45 @@ import { usePWAPrompt } from '@/hooks/usePWAPrompt';
 const PWAUpdatePrompt = () => {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
-  const { promptInstall, isAvailable } = usePWAPrompt();
+  const { promptInstall, isAvailable, updateAvailable } = usePWAPrompt();
 
   useEffect(() => {
-    // Vérifier si l'app est déjà installée
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    const isInWebAppiOS = (window.navigator as any).standalone === true;
-    const isInWebAppChrome = window.matchMedia('(display-mode: minimal-ui)').matches;
-    const isInstalled = isStandalone || isInWebAppiOS || isInWebAppChrome;
+    console.log('PWAUpdatePrompt: État actuel', { isAvailable, updateAvailable });
 
-    console.log('PWAUpdatePrompt: État installation', { isInstalled, isAvailable });
-
-    // Afficher le prompt d'installation si pas installé et disponible
-    if (!isInstalled && isAvailable) {
-      const timer = setTimeout(() => {
-        const installDismissed = localStorage.getItem('pwa-install-dismissed');
-        const lastDismissed = installDismissed ? parseInt(installDismissed) : 0;
-        const daysSinceDismissed = (Date.now() - lastDismissed) / (1000 * 60 * 60 * 24);
-        
-        // Réafficher le prompt après 1 jour
-        if (daysSinceDismissed > 1 || !installDismissed) {
+    // Afficher le prompt d'installation si disponible
+    if (isAvailable) {
+      const installDismissed = localStorage.getItem('pwa-install-dismissed');
+      const lastDismissed = installDismissed ? parseInt(installDismissed) : 0;
+      const daysSinceDismissed = (Date.now() - lastDismissed) / (1000 * 60 * 60 * 24);
+      
+      // Réafficher le prompt après 1 jour ou si jamais fermé
+      if (daysSinceDismissed > 1 || !installDismissed) {
+        setTimeout(() => {
           setShowInstallPrompt(true);
           console.log('PWAUpdatePrompt: Affichage du prompt d\'installation');
-        }
-      }, 3000);
+        }, 2000);
+      }
+    }
 
-      return () => clearTimeout(timer);
+    // Afficher le prompt de mise à jour si disponible
+    if (updateAvailable) {
+      const updateDismissed = localStorage.getItem('pwa-update-dismissed');
+      const lastUpdateDismissed = updateDismissed ? parseInt(updateDismissed) : 0;
+      const hoursSinceUpdateDismissed = (Date.now() - lastUpdateDismissed) / (1000 * 60 * 60);
+      
+      // Réafficher le prompt après 1 heure ou si jamais fermé
+      if (hoursSinceUpdateDismissed > 1 || !updateDismissed) {
+        setTimeout(() => {
+          setShowUpdatePrompt(true);
+          console.log('PWAUpdatePrompt: Affichage du prompt de mise à jour');
+        }, 1000);
+      }
     }
 
     // Écouter les événements PWA
     const handlePWAInstallAvailable = () => {
-      if (!isInstalled) {
+      console.log('PWAUpdatePrompt: Événement pwa-install-available reçu');
+      if (isAvailable) {
         const installDismissed = localStorage.getItem('pwa-install-dismissed');
         const lastDismissed = installDismissed ? parseInt(installDismissed) : 0;
         const daysSinceDismissed = (Date.now() - lastDismissed) / (1000 * 60 * 60 * 24);
@@ -50,22 +58,31 @@ const PWAUpdatePrompt = () => {
     };
 
     const handleUpdateAvailable = () => {
-      setUpdateAvailable(true);
-      setShowUpdatePrompt(true);
+      console.log('PWAUpdatePrompt: Événement pwa-update-available reçu');
+      const updateDismissed = localStorage.getItem('pwa-update-dismissed');
+      const lastUpdateDismissed = updateDismissed ? parseInt(updateDismissed) : 0;
+      const hoursSinceUpdateDismissed = (Date.now() - lastUpdateDismissed) / (1000 * 60 * 60);
+      
+      if (hoursSinceUpdateDismissed > 1 || !updateDismissed) {
+        setShowUpdatePrompt(true);
+      }
     };
 
     const handleSWMessage = (event: MessageEvent) => {
+      console.log('PWAUpdatePrompt: Message du service worker reçu:', event.data);
       if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
         handleUpdateAvailable();
       }
     };
 
-    // Vérifier les mises à jour du service worker
+    // Vérifier les mises à jour du service worker au chargement
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', handleSWMessage);
       
+      // Vérification immédiate des mises à jour
       navigator.serviceWorker.getRegistration().then(registration => {
         if (registration && registration.waiting) {
+          console.log('PWAUpdatePrompt: Service worker en attente détecté');
           handleUpdateAvailable();
         }
       });
@@ -81,7 +98,7 @@ const PWAUpdatePrompt = () => {
         navigator.serviceWorker.removeEventListener('message', handleSWMessage);
       }
     };
-  }, [isAvailable]);
+  }, [isAvailable, updateAvailable]);
 
   const handleInstall = async () => {
     try {
@@ -95,16 +112,25 @@ const PWAUpdatePrompt = () => {
 
   const handleUpdate = async () => {
     try {
+      console.log('PWA: Déclenchement de la mise à jour');
+      
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.getRegistration();
         
         if (registration && registration.waiting) {
+          // Demander au service worker en attente de prendre le contrôle
           registration.waiting.postMessage({ type: 'SKIP_WAITING' });
           
+          // Écouter le changement de contrôleur
           navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('PWA: Nouveau service worker actif, rechargement...');
             window.location.reload();
           });
         } else {
+          // Forcer la mise à jour et recharger
+          if (registration) {
+            await registration.update();
+          }
           window.location.reload();
         }
       } else {
@@ -121,15 +147,13 @@ const PWAUpdatePrompt = () => {
   const handleDismissInstall = () => {
     setShowInstallPrompt(false);
     localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    console.log('PWA: Prompt d\'installation fermé');
   };
 
   const handleDismissUpdate = () => {
     setShowUpdatePrompt(false);
-    setTimeout(() => {
-      if (updateAvailable) {
-        setShowUpdatePrompt(true);
-      }
-    }, 30 * 60 * 1000);
+    localStorage.setItem('pwa-update-dismissed', Date.now().toString());
+    console.log('PWA: Prompt de mise à jour fermé');
   };
 
   // Détecter le type d'appareil pour l'icône

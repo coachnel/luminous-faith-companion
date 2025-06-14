@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2}'],
-        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15 MB
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'bible-api-cache',
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 7 * 24 * 60 * 60 // 7 jours
+                maxAgeSeconds: 7 * 24 * 60 * 60
               }
             }
           },
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'supabase-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 // 1 heure
+                maxAgeSeconds: 60 * 60
               }
             }
           },
@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'images-cache',
               expiration: {
                 maxEntries: 60,
-                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 jours
+                maxAgeSeconds: 30 * 24 * 60 * 60
               }
             }
           }
@@ -72,51 +72,52 @@ export default defineConfig(({ mode }) => ({
         scope: '/',
         lang: 'fr',
         categories: ['lifestyle', 'education', 'health'],
+        prefer_related_applications: false,
         icons: [
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '48x48',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '72x72',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '96x96',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '144x144',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '256x256',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '384x384',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
@@ -130,7 +131,33 @@ export default defineConfig(({ mode }) => ({
             url: '/?section=prayer',
             icons: [
               {
-                src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+                src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
+                sizes: '96x96',
+                type: 'image/png'
+              }
+            ]
+          },
+          {
+            name: 'Lecture',
+            short_name: 'Lecture',
+            description: 'Plans de lecture biblique',
+            url: '/?section=reading-plans',
+            icons: [
+              {
+                src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
+                sizes: '96x96',
+                type: 'image/png'
+              }
+            ]
+          },
+          {
+            name: 'Défis',
+            short_name: 'Défis',
+            description: 'Défis spirituels quotidiens',
+            url: '/?section=challenges',
+            icons: [
+              {
+                src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
                 sizes: '96x96',
                 type: 'image/png'
               }

@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Download, RefreshCw, X, Monitor, Smartphone } from 'lucide-react';
+import { Download, RefreshCw, X, Monitor, Smartphone, Tablet } from 'lucide-react';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
 import { usePWAPrompt } from '@/hooks/usePWAPrompt';
@@ -18,18 +17,21 @@ const PWAUpdatePrompt = () => {
     const isInWebAppChrome = window.matchMedia('(display-mode: minimal-ui)').matches;
     const isInstalled = isStandalone || isInWebAppiOS || isInWebAppChrome;
 
+    console.log('PWAUpdatePrompt: État installation', { isInstalled, isAvailable });
+
     // Afficher le prompt d'installation si pas installé et disponible
     if (!isInstalled && isAvailable) {
-      // Délai pour éviter d'être trop intrusif
       const timer = setTimeout(() => {
         const installDismissed = localStorage.getItem('pwa-install-dismissed');
-        const recentlyDismissed = installDismissed && 
-          (Date.now() - parseInt(installDismissed)) < 24 * 60 * 60 * 1000; // 24h
+        const lastDismissed = installDismissed ? parseInt(installDismissed) : 0;
+        const daysSinceDismissed = (Date.now() - lastDismissed) / (1000 * 60 * 60 * 24);
         
-        if (!recentlyDismissed) {
+        // Réafficher le prompt après 1 jour
+        if (daysSinceDismissed > 1 || !installDismissed) {
           setShowInstallPrompt(true);
+          console.log('PWAUpdatePrompt: Affichage du prompt d\'installation');
         }
-      }, 5000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -38,10 +40,10 @@ const PWAUpdatePrompt = () => {
     const handlePWAInstallAvailable = () => {
       if (!isInstalled) {
         const installDismissed = localStorage.getItem('pwa-install-dismissed');
-        const recentlyDismissed = installDismissed && 
-          (Date.now() - parseInt(installDismissed)) < 24 * 60 * 60 * 1000; // 24h
+        const lastDismissed = installDismissed ? parseInt(installDismissed) : 0;
+        const daysSinceDismissed = (Date.now() - lastDismissed) / (1000 * 60 * 60 * 24);
         
-        if (!recentlyDismissed) {
+        if (daysSinceDismissed > 1 || !installDismissed) {
           setShowInstallPrompt(true);
         }
       }
@@ -62,7 +64,6 @@ const PWAUpdatePrompt = () => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', handleSWMessage);
       
-      // Vérifier s'il y a une mise à jour en attente
       navigator.serviceWorker.getRegistration().then(registration => {
         if (registration && registration.waiting) {
           handleUpdateAvailable();
@@ -86,9 +87,7 @@ const PWAUpdatePrompt = () => {
     try {
       await promptInstall();
       setShowInstallPrompt(false);
-      
-      // Analytics ou tracking de l'installation
-      console.log('PWA installée avec succès');
+      console.log('PWA: Installation déclenchée');
     } catch (error) {
       console.error('Erreur lors de l\'installation PWA:', error);
     }
@@ -100,15 +99,12 @@ const PWAUpdatePrompt = () => {
         const registration = await navigator.serviceWorker.getRegistration();
         
         if (registration && registration.waiting) {
-          // Dire au service worker en attente de prendre le contrôle
           registration.waiting.postMessage({ type: 'SKIP_WAITING' });
           
-          // Attendre que le nouveau service worker prenne le contrôle
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             window.location.reload();
           });
         } else {
-          // Fallback : recharger la page
           window.location.reload();
         }
       } else {
@@ -118,29 +114,48 @@ const PWAUpdatePrompt = () => {
       setShowUpdatePrompt(false);
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      window.location.reload(); // Fallback
+      window.location.reload();
     }
   };
 
   const handleDismissInstall = () => {
     setShowInstallPrompt(false);
-    // Se rappeler du choix de l'utilisateur
     localStorage.setItem('pwa-install-dismissed', Date.now().toString());
   };
 
   const handleDismissUpdate = () => {
     setShowUpdatePrompt(false);
-    // Reporter la mise à jour plus tard
     setTimeout(() => {
       if (updateAvailable) {
         setShowUpdatePrompt(true);
       }
-    }, 30 * 60 * 1000); // 30 minutes
+    }, 30 * 60 * 1000);
   };
 
-  // Détecter le type d'appareil
-  const isDesktop = window.innerWidth >= 1024;
-  const DeviceIcon = isDesktop ? Monitor : Smartphone;
+  // Détecter le type d'appareil pour l'icône
+  const getDeviceIcon = () => {
+    const width = window.innerWidth;
+    if (width >= 1024) return Monitor;
+    if (width >= 768) return Tablet;
+    return Smartphone;
+  };
+
+  const DeviceIcon = getDeviceIcon();
+
+  // Adapter le message selon l'appareil
+  const getInstallMessage = () => {
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isDesktop = window.innerWidth >= 1024;
+    
+    if (isIOS) {
+      return "Accès rapide depuis votre écran d'accueil, notifications et fonctionnement hors-ligne";
+    }
+    if (isDesktop) {
+      return "Accès rapide depuis votre bureau, notifications et fonctionnement hors-ligne";
+    }
+    return "Accès rapide depuis votre écran d'accueil, notifications et fonctionnement hors-ligne";
+  };
 
   if (!showInstallPrompt && !showUpdatePrompt) return null;
 
@@ -160,10 +175,7 @@ const PWAUpdatePrompt = () => {
                 <DeviceIcon className="h-4 w-4 text-[var(--text-secondary)]" />
               </div>
               <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
-                {isDesktop 
-                  ? "Accès rapide depuis votre bureau, notifications et fonctionnement hors-ligne"
-                  : "Accès rapide depuis votre écran d'accueil, notifications et fonctionnement hors-ligne"
-                }
+                {getInstallMessage()}
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0">

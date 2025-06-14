@@ -1,31 +1,52 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Bell, BellRing, Check, X } from 'lucide-react';
-import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { useUserPreferences } from '@/hooks/useSupabaseData';
 import { toast } from 'sonner';
 
 const NotificationSettings = () => {
-  const { permission, requestPermission, sendNotification } = useNotificationSystem();
   const { preferences, updatePreferences } = useUserPreferences();
+  const [hasPermission, setHasPermission] = React.useState(false);
+  const [isSupported, setIsSupported] = React.useState(false);
 
-  const handlePermissionRequest = async () => {
-    const granted = await requestPermission();
-    if (granted) {
-      toast.success('Notifications activées avec succès !');
-      // Test de notification
-      setTimeout(() => {
-        sendNotification(
-          '🎉 Notifications activées !',
-          { body: 'Vos rappels spirituels sont maintenant opérationnels' }
-        );
-      }, 1000);
-    } else {
+  React.useEffect(() => {
+    // Vérifier le support des notifications
+    if ('Notification' in window) {
+      setIsSupported(true);
+      setHasPermission(Notification.permission === 'granted');
+    }
+  }, []);
+
+  const requestPermission = async () => {
+    if (!('Notification' in window)) {
+      toast.error('Les notifications ne sont pas supportées par ce navigateur');
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      const granted = permission === 'granted';
+      
+      setHasPermission(granted);
+      
+      if (granted) {
+        toast.success('Notifications activées avec succès !');
+        // Test de notification
+        setTimeout(() => {
+          new Notification('🎉 Notifications activées !', {
+            body: 'Vos rappels spirituels sont maintenant opérationnels',
+            icon: '/icons/icon-192x192.png'
+          });
+        }, 1000);
+      } else {
+        toast.error('Permission refusée. Vous pouvez l\'activer dans les paramètres de votre navigateur');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la demande de permission:', error);
       toast.error('Impossible d\'activer les notifications');
     }
   };
@@ -48,10 +69,15 @@ const NotificationSettings = () => {
   };
 
   const testNotification = () => {
-    sendNotification(
-      '🔔 Test de notification',
-      { body: 'Votre système de notifications fonctionne parfaitement !' }
-    );
+    if (!hasPermission) {
+      toast.error('Veuillez d\'abord activer les notifications');
+      return;
+    }
+
+    new Notification('🔔 Test de notification', {
+      body: 'Votre système de notifications fonctionne parfaitement !',
+      icon: '/icons/icon-192x192.png'
+    });
     toast.success('Notification de test envoyée');
   };
 
@@ -62,10 +88,10 @@ const NotificationSettings = () => {
         <div className="flex items-center gap-4">
           <div 
             className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              permission.granted ? 'bg-green-100' : 'bg-red-100'
+              hasPermission ? 'bg-green-100' : 'bg-red-100'
             }`}
           >
-            {permission.granted ? (
+            {hasPermission ? (
               <Check className="h-6 w-6 text-green-600" />
             ) : (
               <X className="h-6 w-6 text-red-600" />
@@ -73,17 +99,19 @@ const NotificationSettings = () => {
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-[var(--text-primary)]">
-              {permission.granted ? 'Notifications activées' : 'Notifications désactivées'}
+              {hasPermission ? 'Notifications activées' : 'Notifications désactivées'}
             </h3>
             <p className="text-sm text-[var(--text-secondary)]">
-              {permission.granted 
+              {hasPermission 
                 ? 'Vous recevrez des rappels spirituels' 
-                : permission.error || 'Cliquez pour activer les notifications'
+                : isSupported 
+                  ? 'Cliquez pour activer les notifications'
+                  : 'Les notifications ne sont pas supportées'
               }
             </p>
           </div>
-          {!permission.granted && permission.supported && (
-            <ModernButton onClick={handlePermissionRequest}>
+          {!hasPermission && isSupported && (
+            <ModernButton onClick={requestPermission}>
               <BellRing className="h-4 w-4 mr-2" />
               Activer
             </ModernButton>
@@ -92,7 +120,7 @@ const NotificationSettings = () => {
       </ModernCard>
 
       {/* Paramètres des notifications */}
-      {permission.granted && (
+      {hasPermission && (
         <ModernCard variant="elevated">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">

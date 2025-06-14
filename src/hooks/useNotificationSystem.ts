@@ -19,24 +19,20 @@ export const useNotificationSystem = () => {
 
   useEffect(() => {
     checkNotificationSupport();
-    startNotificationService();
-  }, [user, preferences]);
+  }, []);
 
-  const checkNotificationSupport = async () => {
+  useEffect(() => {
+    if (permission.granted && preferences?.notification_preferences) {
+      startNotificationService();
+    }
+  }, [permission.granted, preferences]);
+
+  const checkNotificationSupport = () => {
     if (!('Notification' in window)) {
       setPermission({
         granted: false,
         supported: false,
         error: 'Les notifications ne sont pas supportées par ce navigateur'
-      });
-      return;
-    }
-
-    if (!('serviceWorker' in navigator)) {
-      setPermission({
-        granted: false,
-        supported: false,
-        error: 'Service Worker non supporté'
       });
       return;
     }
@@ -57,11 +53,6 @@ export const useNotificationSystem = () => {
       
       setPermission(prev => ({ ...prev, granted }));
       
-      if (granted) {
-        await registerServiceWorker();
-        console.log('✅ Notifications activées avec succès');
-      }
-      
       return granted;
     } catch (error) {
       console.error('Erreur lors de la demande de permission:', error);
@@ -73,18 +64,6 @@ export const useNotificationSystem = () => {
     }
   };
 
-  const registerServiceWorker = async () => {
-    try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker enregistré:', registration);
-        return registration;
-      }
-    } catch (error) {
-      console.error('Erreur Service Worker:', error);
-    }
-  };
-
   const sendNotification = (title: string, options: NotificationOptions = {}) => {
     if (!permission.granted) return;
 
@@ -93,7 +72,6 @@ export const useNotificationSystem = () => {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-192x192.png',
         tag: 'spiritual-reminder',
-        requireInteraction: true,
         ...options
       });
 
@@ -120,78 +98,53 @@ export const useNotificationSystem = () => {
   const startNotificationService = () => {
     if (!user || !preferences || !permission.granted) return;
 
-    // Notifications quotidiennes programmées
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(8, 0, 0, 0); // 8h00 demain
+    console.log('🔔 Démarrage du service de notifications');
 
-    const msUntilTomorrow = tomorrow.getTime() - now.getTime();
-
-    // Notification quotidienne
-    setTimeout(() => {
-      sendNotification(
-        '🌅 Bonjour !',
-        { body: 'Commencez votre journée avec une lecture spirituelle' }
-      );
-      
-      // Programmer pour tous les jours suivants
-      setInterval(() => {
-        sendNotification(
-          '🌅 Bonjour !',
-          { body: 'Commencez votre journée avec une lecture spirituelle' }
-        );
-      }, 24 * 60 * 60 * 1000); // Chaque 24h
-      
-    }, msUntilTomorrow);
-
-    // Notifications des préférences utilisateur
-    if (preferences.notification_preferences?.prayerReminder) {
-      schedulePrayerReminders();
-    }
-
-    if (preferences.notification_preferences?.readingReminder) {
-      scheduleReadingReminders();
-    }
+    // Programmer les notifications quotidiennes
+    scheduleQuotidienneNotifications();
   };
 
-  const schedulePrayerReminders = () => {
-    const times = ['08:00', '12:00', '20:00'];
-    times.forEach(time => {
-      const [hours, minutes] = time.split(':').map(Number);
-      const now = new Date();
-      const scheduledTime = new Date();
-      scheduledTime.setHours(hours, minutes, 0, 0);
-      
-      if (scheduledTime <= now) {
-        scheduledTime.setDate(scheduledTime.getDate() + 1);
-      }
-      
-      const delay = scheduledTime.getTime() - now.getTime();
-      
-      setTimeout(() => {
+  const scheduleQuotidienneNotifications = () => {
+    // Notification verset du jour à 8h00
+    if (preferences?.notification_preferences?.dailyVerse) {
+      scheduleDaily(8, 0, () => {
         sendNotification(
-          '🙏 Moment de prière',
-          { body: 'Prenez un instant pour vous recueillir et prier' }
+          '🌅 Bonjour !',
+          { body: 'Découvrez votre verset quotidien pour nourrir votre âme' }
         );
-        
-        // Répéter chaque jour
-        setInterval(() => {
+      });
+    }
+
+    // Notifications de prière
+    if (preferences?.notification_preferences?.prayerReminder) {
+      const prayerTimes = [8, 12, 20];
+      prayerTimes.forEach(hour => {
+        scheduleDaily(hour, 0, () => {
           sendNotification(
             '🙏 Moment de prière',
             { body: 'Prenez un instant pour vous recueillir et prier' }
           );
-        }, 24 * 60 * 60 * 1000);
-        
-      }, delay);
-    });
+        });
+      });
+    }
+
+    // Notification de lecture à 19h00
+    if (preferences?.notification_preferences?.readingReminder) {
+      scheduleDaily(19, 0, () => {
+        sendNotification(
+          '📖 Lecture de la Bible',
+          { body: 'Il est temps de lire votre passage quotidien' }
+        );
+      });
+    }
   };
 
-  const scheduleReadingReminders = () => {
-    const scheduledTime = new Date();
-    scheduledTime.setHours(19, 0, 0, 0); // 19h00
-    
+  const scheduleDaily = (hour: number, minute: number, callback: () => void) => {
     const now = new Date();
+    const scheduledTime = new Date();
+    scheduledTime.setHours(hour, minute, 0, 0);
+    
+    // Si l'heure est déjà passée aujourd'hui, programmer pour demain
     if (scheduledTime <= now) {
       scheduledTime.setDate(scheduledTime.getDate() + 1);
     }
@@ -199,19 +152,9 @@ export const useNotificationSystem = () => {
     const delay = scheduledTime.getTime() - now.getTime();
     
     setTimeout(() => {
-      sendNotification(
-        '📖 Lecture de la Bible',
-        { body: 'Il est temps de lire votre passage quotidien' }
-      );
-      
-      // Répéter chaque jour
-      setInterval(() => {
-        sendNotification(
-          '📖 Lecture de la Bible',
-          { body: 'Il est temps de lire votre passage quotidien' }
-        );
-      }, 24 * 60 * 60 * 1000);
-      
+      callback();
+      // Programmer pour le jour suivant
+      setInterval(callback, 24 * 60 * 60 * 1000);
     }, delay);
   };
 

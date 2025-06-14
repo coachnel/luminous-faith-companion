@@ -5,12 +5,12 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
 import { Target, Plus, CheckCircle, Clock, Calendar, Trophy, Info, Edit3, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNeonData } from '@/hooks/useSupabaseData';
+import { useSupabaseChallenges } from '@/hooks/useSupabaseChallenges';
 import { toast } from 'sonner';
 
 const DailyChallenges = () => {
   const { user } = useAuth();
-  const { challenges, addChallenge, updateChallenge, deleteChallenge } = useNeonData();
+  const { challenges, addChallenge, updateChallenge, deleteChallenge } = useSupabaseChallenges();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<string | null>(null);
   const [newChallenge, setNewChallenge] = useState({
@@ -58,6 +58,7 @@ const DailyChallenges = () => {
       setShowCreateForm(false);
       toast.success('Défi créé !');
     } catch (error) {
+      console.error('Error creating challenge:', error);
       toast.error('Erreur lors de la création');
     }
   };
@@ -102,6 +103,7 @@ const DailyChallenges = () => {
       });
       toast.success('Défi mis à jour !');
     } catch (error) {
+      console.error('Error updating challenge:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   };
@@ -134,6 +136,7 @@ const DailyChallenges = () => {
         toast.success('Progression mise à jour !');
       }
     } catch (error) {
+      console.error('Error updating progress:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   };
@@ -144,6 +147,7 @@ const DailyChallenges = () => {
         await deleteChallenge(challengeId);
         toast.success('Défi supprimé !');
       } catch (error) {
+        console.error('Error deleting challenge:', error);
         toast.error('Erreur lors de la suppression');
       }
     }
@@ -181,17 +185,17 @@ const DailyChallenges = () => {
 
       {/* Statistiques */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
-          <div className="text-2xl font-bold text-blue-600">{challenges.length}</div>
-          <div className="text-sm text-blue-700">Total</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border-blue-200 dark:border-blue-800">
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{challenges.length}</div>
+          <div className="text-sm text-blue-700 dark:text-blue-300">Total</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <div className="text-2xl font-bold text-green-600">{completedChallenges.length}</div>
-          <div className="text-sm text-green-700">Terminés</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completedChallenges.length}</div>
+          <div className="text-sm text-green-700 dark:text-green-300">Terminés</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-          <div className="text-2xl font-bold text-orange-600">{activeChallenges.length}</div>
-          <div className="text-sm text-orange-700">En cours</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 border-orange-200 dark:border-orange-800">
+          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{activeChallenges.length}</div>
+          <div className="text-sm text-orange-700 dark:text-orange-300">En cours</div>
         </ModernCard>
       </div>
 
@@ -207,7 +211,8 @@ const DailyChallenges = () => {
             className="gap-2 flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
-            <span className="whitespace-nowrap">Nouveau défi</span>
+            <span className="hidden sm:inline">Nouveau défi</span>
+            <span className="sm:hidden">Nouveau</span>
           </ModernButton>
         </div>
 
@@ -336,7 +341,7 @@ const DailyChallenges = () => {
                             onChange={(e) => setEditData({...editData, current_value: parseInt(e.target.value) || 0})}
                             className="flex-1 p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)]"
                           />
-                          <span className="flex items-center px-3">sur</span>
+                          <span className="flex items-center px-3 text-[var(--text-secondary)]">sur</span>
                           <input
                             type="number"
                             value={editData.target_value}
@@ -385,7 +390,7 @@ const DailyChallenges = () => {
                               {challenge.current_value}/{challenge.target_value} {challenge.unit}
                             </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div 
                               className="bg-[var(--accent-primary)] h-2 rounded-full transition-all duration-300"
                               style={{ width: `${getProgressPercentage(challenge.current_value, challenge.target_value)}%` }}
@@ -430,7 +435,7 @@ const DailyChallenges = () => {
                               onClick={() => handleDeleteChallenge(challenge.id)}
                               size="sm"
                               variant="ghost"
-                              className="gap-2 text-red-600 hover:text-red-700"
+                              className="gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                             >
                               <X className="h-4 w-4" />
                               <span className="hidden sm:inline">Supprimer</span>
@@ -452,29 +457,29 @@ const DailyChallenges = () => {
                   Défis terminés ({completedChallenges.length})
                 </h4>
                 {completedChallenges.map((challenge) => (
-                  <ModernCard key={challenge.id} className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                  <ModernCard key={challenge.id} className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
                     <div className="space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-semibold text-green-800 break-words">{challenge.title}</h4>
+                          <h4 className="font-semibold text-green-800 dark:text-green-200 break-words">{challenge.title}</h4>
                           {challenge.description && (
-                            <p className="text-sm text-green-700 mt-1 break-words">{challenge.description}</p>
+                            <p className="text-sm text-green-700 dark:text-green-300 mt-1 break-words">{challenge.description}</p>
                           )}
                         </div>
-                        <Badge variant="default" className="flex items-center gap-1 flex-shrink-0 bg-green-600">
+                        <Badge variant="default" className="flex items-center gap-1 flex-shrink-0 bg-green-600 dark:bg-green-700">
                           <Trophy className="h-3 w-3" />
                           Terminé
                         </Badge>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-green-700">Objectif atteint</span>
-                        <span className="font-medium text-green-800">
+                        <span className="text-green-700 dark:text-green-300">Objectif atteint</span>
+                        <span className="font-medium text-green-800 dark:text-green-200">
                           {challenge.target_value}/{challenge.target_value} {challenge.unit}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-green-700">
+                      <div className="flex items-center gap-4 text-sm text-green-700 dark:text-green-300">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>Créé le {new Date(challenge.created_at).toLocaleDateString('fr-FR')}</span>

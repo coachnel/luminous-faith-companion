@@ -5,13 +5,13 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
 import { Compass, Heart, MessageCircle, Bookmark, Calendar, User, Info, ThumbsUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNeonPrayerRequests, useNeonNotes } from '@/hooks/useNeonData';
+import { useNeonPrayerRequests, useNotes } from '@/hooks/useSupabaseData';
 import { toast } from 'sonner';
 
 const Discover = () => {
   const { user } = useAuth();
   const { prayerRequests } = useNeonPrayerRequests();
-  const { notes } = useNeonNotes();
+  const { notes } = useNotes();
   const [activeTab, setActiveTab] = useState<'all' | 'prayers' | 'notes'>('all');
 
   // Combiner et trier tout le contenu partageable
@@ -159,17 +159,17 @@ const Discover = () => {
 
       {/* Statistiques */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
-          <div className="text-2xl font-bold text-blue-600">{allContent.length}</div>
-          <div className="text-sm text-blue-700">Contenus</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border-blue-200 dark:border-blue-800">
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{allContent.length}</div>
+          <div className="text-sm text-blue-700 dark:text-blue-300">Contenus</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <div className="text-2xl font-bold text-green-600">{prayersContent.length}</div>
-          <div className="text-sm text-green-700">Prières</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{prayersContent.length}</div>
+          <div className="text-sm text-green-700 dark:text-green-300">Prières</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-          <div className="text-2xl font-bold text-purple-600">0</div>
-          <div className="text-sm text-purple-700">Notes</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950 border-purple-200 dark:border-purple-800">
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">0</div>
+          <div className="text-sm text-purple-700 dark:text-purple-300">Notes</div>
         </ModernCard>
       </div>
 

@@ -6,71 +6,18 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Bell, BellRing, Check, X, AlertCircle } from 'lucide-react';
 import { useUserPreferences } from '@/hooks/useSupabaseData';
+import { useNotificationSystem } from '@/hooks/useNotificationSystem';
 import { toast } from 'sonner';
 
 const NotificationSettings = () => {
   const { preferences, updatePreferences } = useUserPreferences();
-  const [hasPermission, setHasPermission] = React.useState(false);
-  const [isSupported, setIsSupported] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    // Vérifier le support des notifications
-    if ('Notification' in window) {
-      setIsSupported(true);
-      setHasPermission(Notification.permission === 'granted');
-    }
-  }, []);
-
-  const requestPermission = async () => {
-    if (!('Notification' in window)) {
-      toast.error('Les notifications ne sont pas supportées par ce navigateur');
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      const permission = await Notification.requestPermission();
-      const granted = permission === 'granted';
-      
-      setHasPermission(granted);
-      
-      if (granted) {
-        toast.success('Notifications activées avec succès !');
-        
-        // Test de notification immédiat
-        setTimeout(() => {
-          try {
-            new Notification('🎉 Notifications activées !', {
-              body: 'Vos rappels sont maintenant opérationnels',
-              icon: '/icons/icon-192x192.png',
-              tag: 'activation-test'
-            });
-          } catch (error) {
-            console.warn('Erreur lors du test de notification:', error);
-          }
-        }, 1000);
-        
-        // Enregistrer le service worker pour les notifications persistantes
-        if ('serviceWorker' in navigator) {
-          try {
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            console.log('Service Worker enregistré:', registration);
-          } catch (error) {
-            console.warn('Service Worker non disponible:', error);
-          }
-        }
-      } else {
-        toast.error('Permission refusée. Activez les notifications dans les paramètres de votre navigateur');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la demande de permission:', error);
-      toast.error('Impossible d\'activer les notifications');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { 
+    hasPermission, 
+    isSupported, 
+    requestPermission, 
+    testNotification,
+    isLoading 
+  } = useNotificationSystem();
 
   const updateNotificationPreference = async (key: string, value: boolean) => {
     if (!preferences) return;
@@ -85,28 +32,17 @@ const NotificationSettings = () => {
       
       toast.success(value ? 'Notification activée' : 'Notification désactivée');
     } catch (error) {
+      console.error('Error updating notification preference:', error);
       toast.error('Erreur lors de la sauvegarde');
     }
   };
 
-  const testNotification = () => {
+  const handleTestNotification = () => {
     if (!hasPermission) {
       toast.error('Veuillez d\'abord activer les notifications');
       return;
     }
-
-    try {
-      new Notification('🔔 Test de notification', {
-        body: 'Votre système de notifications fonctionne parfaitement !',
-        icon: '/icons/icon-192x192.png',
-        tag: 'test-notification',
-        requireInteraction: false
-      });
-      toast.success('Notification de test envoyée');
-    } catch (error) {
-      console.error('Erreur lors du test:', error);
-      toast.error('Erreur lors du test de notification');
-    }
+    testNotification();
   };
 
   return (
@@ -116,13 +52,13 @@ const NotificationSettings = () => {
         <div className="flex items-center gap-4">
           <div 
             className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${
-              hasPermission ? 'bg-green-100' : 'bg-red-100'
+              hasPermission ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'
             }`}
           >
             {hasPermission ? (
-              <Check className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+              <Check className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
             ) : (
-              <X className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 dark:text-red-400" />
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -155,8 +91,8 @@ const NotificationSettings = () => {
       {!isSupported && (
         <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-[var(--text-primary)]">Support limité</h3>
@@ -236,7 +172,7 @@ const NotificationSettings = () => {
             </div>
 
             <div className="pt-4 border-t border-[var(--border-default)]">
-              <ModernButton variant="outline" onClick={testNotification} className="w-full">
+              <ModernButton variant="outline" onClick={handleTestNotification} className="w-full">
                 <Bell className="h-4 w-4 mr-2" />
                 Tester les notifications
               </ModernButton>

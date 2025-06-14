@@ -62,37 +62,3 @@ export function useNeonPrayerRequests() {
 
   return { prayerRequests, loading, addPrayerRequest, refetch: fetchPrayerRequests };
 }
-
-export function useNeonNotes() {
-  const [notes, setNotes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      fetchNotes();
-    } else {
-      setNotes([]);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchNotes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNotes(data || []);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { notes, loading, refetch: fetchNotes };
-}

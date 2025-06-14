@@ -68,6 +68,18 @@ export interface UserPreferences {
   updated_at: string;
 }
 
+export interface PrayerRequest {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  author_name: string;
+  is_anonymous: boolean;
+  prayer_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -269,6 +281,54 @@ export function useFavoriteVerses() {
   return { favoriteVerses, loading, addFavoriteVerse, removeFavoriteVerse };
 }
 
+export function useNeonPrayerRequests() {
+  const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      fetchPrayerRequests();
+    } else {
+      setPrayerRequests([]);
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchPrayerRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('prayer_requests')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPrayerRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching prayer requests:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addPrayerRequest = async (requestData: Omit<PrayerRequest, 'id' | 'user_id' | 'prayer_count' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { error } = await supabase
+        .from('prayer_requests')
+        .insert([{ ...requestData, user_id: user?.id, prayer_count: 0 }]);
+
+      if (error) throw error;
+      await fetchPrayerRequests();
+    } catch (error) {
+      console.error('Error adding prayer request:', error);
+      throw error;
+    }
+  };
+
+  return { prayerRequests, loading, addPrayerRequest, refetch: fetchPrayerRequests };
+}
+
 export function useUserPreferences() {
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [loading, setLoading] = useState(true);
@@ -291,37 +351,61 @@ export function useUserPreferences() {
         .eq('user_id', user?.id)
         .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
       
-      // Validate and normalize theme_mode to ensure it's one of the allowed values
-      const normalizeThemeMode = (value: any): 'light' | 'dark' | 'sepia' => {
-        if (value === 'dark' || value === 'sepia') {
-          return value;
-        }
-        return 'light'; // Default fallback
-      };
-      
-      // Transform the JSON data to match our interface
-      const transformedData: UserPreferences = {
-        user_id: data.user_id,
-        bible_version: data.bible_version,
-        language: data.language,
-        theme: data.theme,
-        theme_mode: normalizeThemeMode(data.theme_mode),
-        notification_preferences: typeof data.notification_preferences === 'string' 
-          ? JSON.parse(data.notification_preferences) 
-          : data.notification_preferences,
-        reminder_times: typeof data.reminder_times === 'string' 
-          ? JSON.parse(data.reminder_times) 
-          : data.reminder_times,
-        created_at: data.created_at,
-        updated_at: data.updated_at
-      };
-      
-      setPreferences(transformedData);
-      
-      // Appliquer le thème automatiquement
-      applyTheme(transformedData.theme_mode);
+      if (data) {
+        // Validate and normalize theme_mode to ensure it's one of the allowed values
+        const normalizeThemeMode = (value: any): 'light' | 'dark' | 'sepia' => {
+          if (value === 'dark' || value === 'sepia') {
+            return value;
+          }
+          return 'light'; // Default fallback
+        };
+        
+        // Transform the JSON data to match our interface
+        const transformedData: UserPreferences = {
+          user_id: data.user_id,
+          bible_version: data.bible_version,
+          language: data.language,
+          theme: data.theme,
+          theme_mode: normalizeThemeMode(data.theme_mode),
+          notification_preferences: typeof data.notification_preferences === 'string' 
+            ? JSON.parse(data.notification_preferences) 
+            : data.notification_preferences,
+          reminder_times: typeof data.reminder_times === 'string' 
+            ? JSON.parse(data.reminder_times) 
+            : data.reminder_times,
+          created_at: data.created_at,
+          updated_at: data.updated_at
+        };
+        
+        setPreferences(transformedData);
+        
+        // Appliquer le thème automatiquement
+        applyTheme(transformedData.theme_mode);
+      } else {
+        // Create default preferences if none exist
+        const defaultPreferences: UserPreferences = {
+          user_id: user?.id || '',
+          bible_version: 'LSG',
+          language: 'fr',
+          theme: 'light',
+          theme_mode: 'light',
+          notification_preferences: {
+            dailyVerse: true,
+            prayerReminder: true,
+            readingReminder: true
+          },
+          reminder_times: {
+            prayer: ['08:00', '12:00', '20:00'],
+            reading: '07:00'
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setPreferences(defaultPreferences);
+        applyTheme('light');
+      }
     } catch (error) {
       console.error('Error fetching preferences:', error);
       // En cas d'erreur, utiliser les préférences par défaut
@@ -354,8 +438,7 @@ export function useUserPreferences() {
     try {
       const { error } = await supabase
         .from('user_preferences')
-        .update(updates)
-        .eq('user_id', user?.id);
+        .upsert({ user_id: user?.id, ...updates }, { onConflict: 'user_id' });
 
       if (error) throw error;
       

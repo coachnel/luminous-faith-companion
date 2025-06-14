@@ -104,7 +104,7 @@ const MobileApp = () => {
       )}
 
       <main className={`${activeSection !== 'dashboard' ? 'pb-20' : 'pb-24'} min-h-screen`}>
-        <div className="animate-slide-up">
+        <div className="animate-fade-in">
           {renderContent()}
         </div>
       </main>

@@ -10,10 +10,12 @@ import {
   Award, Flame, MessageCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserPreferences, useNeonData } from '@/hooks/useSupabaseData';
+import { useUserPreferences, useNotes } from '@/hooks/useSupabaseData';
+import { useSupabaseChallenges } from '@/hooks/useSupabaseChallenges';
 import { useReadingPlanProgress } from '@/hooks/useReadingProgress';
 import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardProps {
   onNavigate: (section: string) => void;
@@ -23,32 +25,54 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
   const { user } = useAuth();
   const { theme } = useTheme();
   const { preferences } = useUserPreferences();
-  const { challenges, notes } = useNeonData();
+  const { challenges } = useSupabaseChallenges();
+  const { notes } = useNotes();
   const { plans } = useReadingPlanProgress();
   const [realUserCount, setRealUserCount] = useState<number>(0);
+  const [weeklyActiveUsers, setWeeklyActiveUsers] = useState<number>(0);
 
   // Obtenir le nombre réel d'utilisateurs inscrits
   useEffect(() => {
-    const fetchRealUserCount = async () => {
+    const fetchRealUserStats = async () => {
       try {
-        // Ici on devrait faire un appel API pour obtenir le vrai nombre
-        // Pour l'instant, on simule avec localStorage
-        const storedCount = localStorage.getItem('app_user_count');
-        if (storedCount) {
-          setRealUserCount(parseInt(storedCount));
-        } else {
-          // Simuler un compteur basé sur l'ID utilisateur actuel
-          const baseCount = user?.id ? user.id.split('-').length * 37 : 127;
-          setRealUserCount(baseCount);
-          localStorage.setItem('app_user_count', baseCount.toString());
-        }
+        // Compter les utilisateurs réels depuis les profils
+        const { count: totalUsers } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+
+        // Compter les utilisateurs actifs cette semaine (avec des défis ou notes récents)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const { data: activeChallengeUsers } = await supabase
+          .from('daily_challenges')
+          .select('user_id')
+          .gte('created_at', oneWeekAgo.toISOString());
+
+        const { data: activeNoteUsers } = await supabase
+          .from('notes')
+          .select('user_id')
+          .gte('created_at', oneWeekAgo.toISOString());
+
+        // Combiner et dédupliquer les utilisateurs actifs
+        const activeUsers = new Set([
+          ...(activeChallengeUsers?.map(u => u.user_id) || []),
+          ...(activeNoteUsers?.map(u => u.user_id) || [])
+        ]);
+
+        setRealUserCount(totalUsers || 0);
+        setWeeklyActiveUsers(activeUsers.size);
       } catch (error) {
         console.error('Erreur lors du comptage des utilisateurs:', error);
-        setRealUserCount(127); // Valeur par défaut
+        // Valeurs par défaut en cas d'erreur
+        setRealUserCount(1);
+        setWeeklyActiveUsers(1);
       }
     };
 
-    fetchRealUserCount();
+    if (user) {
+      fetchRealUserStats();
+    }
   }, [user]);
 
   // Calculer les statistiques de progression
@@ -56,11 +80,6 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
   const completedChallenges = challenges.filter(c => c.is_completed);
   const activeChallenges = challenges.filter(c => !c.is_completed);
   const totalNotes = notes.length;
-
-  // Stats pour la communauté (données réelles et dynamiques)
-  const weeklyActiveChallenges = activeChallenges.length;
-  const todayPrayers = 0; // À implémenter avec de vraies données
-  const thisWeekActiveUsers = Math.max(1, Math.floor(realUserCount * 0.23)); // 23% d'utilisateurs actifs cette semaine
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -121,21 +140,21 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
 
       {/* Statistiques principales */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
-          <div className="text-2xl font-bold text-blue-600">{activePlans.length}</div>
-          <div className="text-sm text-blue-700 whitespace-nowrap">Plans actifs</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border-blue-200 dark:border-blue-800">
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{activePlans.length}</div>
+          <div className="text-sm text-blue-700 dark:text-blue-300 whitespace-nowrap">Plans actifs</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <div className="text-2xl font-bold text-green-600">{completedChallenges.length}</div>
-          <div className="text-sm text-green-700 whitespace-nowrap">Défis terminés</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completedChallenges.length}</div>
+          <div className="text-sm text-green-700 dark:text-green-300 whitespace-nowrap">Défis terminés</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-          <div className="text-2xl font-bold text-purple-600">{totalNotes}</div>
-          <div className="text-sm text-purple-700 whitespace-nowrap">Notes créées</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950 border-purple-200 dark:border-purple-800">
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{totalNotes}</div>
+          <div className="text-sm text-purple-700 dark:text-purple-300 whitespace-nowrap">Notes créées</div>
         </ModernCard>
-        <ModernCard className="p-4 text-center bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-          <div className="text-2xl font-bold text-orange-600">{activeChallenges.length}</div>
-          <div className="text-sm text-orange-700 whitespace-nowrap">Défis en cours</div>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 border-orange-200 dark:border-orange-800">
+          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{activeChallenges.length}</div>
+          <div className="text-sm text-orange-700 dark:text-orange-300 whitespace-nowrap">Défis en cours</div>
         </ModernCard>
       </div>
 
@@ -153,7 +172,7 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
             className="h-auto p-4 flex-col gap-2"
           >
             <Calendar className="h-6 w-6" />
-            <span className="text-sm whitespace-nowrap">Nouveau plan</span>
+            <span className="text-sm text-center leading-tight">Nouveau<br className="sm:hidden"/>plan</span>
           </ModernButton>
           
           <ModernButton 
@@ -162,7 +181,7 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
             className="h-auto p-4 flex-col gap-2"
           >
             <Target className="h-6 w-6" />
-            <span className="text-sm whitespace-nowrap">Nouveau défi</span>
+            <span className="text-sm text-center leading-tight">Nouveau<br className="sm:hidden"/>défi</span>
           </ModernButton>
           
           <ModernButton 
@@ -171,7 +190,7 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
             className="h-auto p-4 flex-col gap-2"
           >
             <Users className="h-6 w-6" />
-            <span className="text-sm whitespace-nowrap">Créer un cercle</span>
+            <span className="text-sm text-center leading-tight">Créer un<br className="sm:hidden"/>cercle</span>
           </ModernButton>
           
           <ModernButton 
@@ -180,7 +199,7 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
             className="h-auto p-4 flex-col gap-2"
           >
             <Edit3 className="h-6 w-6" />
-            <span className="text-sm whitespace-nowrap">Nouvelle note</span>
+            <span className="text-sm text-center leading-tight">Nouvelle<br className="sm:hidden"/>note</span>
           </ModernButton>
           
           <ModernButton 
@@ -189,7 +208,7 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
             className="h-auto p-4 flex-col gap-2"
           >
             <Compass className="h-6 w-6" />
-            <span className="text-sm whitespace-nowrap">Découvrir</span>
+            <span className="text-sm text-center leading-tight">Découvrir</span>
           </ModernButton>
           
           <ModernButton 
@@ -198,7 +217,7 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
             className="h-auto p-4 flex-col gap-2"
           >
             <Plus className="h-6 w-6" />
-            <span className="text-sm whitespace-nowrap">Plus</span>
+            <span className="text-sm text-center leading-tight">Plus</span>
           </ModernButton>
         </div>
       </ModernCard>
@@ -327,13 +346,13 @@ const ModernDashboard = ({ onNavigate }: DashboardProps) => {
           </div>
           
           <div className="text-center p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
-            <div className="text-2xl font-bold text-green-600 mb-1">{weeklyActiveChallenges}</div>
-            <div className="text-sm text-[var(--text-secondary)] whitespace-nowrap">Défis actifs cette semaine</div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">{activeChallenges.length}</div>
+            <div className="text-sm text-[var(--text-secondary)] text-center leading-tight">Défis actifs<br className="sm:hidden"/>cette semaine</div>
           </div>
           
           <div className="text-center p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-default)]">
-            <div className="text-2xl font-bold text-blue-600 mb-1">{thisWeekActiveUsers}</div>
-            <div className="text-sm text-[var(--text-secondary)] whitespace-nowrap">Utilisateurs actifs cette semaine</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">{weeklyActiveUsers}</div>
+            <div className="text-sm text-[var(--text-secondary)] text-center leading-tight">Utilisateurs actifs<br className="sm:hidden"/>cette semaine</div>
           </div>
         </div>
       </ModernCard>

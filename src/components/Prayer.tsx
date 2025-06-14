@@ -45,6 +45,7 @@ const Prayer = () => {
       
       toast.success("Demande de prière ajoutée avec succès ✨");
     } catch (error) {
+      console.error('Error adding prayer request:', error);
       toast.error("Erreur lors de l'ajout de la demande");
     }
   };

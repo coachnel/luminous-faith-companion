@@ -1,334 +1,129 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from './useAuth';
-import { useUserPreferences } from './useSupabaseData';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
-interface NotificationPermission {
-  granted: boolean;
-  supported: boolean;
-  error?: string;
-}
-
 export const useNotificationSystem = () => {
-  const [permission, setPermission] = useState<NotificationPermission>({
-    granted: false,
-    supported: false
-  });
-  const { user } = useAuth();
-  const { preferences } = useUserPreferences();
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    checkNotificationSupport();
+    // Vérifier le support des notifications
+    if ('Notification' in window) {
+      setIsSupported(true);
+      setHasPermission(Notification.permission === 'granted');
+    }
   }, []);
 
-  useEffect(() => {
-    if (permission.granted && preferences?.notification_preferences) {
-      startNotificationService();
-    }
-  }, [permission.granted, preferences]);
-
-  const checkNotificationSupport = () => {
+  const requestPermission = useCallback(async () => {
     if (!('Notification' in window)) {
-      setPermission({
-        granted: false,
-        supported: false,
-        error: 'Les notifications ne sont pas supportées par ce navigateur'
-      });
-      return;
-    }
-
-    const currentPermission = Notification.permission;
-    setPermission({
-      granted: currentPermission === 'granted',
-      supported: true
-    });
-  };
-
-  const requestPermission = async (): Promise<boolean> => {
-    if (!('Notification' in window)) {
-      toast.error('Notifications non supportées par ce navigateur');
+      toast.error('Les notifications ne sont pas supportées par ce navigateur');
       return false;
     }
 
+    setIsLoading(true);
+    
     try {
       const permission = await Notification.requestPermission();
       const granted = permission === 'granted';
       
-      setPermission(prev => ({ ...prev, granted }));
+      setHasPermission(granted);
       
       if (granted) {
-        toast.success('Notifications activées !');
+        toast.success('Notifications activées avec succès !');
         
-        // Test immédiat
+        // Test de notification immédiat
         setTimeout(() => {
-          sendNotification('🎉 Notifications activées !', {
-            body: 'Vous recevrez maintenant vos rappels quotidiens',
-            tag: 'activation-success'
-          });
+          try {
+            new Notification('🎉 Notifications activées !', {
+              body: 'Vos rappels sont maintenant opérationnels',
+              icon: '/icons/icon-192x192.png',
+              tag: 'activation-test',
+              requireInteraction: false
+            });
+          } catch (error) {
+            console.warn('Erreur lors du test de notification:', error);
+          }
         }, 1000);
-
-        // Enregistrer le service worker si disponible
+        
+        // Enregistrer le service worker pour les notifications persistantes
         if ('serviceWorker' in navigator) {
           try {
             await navigator.serviceWorker.register('/sw.js');
-            console.log('✅ Service Worker enregistré pour les notifications');
+            console.log('Service Worker enregistré pour les notifications');
           } catch (error) {
-            console.warn('⚠️ Service Worker non disponible:', error);
+            console.warn('Service Worker non disponible:', error);
           }
         }
-
-        return true;
       } else {
         toast.error('Permission refusée. Activez les notifications dans les paramètres de votre navigateur');
-        return false;
       }
+      
+      return granted;
     } catch (error) {
-      console.error('❌ Erreur lors de la demande de permission:', error);
+      console.error('Erreur lors de la demande de permission:', error);
       toast.error('Impossible d\'activer les notifications');
       return false;
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  const sendNotification = (title: string, options: NotificationOptions = {}) => {
-    if (!permission.granted) {
-      console.warn('⚠️ Permission non accordée pour les notifications');
-      return null;
-    }
-
-    try {
-      const notification = new Notification(title, {
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-192x192.png',
-        tag: 'bible-app-reminder',
-        requireInteraction: false,
-        silent: false,
-        ...options
-      });
-
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-
-      notification.onerror = (error) => {
-        console.error('❌ Erreur notification:', error);
-      };
-
-      notification.onshow = () => {
-        console.log('✅ Notification affichée:', title);
-      };
-
-      // Auto-fermeture après 8 secondes
-      setTimeout(() => {
-        try {
-          notification.close();
-        } catch (e) {
-          // Notification déjà fermée
-        }
-      }, 8000);
-      
-      return notification;
-    } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi de notification:', error);
-      toast.error('Erreur lors de l\'envoi de la notification');
-      return null;
-    }
-  };
-
-  const sendEmailNotification = async (title: string, body: string) => {
-    if (!user?.email) {
-      console.warn('⚠️ Aucun email utilisateur disponible');
-      return false;
-    }
-
-    try {
-      // Simuler l'envoi d'email - à remplacer par une vraie API
-      console.log(`📧 Email envoyé à ${user.email}: ${title} - ${body}`);
-      toast.success('Notification par email envoyée !');
-      return true;
-    } catch (error) {
-      console.error('❌ Erreur lors de l\'envoi d\'email:', error);
-      toast.error('Erreur lors de l\'envoi de l\'email');
-      return false;
-    }
-  };
-
-  const scheduleNotification = (title: string, body: string, delayMs: number) => {
-    const timeoutId = setTimeout(() => {
-      sendNotification(title, { body });
-    }, delayMs);
-
-    // Sauvegarder l'ID pour pouvoir l'annuler si nécessaire
-    const timeoutKey = `notification-timeout-${Date.now()}`;
-    localStorage.setItem(timeoutKey, timeoutId.toString());
-
-    return () => {
-      clearTimeout(timeoutId);
-      localStorage.removeItem(timeoutKey);
-    };
-  };
-
-  const startNotificationService = () => {
-    if (!user || !preferences || !permission.granted) {
-      console.warn('⚠️ Conditions non remplies pour démarrer le service de notifications');
+  const testNotification = useCallback(() => {
+    if (!hasPermission) {
+      toast.error('Veuillez d\'abord activer les notifications');
       return;
     }
 
-    console.log('🔔 Service de notifications démarré');
-    
-    // Nettoyer les anciens intervalles
-    clearOldIntervals();
-
-    // Programmer les notifications selon les préférences
-    scheduleRecurringNotifications();
-  };
-
-  const scheduleRecurringNotifications = () => {
-    if (!preferences?.notification_preferences) return;
-
-    const prefs = preferences.notification_preferences;
-
-    // Notification verset du jour à 8h00
-    if (prefs.dailyVerse) {
-      scheduleDaily(8, 0, () => {
-        sendNotification('🌅 Bonjour !', {
-          body: 'Découvrez votre verset quotidien et commencez bien la journée',
-          tag: 'daily-verse',
-          icon: '/icons/icon-192x192.png'
-        });
-        
-        // Aussi par email si préféré
-        sendEmailNotification('🌅 Bonjour !', 'Découvrez votre verset quotidien et commencez bien la journée');
-      });
-      console.log('📅 Notification verset quotidien programmée (8h00)');
-    }
-
-    // Notifications de prière
-    if (prefs.prayerReminder) {
-      const prayerTimes = [
-        { hour: 8, label: 'matinale' },
-        { hour: 12, label: 'de midi' },
-        { hour: 20, label: 'du soir' }
-      ];
-      
-      prayerTimes.forEach(({ hour, label }) => {
-        scheduleDaily(hour, 0, () => {
-          const message = `C'est l'heure de votre prière ${label}. Prenez un instant pour vous recueillir`;
-          sendNotification('🙏 Moment de prière', {
-            body: message,
-            tag: `prayer-reminder-${hour}`,
-            icon: '/icons/icon-192x192.png'
-          });
-          sendEmailNotification('🙏 Moment de prière', message);
-        });
-      });
-      console.log('📅 Notifications de prière programmées (8h, 12h, 20h)');
-    }
-
-    // Notification de lecture à 19h00
-    if (prefs.readingReminder) {
-      scheduleDaily(19, 0, () => {
-        const message = 'Il est temps de lire votre passage quotidien. Continuez votre progression !';
-        sendNotification('📖 Lecture quotidienne', {
-          body: message,
-          tag: 'reading-reminder',
-          icon: '/icons/icon-192x192.png'
-        });
-        sendEmailNotification('📖 Lecture quotidienne', message);
-      });
-      console.log('📅 Notification lecture quotidienne programmée (19h00)');
-    }
-  };
-
-  const clearOldIntervals = () => {
     try {
-      // Nettoyer tous les anciens intervalles et timeouts
-      const keys = Object.keys(localStorage).filter(key => 
-        key.startsWith('notification-interval-') || key.startsWith('notification-timeout-')
-      );
-      
-      keys.forEach(key => {
-        const id = localStorage.getItem(key);
-        if (id) {
-          if (key.includes('interval')) {
-            clearInterval(parseInt(id));
-          } else {
-            clearTimeout(parseInt(id));
-          }
-          localStorage.removeItem(key);
-        }
+      new Notification('🔔 Test de notification', {
+        body: 'Votre système de notifications fonctionne parfaitement !',
+        icon: '/icons/icon-192x192.png',
+        tag: 'test-notification',
+        requireInteraction: false
       });
-      
-      console.log('🧹 Anciens intervalles/timeouts nettoyés');
+      toast.success('Notification de test envoyée');
     } catch (error) {
-      console.error('❌ Erreur lors du nettoyage:', error);
-    }
-  };
-
-  const scheduleDaily = (hour: number, minute: number, callback: () => void) => {
-    const now = new Date();
-    const scheduledTime = new Date();
-    scheduledTime.setHours(hour, minute, 0, 0);
-    
-    // Si l'heure est déjà passée aujourd'hui, programmer pour demain
-    if (scheduledTime <= now) {
-      scheduledTime.setDate(scheduledTime.getDate() + 1);
-    }
-    
-    const delay = scheduledTime.getTime() - now.getTime();
-    
-    // Premier déclenchement
-    const timeoutId = setTimeout(() => {
-      callback();
-      
-      // Puis répéter chaque 24h
-      const intervalId = setInterval(callback, 24 * 60 * 60 * 1000);
-      
-      // Sauvegarder l'ID de l'intervalle
-      localStorage.setItem(`notification-interval-${hour}-${minute}`, intervalId.toString());
-      
-      console.log(`⏰ Notification récurrente configurée pour ${hour}:${minute.toString().padStart(2, '0')}`);
-    }, delay);
-
-    // Sauvegarder l'ID du timeout initial
-    localStorage.setItem(`notification-timeout-${hour}-${minute}`, timeoutId.toString());
-    
-    const nextTime = scheduledTime.toLocaleString('fr-FR');
-    console.log(`⏰ Prochaine notification à ${hour}:${minute.toString().padStart(2, '0')} (${nextTime})`);
-  };
-
-  // Test de notification
-  const testNotification = () => {
-    if (!permission.granted) {
-      toast.error('Veuillez d\'abord activer les notifications');
-      return false;
-    }
-
-    const success = sendNotification('🔔 Test de notification', {
-      body: 'Votre système de notifications fonctionne parfaitement ! Vous recevrez vos rappels quotidiens.',
-      tag: 'test-notification',
-      requireInteraction: true
-    });
-
-    if (success) {
-      toast.success('Notification de test envoyée !');
-      // Aussi tester l'email
-      sendEmailNotification('🔔 Test de notification', 'Votre système de notifications fonctionne parfaitement !');
-      return true;
-    } else {
+      console.error('Erreur lors du test:', error);
       toast.error('Erreur lors du test de notification');
-      return false;
     }
-  };
+  }, [hasPermission]);
+
+  const sendNotification = useCallback((title: string, options?: NotificationOptions) => {
+    if (!hasPermission) {
+      console.warn('Notifications non autorisées');
+      return;
+    }
+
+    try {
+      new Notification(title, {
+        icon: '/icons/icon-192x192.png',
+        requireInteraction: false,
+        ...options
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de notification:', error);
+    }
+  }, [hasPermission]);
+
+  const scheduleNotification = useCallback((title: string, body: string, delay: number) => {
+    if (!hasPermission) {
+      console.warn('Notifications non autorisées');
+      return;
+    }
+
+    setTimeout(() => {
+      sendNotification(title, { body });
+    }, delay);
+  }, [hasPermission, sendNotification]);
 
   return {
-    permission,
+    hasPermission,
+    isSupported,
+    isLoading,
     requestPermission,
-    sendNotification,
-    sendEmailNotification,
-    scheduleNotification,
     testNotification,
-    clearOldIntervals
+    sendNotification,
+    scheduleNotification
   };
 };

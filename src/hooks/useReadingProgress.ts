@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 // Types pour la progression de lecture
@@ -64,14 +63,11 @@ export function useReadingPlanProgress() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('reading_plan_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPlans(data || []);
+      // Utiliser localStorage temporairement
+      const storedPlans = localStorage.getItem(`reading_plans_${user.id}`);
+      if (storedPlans) {
+        setPlans(JSON.parse(storedPlans));
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des plans:', error);
       setPlans([]);
@@ -88,19 +84,22 @@ export function useReadingPlanProgress() {
     if (!user) throw new Error('Utilisateur non connecté');
 
     try {
-      const { error } = await supabase
-        .from('reading_plan_progress')
-        .insert([{
-          user_id: user.id,
-          plan_id: planId,
-          plan_name: planName,
-          current_day: 1,
-          completed_days: [],
-          is_active: true
-        }]);
+      const newPlan: ReadingPlanProgress = {
+        id: Date.now().toString(),
+        user_id: user.id,
+        plan_id: planId,
+        plan_name: planName,
+        current_day: 1,
+        completed_days: [],
+        start_date: new Date().toISOString(),
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-      await fetchPlans();
+      const updatedPlans = [...plans, newPlan];
+      setPlans(updatedPlans);
+      localStorage.setItem(`reading_plans_${user.id}`, JSON.stringify(updatedPlans));
     } catch (error) {
       console.error('Erreur lors du démarrage du plan:', error);
       throw error;
@@ -111,26 +110,24 @@ export function useReadingPlanProgress() {
     if (!user) throw new Error('Utilisateur non connecté');
 
     try {
-      const plan = plans.find(p => p.id === planId);
-      if (!plan) throw new Error('Plan non trouvé');
+      const updatedPlans = plans.map(plan => {
+        if (plan.id === planId) {
+          const updatedCompletedDays = [...plan.completed_days];
+          if (!updatedCompletedDays.includes(day)) {
+            updatedCompletedDays.push(day);
+          }
+          return {
+            ...plan,
+            completed_days: updatedCompletedDays,
+            current_day: Math.max(plan.current_day, day + 1),
+            updated_at: new Date().toISOString()
+          };
+        }
+        return plan;
+      });
 
-      const updatedCompletedDays = [...plan.completed_days];
-      if (!updatedCompletedDays.includes(day)) {
-        updatedCompletedDays.push(day);
-      }
-
-      const { error } = await supabase
-        .from('reading_plan_progress')
-        .update({
-          completed_days: updatedCompletedDays,
-          current_day: Math.max(plan.current_day, day + 1),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', planId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      await fetchPlans();
+      setPlans(updatedPlans);
+      localStorage.setItem(`reading_plans_${user.id}`, JSON.stringify(updatedPlans));
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
       throw error;
@@ -173,14 +170,11 @@ export function useBibleReadingProgress() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('bible_reading_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('last_read_at', { ascending: false });
-
-      if (error) throw error;
-      setProgress(data || []);
+      // Utiliser localStorage temporairement
+      const storedProgress = localStorage.getItem(`bible_progress_${user.id}`);
+      if (storedProgress) {
+        setProgress(JSON.parse(storedProgress));
+      }
     } catch (error) {
       console.error('Erreur lors du chargement de la progression:', error);
       setProgress([]);
@@ -197,20 +191,26 @@ export function useBibleReadingProgress() {
     if (!user) throw new Error('Utilisateur non connecté');
 
     try {
-      const { error } = await supabase
-        .from('bible_reading_progress')
-        .upsert({
-          user_id: user.id,
-          book_id: bookId,
-          book_name: bookName,
-          chapter_number: chapterNumber,
-          verse_number: verseNumber,
-          last_read_at: new Date().toISOString(),
-          is_completed: true
-        });
+      const newProgress: BibleReadingProgress = {
+        id: `${bookId}_${chapterNumber}_${Date.now()}`,
+        user_id: user.id,
+        book_id: bookId,
+        book_name: bookName,
+        chapter_number: chapterNumber,
+        verse_number: verseNumber,
+        last_read_at: new Date().toISOString(),
+        is_completed: true,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
-      await fetchProgress();
+      // Supprimer l'ancienne entrée si elle existe
+      const filteredProgress = progress.filter(p => 
+        !(p.book_id === bookId && p.chapter_number === chapterNumber)
+      );
+      
+      const updatedProgress = [newProgress, ...filteredProgress];
+      setProgress(updatedProgress);
+      localStorage.setItem(`bible_progress_${user.id}`, JSON.stringify(updatedProgress));
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       throw error;

@@ -1,237 +1,240 @@
-import React, { useEffect } from 'react';
-import { Search, Book, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+import React, { useState, useEffect } from 'react';
+import { useBible } from '@/hooks/useBible';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { useBible } from '../contexts/BibleContext';
-import VerseCard from './VerseCard';
+import { Search, BookOpen, Heart, CheckCircle } from 'lucide-react';
 import { useBibleReadingProgress } from '@/hooks/useReadingProgress';
+import { toast } from 'sonner';
 
-const BibleView: React.FC = () => {
-  const {
-    books,
-    selectedBook,
-    selectedChapter,
-    selectedVersion,
+const BibleView = () => {
+  const { 
+    books, 
+    selectedBook, 
+    selectedChapter, 
+    verses, 
     searchQuery,
     searchResults,
-    currentVerses,
-    isLoading,
-    setSelectedBook,
-    setSelectedChapter,
-    setSelectedVersion,
+    isSearching,
+    handleBookSelect, 
+    handleChapterSelect, 
     setSearchQuery,
-    getAvailableChapters,
+    clearSearch 
   } = useBible();
+  
+  const { markChapterRead, progress } = useBibleReadingProgress();
+  const [selectedVerse, setSelectedVerse] = useState(null);
 
-  const oldTestamentBooks = books.filter(book => book.testament === 'old');
-  const newTestamentBooks = books.filter(book => book.testament === 'new');
-  const availableChapters = getAvailableChapters();
-
-  const handlePreviousChapter = () => {
-    if (selectedChapter > 1) {
-      setSelectedChapter(selectedChapter - 1);
-    }
-  };
-
-  const handleNextChapter = () => {
-    const maxChapter = Math.max(...availableChapters);
-    if (selectedChapter < maxChapter) {
-      setSelectedChapter(selectedChapter + 1);
-    }
-  };
-
-  const displayedVerses = searchQuery.trim() ? searchResults : currentVerses;
-  const showSearchResults = searchQuery.trim() && searchResults.length > 0;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-purple-600 text-sm sm:text-base">Chargement de la Bible complète (73 livres)...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const { markChapterRead } = useBibleReadingProgress();
-
-  const handleChapterRead = async (bookId: string, bookName: string, chapter: number) => {
+  const handleMarkAsRead = async () => {
+    if (!selectedBook || !selectedChapter) return;
+    
     try {
-      await markChapterRead(bookId, bookName, chapter);
-      console.log(`📖 Progression sauvegardée: ${bookName} ${chapter}`);
+      // Obtenir l'ID du livre à partir de son nom
+      const bookId = String(books.indexOf(selectedBook) + 1);
+      await markChapterRead(bookId, selectedBook, selectedChapter);
+      toast.success(`${selectedBook} ${selectedChapter} marqué comme lu !`);
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de la progression:', error);
+      toast.error('Erreur lors de la sauvegarde');
     }
   };
 
-  useEffect(() => {
-    if (selectedBook && selectedChapter && currentVerses.length > 0) {
-      // Marquer comme lu après 5 secondes sur un chapitre
-      const timer = setTimeout(() => {
-        handleChapterRead(selectedBook.id, selectedBook.name, selectedChapter);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [selectedBook, selectedChapter, currentVerses]);
+  const isChapterRead = progress.some(p => 
+    p.book_name === selectedBook && 
+    p.chapter_number === selectedChapter && 
+    p.is_completed
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
-      <div className="bg-white shadow-sm border-b border-purple-100 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
-          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center">
-              <Book className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Bible Complète</h1>
-              <p className="text-gray-600 text-xs sm:text-sm">{books.length} livres • Votre parcours spirituel</p>
-            </div>
-          </div>
+    <div className="container mx-auto p-4 space-y-6">
+      {/* Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-6 w-6" />
+            Bible - Lecture et Étude
+          </CardTitle>
+          <CardDescription>
+            Explorez les Écritures saintes et enrichissez votre foi
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
-          <div className="relative mb-4 sm:mb-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
+      {/* Search Section */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-2">
+            <Search className="h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Rechercher un verset, un mot..."
+              placeholder="Rechercher un verset, un mot ou un passage..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 py-2 sm:py-3 text-sm sm:text-base border-purple-200 focus:border-purple-600 focus:ring-purple-600"
+              className="flex-1"
             />
-          </div>
-
-          <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
-            <div className="w-full">
-              <Select value={selectedBook} onValueChange={setSelectedBook}>
-                <SelectTrigger className="border-purple-200 focus:border-purple-600 text-sm sm:text-base">
-                  <SelectValue placeholder="Sélectionner un livre" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-purple-200 max-h-60 sm:max-h-80">
-                  <div className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-500">
-                    Ancien Testament ({oldTestamentBooks.length} livres)
-                  </div>
-                  {oldTestamentBooks.map((book) => (
-                    <SelectItem key={book.name} value={book.name} className="hover:bg-purple-50 text-sm">
-                      {book.name}
-                    </SelectItem>
-                  ))}
-                  <Separator className="my-2" />
-                  <div className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-500">
-                    Nouveau Testament ({newTestamentBooks.length} livres)
-                  </div>
-                  {newTestamentBooks.map((book) => (
-                    <SelectItem key={book.name} value={book.name} className="hover:bg-purple-50 text-sm">
-                      {book.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePreviousChapter}
-                disabled={selectedChapter <= 1}
-                className="border-purple-200 hover:bg-purple-50 flex-shrink-0 p-2 sm:px-3"
-              >
-                <ChevronLeft className="h-4 w-4" />
+            {isSearching && (
+              <Button variant="outline" size="sm" onClick={clearSearch}>
+                Effacer
               </Button>
-              <Select 
-                value={selectedChapter.toString()} 
-                onValueChange={(value) => setSelectedChapter(parseInt(value))}
-              >
-                <SelectTrigger className="border-purple-200 focus:border-purple-600 text-sm sm:text-base">
-                  <SelectValue placeholder="Chapitre" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-purple-200 max-h-60">
-                  {availableChapters.map((chapter) => (
-                    <SelectItem key={chapter} value={chapter.toString()} className="hover:bg-purple-50 text-sm">
-                      Chapitre {chapter}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNextChapter}
-                disabled={selectedChapter >= Math.max(...availableChapters)}
-                className="border-purple-200 hover:bg-purple-50 flex-shrink-0 p-2 sm:px-3"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="w-full">
-              <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-                <SelectTrigger className="border-purple-200 focus:border-purple-600 text-sm sm:text-base">
-                  <SelectValue placeholder="Version" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-purple-200">
-                  <SelectItem value="Louis Segond (1910)" className="hover:bg-purple-50 text-sm">Louis Segond (1910)</SelectItem>
-                  <SelectItem value="Bible de Jérusalem" className="hover:bg-purple-50 text-sm">Bible de Jérusalem</SelectItem>
-                  <SelectItem value="Traduction Œcuménique" className="hover:bg-purple-50 text-sm">Traduction Œcuménique</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-8">
-        {showSearchResults && (
-          <Card className="mb-4 sm:mb-6 bg-white border-purple-200">
-            <CardHeader className="pb-3 px-4 sm:px-6">
-              <h2 className="text-base sm:text-lg font-semibold text-purple-600 flex items-center gap-2">
-                <Book className="h-4 w-4 sm:h-5 sm:w-5" />
-                Résultats de recherche
-                <span className="text-xs sm:text-sm font-normal text-purple-400">
-                  {searchResults.length} résultat(s)
-                </span>
-              </h2>
-            </CardHeader>
-          </Card>
-        )}
-
-        {!showSearchResults && (
-          <Card className="mb-4 sm:mb-6 bg-white border-purple-200">
-            <CardHeader className="pb-3 px-4 sm:px-6">
-              <h2 className="text-base sm:text-lg font-semibold text-purple-600 flex items-center gap-2">
-                <Book className="h-4 w-4 sm:h-5 sm:w-5" />
-                {selectedBook} - Chapitre {selectedChapter}
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600">Version {selectedVersion}</p>
-            </CardHeader>
-          </Card>
-        )}
-
-        <ScrollArea className="h-[calc(100vh-280px)] sm:h-[600px]">
-          <div className="space-y-3 sm:space-y-4 pb-4">
-            {displayedVerses.length > 0 ? (
-              displayedVerses.map((verse) => (
-                <div key={`${verse.book}-${verse.chapter}-${verse.verse}`} className="animate-fade-in">
-                  <VerseCard verse={verse} />
-                </div>
-              ))
-            ) : (
-              <Card className="bg-white border-purple-200">
-                <CardContent className="py-8 sm:py-12 text-center px-4">
-                  <Book className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 text-sm sm:text-base">
-                    {searchQuery.trim() ? 'Aucun verset trouvé pour cette recherche.' : 'Aucun verset disponible.'}
-                  </p>
-                </CardContent>
-              </Card>
             )}
           </div>
-        </ScrollArea>
+        </CardContent>
+      </Card>
+
+      {/* Barre d'actions avec progression */}
+      {selectedBook && selectedChapter && (
+        <Card>
+          <CardContent className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-semibold">
+                {selectedBook} - Chapitre {selectedChapter}
+              </h2>
+              {isChapterRead && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm">Lu</span>
+                </div>
+              )}
+            </div>
+            
+            <Button
+              variant={isChapterRead ? "secondary" : "default"}
+              size="sm"
+              onClick={handleMarkAsRead}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="h-4 w-4" />
+              {isChapterRead ? 'Lu' : 'Marquer comme lu'}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Main Content */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Books List */}
+        <Card className="md:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Livres de la Bible</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <ScrollArea className="h-96">
+              <div className="p-4 space-y-1">
+                {books.map((book, index) => (
+                  <Button
+                    key={index}
+                    variant={selectedBook === book ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => handleBookSelect(book)}
+                  >
+                    {book}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* Chapter and Verses Display */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>
+                {selectedBook ? `${selectedBook}${selectedChapter ? ` - Chapitre ${selectedChapter}` : ''}` : 'Sélectionnez un livre'}
+              </span>
+              {selectedBook && verses.length > 0 && (
+                <span className="text-sm text-gray-500">
+                  {verses.length} versets
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!selectedBook ? (
+              <p className="text-center text-gray-500 py-8">
+                Choisissez un livre de la Bible pour commencer votre lecture
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {/* Chapter Selection */}
+                {selectedBook && !selectedChapter && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Chapitres disponibles :</h3>
+                    <div className="grid grid-cols-10 gap-2">
+                      {Array.from({ length: 50 }, (_, i) => i + 1).map((chapter) => (
+                        <Button
+                          key={chapter}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleChapterSelect(chapter)}
+                        >
+                          {chapter}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Verses Display */}
+                {verses.length > 0 && (
+                  <ScrollArea className="h-96">
+                    <div className="space-y-3">
+                      {verses.map((verse, index) => (
+                        <div
+                          key={index}
+                          className={`p-3 rounded-lg border transition-colors cursor-pointer ${
+                            selectedVerse === index ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                          }`}
+                          onClick={() => setSelectedVerse(selectedVerse === index ? null : index)}
+                        >
+                          <div className="flex items-start space-x-2">
+                            <span className="font-semibold text-blue-600 text-sm min-w-[2rem]">
+                              {index + 1}.
+                            </span>
+                            <p className="text-gray-800 leading-relaxed flex-1">
+                              {verse}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Search Results */}
+      {isSearching && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Résultats de recherche</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {searchResults.length > 0 ? (
+              <ScrollArea className="h-64">
+                <div className="space-y-2">
+                  {searchResults.map((result, index) => (
+                    <div key={index} className="p-3 border rounded-lg">
+                      <p className="text-sm font-semibold text-blue-600">
+                        {result.book} {result.chapter}:{result.verse}
+                      </p>
+                      <p className="text-gray-700 mt-1">{result.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <p className="text-center text-gray-500">
+                Aucun résultat trouvé pour "{searchQuery}"
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

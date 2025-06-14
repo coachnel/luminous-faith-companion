@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNeonBible } from '@/hooks/useNeonBible';
 import { Button } from '@/components/ui/button';
@@ -6,8 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useBibleReadingProgress } from '@/hooks/useReadingProgress';
 import { CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
-export function EnhancedBibleView() {
+export default function EnhancedBibleView() {
   const {
     books,
     currentVerses,

@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ModernButton } from '@/components/ui/modern-button';
+import { ModernCard } from '@/components/ui/modern-card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -9,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Target, Users, Lock, CheckCircle, Flame, Info, Globe, Eye } from 'lucide-react';
-import { useSupabaseChallenges, useSupabaseChallengeProgress } from '@/hooks/useSupabaseChallenges';
+import { Plus, Target, Users, Lock, CheckCircle, Flame, Info, Calendar, Trophy } from 'lucide-react';
+import { useChallenges, useChallengeProgress } from '@/hooks/useChallenges';
 import { toast } from 'sonner';
 
 export function EnhancedChallengesSection() {
-  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted } = useSupabaseChallenges();
+  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted } = useChallenges();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newChallenge, setNewChallenge] = useState({
     title: '',
@@ -50,78 +51,81 @@ export function EnhancedChallengesSection() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="animate-pulse bg-gray-200 h-32 rounded-lg"></div>
-        <div className="animate-pulse bg-gray-200 h-32 rounded-lg"></div>
+      <div className="space-y-4 p-4">
+        <div className="animate-pulse bg-[var(--bg-secondary)] h-32 rounded-lg"></div>
+        <div className="animate-pulse bg-[var(--bg-secondary)] h-32 rounded-lg"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       {/* Explication */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Info className="h-4 w-4 text-blue-600" />
-            Comment ça marche ?
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-700">
-            Les défis spirituels vous permettent de vous fixer des objectifs personnels comme "Prier chaque matin" ou "Lire 3 chapitres par jour". 
-            Vous pouvez les garder privés ou les partager avec la communauté pour encourager d'autres croyants. 
-            Validez chaque jour votre progression et suivez vos séries de réussite !
-          </p>
-        </CardContent>
-      </Card>
+      <ModernCard className="border-[var(--accent-primary)]/20">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+            <Info className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+              Comment ça marche ?
+            </h3>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Créez des défis spirituels personnels (exemple : "Prier chaque matin pendant 30 jours"). 
+              Choisissez de les garder privés ou de les partager avec la communauté. 
+              Validez chaque jour votre progression pour maintenir votre motivation et voir votre croissance spirituelle.
+            </p>
+          </div>
+        </div>
+      </ModernCard>
 
       {/* En-tête avec bouton de création */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
+          <h2 className="text-2xl font-bold flex items-center gap-2 text-[var(--text-primary)]">
             <Target className="h-6 w-6" />
             Défis spirituels
           </h2>
-          <p className="text-gray-600">Créez et suivez vos objectifs spirituels personnels</p>
+          <p className="text-[var(--text-secondary)]">Créez et suivez vos objectifs spirituels</p>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <ModernButton>
               <Plus className="h-4 w-4 mr-2" />
               Nouveau défi
-            </Button>
+            </ModernButton>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="bg-[var(--bg-card)] border-[var(--border-default)]">
             <DialogHeader>
-              <DialogTitle>Créer un nouveau défi</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-[var(--text-primary)]">Créer un nouveau défi</DialogTitle>
+              <DialogDescription className="text-[var(--text-secondary)]">
                 Définissez un objectif spirituel personnel à atteindre
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Titre du défi</Label>
+                <Label htmlFor="title" className="text-[var(--text-primary)]">Titre du défi</Label>
                 <Input
                   id="title"
                   value={newChallenge.title}
                   onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="ex: Prier chaque matin"
+                  className="bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-primary)]"
                 />
               </div>
               <div>
-                <Label htmlFor="description">Description (optionnel)</Label>
+                <Label htmlFor="description" className="text-[var(--text-primary)]">Description (optionnel)</Label>
                 <Textarea
                   id="description"
                   value={newChallenge.description}
                   onChange={(e) => setNewChallenge(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Décrivez votre défi en détail..."
-                  rows={3}
+                  className="bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-primary)]"
                 />
               </div>
               <div>
-                <Label htmlFor="target_days">Durée (jours)</Label>
+                <Label htmlFor="target_days" className="text-[var(--text-primary)]">Durée (jours)</Label>
                 <Input
                   id="target_days"
                   type="number"
@@ -129,6 +133,7 @@ export function EnhancedChallengesSection() {
                   onChange={(e) => setNewChallenge(prev => ({ ...prev, target_days: parseInt(e.target.value) || 30 }))}
                   min="1"
                   max="365"
+                  className="bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-primary)]"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -137,18 +142,18 @@ export function EnhancedChallengesSection() {
                   checked={newChallenge.is_public}
                   onCheckedChange={(checked) => setNewChallenge(prev => ({ ...prev, is_public: checked }))}
                 />
-                <Label htmlFor="is_public" className="flex items-center gap-2">
-                  {newChallenge.is_public ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                <Label htmlFor="is_public" className="flex items-center gap-2 text-[var(--text-primary)]">
+                  {newChallenge.is_public ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                   {newChallenge.is_public ? 'Partager avec la communauté' : 'Garder privé'}
                 </Label>
               </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={handleCreateChallenge} className="flex-1">
+                <ModernButton onClick={handleCreateChallenge} className="flex-1">
                   Créer le défi
-                </Button>
-                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+                </ModernButton>
+                <ModernButton variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Annuler
-                </Button>
+                </ModernButton>
               </div>
             </div>
           </DialogContent>
@@ -157,15 +162,15 @@ export function EnhancedChallengesSection() {
 
       {/* Mes défis */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Mes défis</h3>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">Mes défis</h3>
         {challenges.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Target className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">Aucun défi en cours</p>
-              <p className="text-sm text-gray-500">Créez votre premier défi spirituel !</p>
-            </CardContent>
-          </Card>
+          <ModernCard>
+            <div className="text-center py-8">
+              <Target className="h-12 w-12 mx-auto text-[var(--text-secondary)] mb-4" />
+              <p className="text-[var(--text-secondary)]">Aucun défi en cours</p>
+              <p className="text-sm text-[var(--text-secondary)]">Créez votre premier défi spirituel !</p>
+            </div>
+          </ModernCard>
         ) : (
           challenges.map((challenge) => (
             <ChallengeCard 
@@ -180,35 +185,28 @@ export function EnhancedChallengesSection() {
       {/* Défis de la communauté */}
       {publicChallenges.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
+          <h3 className="text-lg font-semibold flex items-center gap-2 text-[var(--text-primary)]">
             <Users className="h-5 w-5" />
-            Fil d'actualité - Défis de la communauté
+            Défis de la communauté
           </h3>
           <div className="grid gap-4">
-            {publicChallenges.map((challenge) => (
-              <Card key={challenge.id} className="border-green-200 bg-green-50">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">{challenge.title}</CardTitle>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">
-                      <Globe className="h-3 w-3 mr-1" />
-                      Public
-                    </Badge>
-                  </div>
-                  {challenge.description && (
-                    <CardDescription>{challenge.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Durée: {challenge.target_days} jours</span>
-                    <Badge variant="outline">
-                      <Eye className="h-3 w-3 mr-1" />
-                      Communauté
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
+            {publicChallenges.slice(0, 6).map((challenge) => (
+              <ModernCard key={challenge.id} className="border-[var(--accent-primary)]/20">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h4>
+                  <Badge variant="secondary" className="bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+                    <Users className="h-3 w-3 mr-1" />
+                    Public
+                  </Badge>
+                </div>
+                {challenge.description && (
+                  <p className="text-sm text-[var(--text-secondary)] mb-3">{challenge.description}</p>
+                )}
+                <div className="text-sm text-[var(--text-secondary)] flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Durée: {challenge.target_days} jours
+                </div>
+              </ModernCard>
             ))}
           </div>
         </div>
@@ -221,63 +219,59 @@ function ChallengeCard({ challenge, onMarkCompleted }: {
   challenge: any; 
   onMarkCompleted: (id: string) => void;
 }) {
-  const { progress, getStats } = useSupabaseChallengeProgress(challenge.id);
+  const { progress, getStats } = useChallengeProgress(challenge.id);
   const stats = getStats();
   const progressPercentage = Math.round((stats.completedDays / challenge.target_days) * 100);
-  
-  // Vérifier si le défi a été validé aujourd'hui
-  const today = new Date().toISOString().split('T')[0];
-  const completedToday = progress.some(p => p.completed_date === today);
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            {challenge.title}
-            {challenge.is_public ? <Globe className="h-4 w-4 text-green-600" /> : <Lock className="h-4 w-4 text-gray-500" />}
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            {stats.currentStreak > 0 && (
-              <Badge variant="outline" className="text-orange-600">
-                <Flame className="h-3 w-3 mr-1" />
-                {stats.currentStreak}
-              </Badge>
-            )}
-            <Badge variant="secondary">{progressPercentage}%</Badge>
-          </div>
+    <ModernCard>
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-semibold flex items-center gap-2 text-[var(--text-primary)]">
+          {challenge.title}
+          {challenge.is_public ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+        </h4>
+        <div className="flex items-center gap-2">
+          {stats.currentStreak > 0 && (
+            <Badge variant="outline" className="text-orange-600 border-orange-600">
+              <Flame className="h-3 w-3 mr-1" />
+              {stats.currentStreak}
+            </Badge>
+          )}
+          <Badge variant="secondary" className="bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+            {progressPercentage}%
+          </Badge>
         </div>
-        {challenge.description && (
-          <CardDescription>{challenge.description}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Progression: {stats.completedDays}/{challenge.target_days} jours</span>
-              <span>Série actuelle: {stats.currentStreak}</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2" />
+      </div>
+      {challenge.description && (
+        <p className="text-sm text-[var(--text-secondary)] mb-4">{challenge.description}</p>
+      )}
+      <div className="space-y-4">
+        <div>
+          <div className="flex justify-between text-sm mb-2 text-[var(--text-secondary)]">
+            <span>Progression: {stats.completedDays}/{challenge.target_days} jours</span>
+            <span>Série actuelle: {stats.currentStreak}</span>
           </div>
-          
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              Record: {stats.longestStreak} jours consécutifs
-            </div>
-            <Button
-              size="sm"
-              onClick={() => onMarkCompleted(challenge.id)}
-              disabled={completedToday}
-              variant={completedToday ? "secondary" : "default"}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle className="h-4 w-4" />
-              {completedToday ? 'Validé aujourd\'hui' : 'Valider aujourd\'hui'}
-            </Button>
-          </div>
+          <Progress value={progressPercentage} className="h-2" />
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-[var(--text-secondary)] flex items-center gap-1">
+            <Trophy className="h-3 w-3" />
+            Record: {stats.longestStreak} jours consécutifs
+          </div>
+          <ModernButton
+            size="sm"
+            onClick={() => onMarkCompleted(challenge.id)}
+            disabled={progress.some(p => p.completed_date === new Date().toISOString().split('T')[0])}
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {progress.some(p => p.completed_date === new Date().toISOString().split('T')[0])
+              ? 'Terminé aujourd\'hui' 
+              : 'Valider aujourd\'hui'
+            }
+          </ModernButton>
+        </div>
+      </div>
+    </ModernCard>
   );
 }

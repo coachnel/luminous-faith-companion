@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,8 +9,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { BibleProvider } from "./contexts/BibleContext";
 import BibleView from "./components/BibleView";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import AppShell from "@/components/AppShell";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +23,10 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route
-              path="/*"
+              path="/"
               element={
                 <ErrorBoundary>
-                  <AppShell />
+                  <Index />
                 </ErrorBoundary>
               }
             />

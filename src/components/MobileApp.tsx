@@ -39,6 +39,12 @@ const MobileApp = () => {
     setCurrentSection(targetSection);
   }, []);
 
+  // Create a wrapper function for navigation that accepts string and converts to AppSection
+  const handleNavigationFromNav = useCallback((section: string) => {
+    const validSection = section as AppSection;
+    setCurrentSection(validSection);
+  }, []);
+
   // Mémoiser le rendu des sections pour optimiser les performances
   const renderSection = useMemo(() => {
     const sections = {
@@ -77,7 +83,7 @@ const MobileApp = () => {
       </div>
       <ModernFinanceNavigation 
         activeSection={currentSection} 
-        setActiveSection={setCurrentSection}
+        setActiveSection={handleNavigationFromNav}
       />
     </div>
   );

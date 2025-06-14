@@ -1,4 +1,3 @@
-
 // Client API pour les données bibliques stockées dans Neon
 import { neonClient } from './restClient';
 import { BibleDataLoader } from './bibleDataLoader';
@@ -141,8 +140,8 @@ class NeonBibleClient {
     try {
       console.log('🔄 Initialisation du client Bible Neon avec données réelles...');
       
-      // Charger les versets réels
-      const realVerses = BibleDataLoader.loadRealVerses();
+      // Charger les versets réels - FIXED: await the promise
+      const realVerses = await BibleDataLoader.loadRealVerses();
       
       // Initialiser les versions
       const versions: NeonBibleVersion[] = [
@@ -316,7 +315,8 @@ class NeonBibleClient {
     try {
       await this.ensureInitialized();
       
-      const allVerses = BibleDataLoader.loadRealVerses();
+      // FIXED: await the promise to get the actual array
+      const allVerses = await BibleDataLoader.loadRealVerses();
       const totalVerses = allVerses.length;
       const realVerses = totalVerses; // Tous les versets du loader sont réels
       

@@ -45,12 +45,8 @@ export function usePWAPrompt() {
       setDeferredPrompt(null);
       console.log('PWA: Application installée');
       
-      // Analytics ou tracking
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'pwa_install', {
-          event_category: 'engagement'
-        });
-      }
+      // Track installation without gtag dependency
+      console.log('PWA installation completed');
     };
 
     // Écouter les changements de mode d'affichage

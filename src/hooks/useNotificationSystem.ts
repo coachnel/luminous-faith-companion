@@ -53,6 +53,18 @@ export const useNotificationSystem = () => {
       
       setPermission(prev => ({ ...prev, granted }));
       
+      if (granted) {
+        // Demander aussi la permission pour les notifications persistantes
+        if ('serviceWorker' in navigator) {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('Service Worker enregistré:', registration);
+          } catch (error) {
+            console.warn('Service Worker non disponible:', error);
+          }
+        }
+      }
+      
       return granted;
     } catch (error) {
       console.error('Erreur lors de la demande de permission:', error);
@@ -71,7 +83,8 @@ export const useNotificationSystem = () => {
       const notification = new Notification(title, {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-192x192.png',
-        tag: 'spiritual-reminder',
+        tag: 'bible-app-reminder',
+        requireInteraction: true, // Garde la notification visible
         ...options
       });
 
@@ -80,8 +93,8 @@ export const useNotificationSystem = () => {
         notification.close();
       };
 
-      // Auto-fermeture après 10 secondes
-      setTimeout(() => notification.close(), 10000);
+      // Auto-fermeture après 15 secondes pour les notifications persistantes
+      setTimeout(() => notification.close(), 15000);
       
       return notification;
     } catch (error) {
@@ -98,19 +111,22 @@ export const useNotificationSystem = () => {
   const startNotificationService = () => {
     if (!user || !preferences || !permission.granted) return;
 
-    console.log('🔔 Démarrage du service de notifications');
+    console.log('🔔 Service de notifications démarré');
 
     // Programmer les notifications quotidiennes
-    scheduleQuotidienneNotifications();
+    scheduleRecurringNotifications();
   };
 
-  const scheduleQuotidienneNotifications = () => {
+  const scheduleRecurringNotifications = () => {
     // Notification verset du jour à 8h00
     if (preferences?.notification_preferences?.dailyVerse) {
       scheduleDaily(8, 0, () => {
         sendNotification(
           '🌅 Bonjour !',
-          { body: 'Découvrez votre verset quotidien pour nourrir votre âme' }
+          { 
+            body: 'Découvrez votre verset quotidien',
+            tag: 'daily-verse'
+          }
         );
       });
     }
@@ -122,7 +138,10 @@ export const useNotificationSystem = () => {
         scheduleDaily(hour, 0, () => {
           sendNotification(
             '🙏 Moment de prière',
-            { body: 'Prenez un instant pour vous recueillir et prier' }
+            { 
+              body: 'Prenez un instant pour vous recueillir',
+              tag: 'prayer-reminder'
+            }
           );
         });
       });
@@ -132,8 +151,11 @@ export const useNotificationSystem = () => {
     if (preferences?.notification_preferences?.readingReminder) {
       scheduleDaily(19, 0, () => {
         sendNotification(
-          '📖 Lecture de la Bible',
-          { body: 'Il est temps de lire votre passage quotidien' }
+          '📖 Lecture quotidienne',
+          { 
+            body: 'Il est temps de lire votre passage',
+            tag: 'reading-reminder'
+          }
         );
       });
     }
@@ -154,7 +176,10 @@ export const useNotificationSystem = () => {
     setTimeout(() => {
       callback();
       // Programmer pour le jour suivant
-      setInterval(callback, 24 * 60 * 60 * 1000);
+      const intervalId = setInterval(callback, 24 * 60 * 60 * 1000);
+      
+      // Sauvegarder l'ID pour pouvoir l'arrêter plus tard si nécessaire
+      localStorage.setItem(`notification-interval-${hour}-${minute}`, intervalId.toString());
     }, delay);
   };
 

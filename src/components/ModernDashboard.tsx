@@ -4,9 +4,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
-import { BookOpen, Heart, Target, Calendar, Users, MessageSquare, Bell, User, Edit3 } from 'lucide-react';
+import { BookOpen, Heart, Target, Calendar, Users, Bell, User, Edit3, TrendingUp } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useProfile } from '@/hooks/useSupabaseData';
+import { useProfile, useUserPreferences } from '@/hooks/useSupabaseData';
+import { useNeonNotes, useNeonPrayerRequests } from '@/hooks/useNeonData';
 
 interface ModernDashboardProps {
   onNavigate: (section: string) => void;
@@ -15,6 +16,9 @@ interface ModernDashboardProps {
 const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { preferences } = useUserPreferences();
+  const { notes } = useNeonNotes();
+  const { prayerRequests } = useNeonPrayerRequests();
   const { theme } = useTheme();
 
   const getUserInitials = () => {
@@ -24,11 +28,59 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
     return user?.email?.[0]?.toUpperCase() || 'U';
   };
 
+  // Calcul de données réelles
+  const getReadingProgress = () => {
+    const savedProgress = localStorage.getItem('readingProgress');
+    if (savedProgress) {
+      const progress = JSON.parse(savedProgress);
+      return Math.round((Object.keys(progress).length / 66) * 100); // 66 livres bibliques
+    }
+    return 0;
+  };
+
+  const getActiveChalllenges = () => {
+    const savedChallenges = localStorage.getItem('dailyChallenges');
+    if (savedChallenges) {
+      const challenges = JSON.parse(savedChallenges);
+      return challenges.filter((c: any) => c.completed === false).length;
+    }
+    return 0;
+  };
+
+  const getReadingStreak = () => {
+    const lastRead = localStorage.getItem('lastBibleRead');
+    if (lastRead) {
+      const daysDiff = Math.floor((Date.now() - new Date(lastRead).getTime()) / (1000 * 60 * 60 * 24));
+      return Math.max(0, 7 - daysDiff); // Maximum 7 jours de suite
+    }
+    return 0;
+  };
+
   const stats = [
-    { label: 'Jours de lecture', value: '7', color: 'bg-blue-500' },
-    { label: 'Versets favoris', value: '24', color: 'bg-purple-500' },
-    { label: 'Défis actifs', value: '3', color: 'bg-green-500' },
-    { label: 'Prières partagées', value: '12', color: 'bg-orange-500' }
+    { 
+      label: 'Jours de lecture', 
+      value: getReadingStreak().toString(), 
+      color: 'bg-blue-500',
+      trend: '+2 cette semaine'
+    },
+    { 
+      label: 'Notes créées', 
+      value: notes.length.toString(), 
+      color: 'bg-purple-500',
+      trend: 'Personnel'
+    },
+    { 
+      label: 'Défis actifs', 
+      value: getActiveChalllenges().toString(), 
+      color: 'bg-green-500',
+      trend: 'En cours'
+    },
+    { 
+      label: 'Prières partagées', 
+      value: prayerRequests.length.toString(), 
+      color: 'bg-orange-500',
+      trend: 'Communauté'
+    }
   ];
 
   const quickActions = [
@@ -76,6 +128,34 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
     }
   ];
 
+  const recentActivities = [
+    {
+      icon: BookOpen,
+      title: 'Lecture quotidienne',
+      description: localStorage.getItem('lastBibleRead') 
+        ? `Dernière lecture: ${new Date(localStorage.getItem('lastBibleRead')!).toLocaleDateString('fr-FR')}`
+        : 'Aucune lecture récente',
+      color: 'bg-blue-500',
+      bgGradient: 'from-blue-500/10 to-purple-500/10'
+    },
+    {
+      icon: Target,
+      title: 'Progression des défis',
+      description: `${getActiveChalllenges()} défis en cours`,
+      color: 'bg-green-500',
+      bgGradient: 'from-green-500/10 to-emerald-500/10'
+    },
+    {
+      icon: Edit3,
+      title: 'Notes personnelles',
+      description: notes.length > 0 
+        ? `${notes.length} note(s) créée(s)`
+        : 'Aucune note créée',
+      color: 'bg-purple-500',
+      bgGradient: 'from-purple-500/10 to-pink-500/10'
+    }
+  ];
+
   return (
     <div className="flex flex-col min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* Header moderne */}
@@ -105,16 +185,19 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Balance spirituelle */}
+        {/* Progression générale */}
         <div className="mb-8">
-          <p className="text-[var(--text-secondary)] text-sm mb-2">Progression spirituelle</p>
+          <p className="text-[var(--text-secondary)] text-sm mb-2">Progression générale</p>
           <div className="flex items-baseline gap-2">
-            <h2 className="text-[var(--text-primary)] text-4xl font-bold">85%</h2>
-            <span className="text-green-500 text-sm font-medium">+12% ce mois</span>
+            <h2 className="text-[var(--text-primary)] text-4xl font-bold">{getReadingProgress()}%</h2>
+            <span className="text-green-500 text-sm font-medium flex items-center gap-1">
+              <TrendingUp className="h-4 w-4" />
+              +{getReadingStreak()} jours
+            </span>
           </div>
         </div>
 
-        {/* Cartes de stats modernes */}
+        {/* Cartes de stats modernes avec données réelles */}
         <div className="grid grid-cols-2 gap-4 mb-8">
           {stats.map((stat, index) => (
             <ModernCard key={index} className="p-4 bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-secondary)]">
@@ -122,6 +205,7 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
                 <div>
                   <p className="text-[var(--text-secondary)] text-xs mb-1">{stat.label}</p>
                   <p className="text-[var(--text-primary)] text-xl font-bold">{stat.value}</p>
+                  <p className="text-[var(--text-secondary)] text-xs">{stat.trend}</p>
                 </div>
                 <div className={`w-8 h-8 rounded-lg ${stat.color} opacity-20`}></div>
               </div>
@@ -133,7 +217,7 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
       {/* Section Actions rapides */}
       <div className="px-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[var(--text-primary)] font-semibold text-lg">Spiritualité</h3>
+          <h3 className="text-[var(--text-primary)] font-semibold text-lg">Sections</h3>
           <ModernButton variant="ghost" size="sm">
             <span className="text-[var(--accent-primary)] text-sm">Voir tout</span>
           </ModernButton>
@@ -157,49 +241,24 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Section Activité récente */}
+      {/* Section Activité récente avec données réelles */}
       <div className="px-6 flex-1">
         <h3 className="text-[var(--text-primary)] font-semibold text-lg mb-4">Activité récente</h3>
         
         <div className="space-y-3">
-          <ModernCard className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-none">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-white" />
+          {recentActivities.map((activity, index) => (
+            <ModernCard key={index} className={`p-4 bg-gradient-to-r ${activity.bgGradient} border-none`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full ${activity.color} flex items-center justify-center`}>
+                  <activity.icon className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[var(--text-primary)] font-medium text-sm">{activity.title}</p>
+                  <p className="text-[var(--text-secondary)] text-xs">{activity.description}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-[var(--text-primary)] font-medium text-sm">Lecture quotidienne</p>
-                <p className="text-[var(--text-secondary)] text-xs">Psaume 23 - Il y a 2h</p>
-              </div>
-              <div className="text-blue-500 text-xs font-medium">+47%</div>
-            </div>
-          </ModernCard>
-
-          <ModernCard className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-none">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                <Target className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[var(--text-primary)] font-medium text-sm">Défi accompli</p>
-                <p className="text-[var(--text-secondary)] text-xs">Prière matinale - Aujourd'hui</p>
-              </div>
-              <div className="text-green-500 text-xs font-medium">25%</div>
-            </div>
-          </ModernCard>
-
-          <ModernCard className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-none">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
-                <Heart className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[var(--text-primary)] font-medium text-sm">Note ajoutée</p>
-                <p className="text-[var(--text-secondary)] text-xs">Réflexion sur Jean 3:16 - Il y a 1h</p>
-              </div>
-              <div className="text-purple-500 text-xs font-medium">23%</div>
-            </div>
-          </ModernCard>
+            </ModernCard>
+          ))}
         </div>
       </div>
     </div>

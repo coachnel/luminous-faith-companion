@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, Book, ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react';
+import { Search, Book, ChevronLeft, ChevronRight, X, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNeonBible } from '@/hooks/useNeonBible';
 import VerseCard from './VerseCard';
 
@@ -22,6 +23,7 @@ const EnhancedBibleView: React.FC = () => {
     selectedVersion,
     searchQuery,
     isLoading,
+    dataQuality,
     selectBook,
     selectChapter,
     selectVersion,
@@ -36,7 +38,10 @@ const EnhancedBibleView: React.FC = () => {
     totalBooks,
     oldTestamentBooks,
     newTestamentBooks,
-    currentVersesCount
+    currentVersesCount,
+    currentVersesStats,
+    hasRealVerses,
+    isFullyReal
   } = useNeonBible();
 
   const oldTestamentBooksFiltered = books.filter(book => book.testament === 'old');
@@ -50,7 +55,7 @@ const EnhancedBibleView: React.FC = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-purple-600 text-sm sm:text-base mb-2">Chargement de la Bible complète...</p>
-          <p className="text-purple-500 text-xs">Initialisation des 73 livres bibliques catholiques</p>
+          <p className="text-purple-500 text-xs">Initialisation des 73 livres bibliques catholiques avec versets réels</p>
         </div>
       </div>
     );
@@ -69,8 +74,30 @@ const EnhancedBibleView: React.FC = () => {
               <p className="text-gray-600 text-xs sm:text-sm">
                 {totalBooks} livres • {oldTestamentBooks} AT + {newTestamentBooks} NT • {currentVersion?.name || 'Version inconnue'}
               </p>
+              {dataQuality && (
+                <div className="flex items-center gap-2 mt-1">
+                  {dataQuality.qualityPercentage === 100 ? (
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-3 w-3 text-amber-500" />
+                  )}
+                  <span className="text-xs text-gray-500">
+                    {dataQuality.qualityPercentage}% versets réels ({dataQuality.realVerses.toLocaleString()})
+                  </span>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Alerte qualité des données si nécessaire */}
+          {dataQuality && dataQuality.qualityPercentage < 100 && (
+            <Alert className="mb-4 border-amber-200 bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800 text-sm">
+                Certains versets sont encore en cours de chargement. {dataQuality.placeholders.toLocaleString()} versets seront complétés progressivement.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Barre de recherche */}
           <div className="relative mb-4 sm:mb-6">
@@ -209,13 +236,34 @@ const EnhancedBibleView: React.FC = () => {
           selectedBook && (
             <Card className="mb-4 sm:mb-6 bg-white border-purple-200">
               <CardHeader className="pb-3 px-4 sm:px-6">
-                <h2 className="text-base sm:text-lg font-semibold text-purple-600 flex items-center gap-2">
-                  <Book className="h-4 w-4 sm:h-5 sm:w-5" />
-                  {selectedBook.name} - Chapitre {selectedChapter}
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-semibold text-purple-600 flex items-center gap-2">
+                    <Book className="h-4 w-4 sm:h-5 sm:w-5" />
+                    {selectedBook.name} - Chapitre {selectedChapter}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    {isFullyReal && (
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Texte complet
+                      </Badge>
+                    )}
+                    {hasRealVerses && !isFullyReal && (
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        {currentVersesStats.real}/{currentVersesStats.total} versets
+                      </Badge>
+                    )}
+                  </div>
+                </div>
                 <p className="text-xs sm:text-sm text-gray-600">
                   {currentVersion?.name} • {currentVersesCount} verset{currentVersesCount !== 1 ? 's' : ''} • 
                   {selectedBook.testament === 'old' ? ' Ancien Testament' : ' Nouveau Testament'}
+                  {currentVersesStats.real > 0 && (
+                    <span className="ml-2 text-green-600">
+                      • {currentVersesStats.real} texte{currentVersesStats.real !== 1 ? 's' : ''} réel{currentVersesStats.real !== 1 ? 's' : ''}
+                    </span>
+                  )}
                 </p>
               </CardHeader>
             </Card>
@@ -255,7 +303,7 @@ const EnhancedBibleView: React.FC = () => {
                     <>
                       <Book className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-500 text-sm sm:text-base">
-                        {selectedBook ? 'Versets en cours de génération...' : 'Sélectionnez un livre pour commencer.'}
+                        {selectedBook ? 'Versets en cours de chargement...' : 'Sélectionnez un livre pour commencer.'}
                       </p>
                       <p className="text-gray-400 text-xs sm:text-sm mt-2">
                         Bible complète • {totalBooks} livres disponibles

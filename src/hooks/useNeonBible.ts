@@ -12,6 +12,7 @@ export function useNeonBible() {
   const [selectedVersion, setSelectedVersion] = useState<string>('lsg1910');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [dataQuality, setDataQuality] = useState<any>(null);
 
   // Initialisation avec données complètes
   useEffect(() => {
@@ -35,9 +36,14 @@ export function useNeonBible() {
           setSelectedBook(booksData[0]);
         }
         
+        // Obtenir le rapport qualité des données
+        const quality = await neonBibleClient.getDataQualityReport();
+        setDataQuality(quality);
+        
         console.log(`✅ Bible complète chargée: ${booksData.length} livres, ${versionsData.length} versions`);
         console.log(`📚 Ancien Testament: ${booksData.filter(b => b.testament === 'old').length} livres`);
         console.log(`📖 Nouveau Testament: ${booksData.filter(b => b.testament === 'new').length} livres`);
+        console.log(`📊 Qualité des données: ${quality.qualityPercentage}% de versets réels (${quality.realVerses}/${quality.totalVerses})`);
         
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la Bible:', error);
@@ -62,7 +68,18 @@ export function useNeonBible() {
           selectedVersion
         );
         setCurrentVerses(verses);
-        console.log(`✅ ${verses.length} versets chargés pour ${selectedBook.name} ${selectedChapter}`);
+        
+        // Compter les versets réels vs placeholders
+        const realVerses = verses.filter(v => 
+          !v.text.includes('[') && !v.text.includes('à compléter')
+        );
+        const placeholders = verses.length - realVerses.length;
+        
+        if (placeholders > 0) {
+          console.log(`⚠️ ${realVerses.length} versets réels, ${placeholders} placeholders pour ${selectedBook.name} ${selectedChapter}`);
+        } else {
+          console.log(`✅ ${verses.length} versets réels chargés pour ${selectedBook.name} ${selectedChapter}`);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des versets:', error);
         setCurrentVerses([]);
@@ -145,6 +162,13 @@ export function useNeonBible() {
   const canGoToPrevious = selectedChapter > 1;
   const canGoToNext = selectedBook ? selectedChapter < selectedBook.chapters_count : false;
 
+  // Calculer les statistiques des versets actuels
+  const currentVersesStats = {
+    total: currentVerses.length,
+    real: currentVerses.filter(v => !v.text.includes('[') && !v.text.includes('à compléter')).length,
+    placeholders: currentVerses.filter(v => v.text.includes('[') || v.text.includes('à compléter')).length
+  };
+
   return {
     // État
     books,
@@ -156,6 +180,7 @@ export function useNeonBible() {
     selectedVersion,
     searchQuery,
     isLoading,
+    dataQuality,
     
     // Actions
     selectBook,
@@ -176,6 +201,11 @@ export function useNeonBible() {
     totalBooks: books.length,
     oldTestamentBooks: books.filter(b => b.testament === 'old').length,
     newTestamentBooks: books.filter(b => b.testament === 'new').length,
-    currentVersesCount: currentVerses.length
+    currentVersesCount: currentVerses.length,
+    currentVersesStats,
+    
+    // Indicateurs de qualité
+    hasRealVerses: currentVersesStats.real > 0,
+    isFullyReal: currentVersesStats.placeholders === 0 && currentVersesStats.real > 0
   };
 }

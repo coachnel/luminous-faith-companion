@@ -44,8 +44,10 @@ class NeonBibleClient {
 
   private async ensureInitialized(): Promise<void> {
     if (!this.initialized) {
+      console.log('🔄 Initialisation du client Bible Neon...');
       await bibleDataInitializer.initializeCompleteBibleData();
       this.initialized = true;
+      console.log('✅ Client Bible Neon initialisé avec versets réels');
     }
   }
 
@@ -53,13 +55,13 @@ class NeonBibleClient {
   async getBooks(): Promise<NeonBook[]> {
     try {
       await this.ensureInitialized();
-      console.log('Fetching books from Neon...');
+      console.log('📚 Récupération des livres depuis Neon...');
       
-      // Charger depuis le stockage local initialisé
       const books = JSON.parse(localStorage.getItem('neon_books') || '[]');
+      console.log(`✅ ${books.length} livres chargés`);
       return books.sort((a: NeonBook, b: NeonBook) => a.order_number - b.order_number);
     } catch (error) {
-      console.error('Error fetching books:', error);
+      console.error('❌ Erreur lors de la récupération des livres:', error);
       return [];
     }
   }
@@ -67,7 +69,7 @@ class NeonBibleClient {
   // Récupérer les chapitres d'un livre
   async getChapters(bookId: string): Promise<NeonChapter[]> {
     try {
-      console.log('Fetching chapters for book:', bookId);
+      console.log('📖 Récupération des chapitres pour le livre:', bookId);
       const books = await this.getBooks();
       const book = books.find(b => b.id === bookId);
       
@@ -85,7 +87,7 @@ class NeonBibleClient {
       
       return chapters;
     } catch (error) {
-      console.error('Error fetching chapters:', error);
+      console.error('❌ Erreur lors de la récupération des chapitres:', error);
       return [];
     }
   }
@@ -94,7 +96,7 @@ class NeonBibleClient {
   async getVerses(bookId: string, chapterNumber: number, versionId: string = 'lsg1910'): Promise<NeonVerse[]> {
     try {
       await this.ensureInitialized();
-      console.log('Fetching verses for book:', bookId, 'chapter:', chapterNumber, 'version:', versionId);
+      console.log(`📄 Récupération des versets pour ${bookId} ${chapterNumber} (${versionId})`);
       
       // Charger tous les versets depuis le stockage
       const allVerses = JSON.parse(localStorage.getItem('neon_verses') || '[]');
@@ -106,8 +108,9 @@ class NeonBibleClient {
         verse.version_id === versionId
       );
 
-      // Si aucun verset trouvé, générer des versets par défaut
+      // Si aucun verset trouvé, générer des versets
       if (verses.length === 0) {
+        console.log(`⚠️ Aucun verset trouvé, génération pour ${bookId} ${chapterNumber}`);
         verses = await bibleDataInitializer.generateMissingVerses(bookId, chapterNumber);
         
         // Sauvegarder les nouveaux versets
@@ -115,9 +118,22 @@ class NeonBibleClient {
         localStorage.setItem('neon_verses', JSON.stringify(updatedVerses));
       }
 
-      return verses.sort((a: NeonVerse, b: NeonVerse) => a.verse_number - b.verse_number);
+      const sortedVerses = verses.sort((a: NeonVerse, b: NeonVerse) => a.verse_number - b.verse_number);
+      console.log(`✅ ${sortedVerses.length} versets chargés pour ${bookId} ${chapterNumber}`);
+      
+      // Vérifier si on a des vrais versets ou des placeholders
+      const realVerses = sortedVerses.filter(v => !v.text.includes('[') && !v.text.includes('à compléter'));
+      const placeholders = sortedVerses.length - realVerses.length;
+      
+      if (placeholders > 0) {
+        console.log(`⚠️ ${placeholders} versets sont encore des placeholders`);
+      } else {
+        console.log(`✅ Tous les versets sont réels`);
+      }
+      
+      return sortedVerses;
     } catch (error) {
-      console.error('Error fetching verses:', error);
+      console.error('❌ Erreur lors de la récupération des versets:', error);
       return [];
     }
   }
@@ -126,16 +142,20 @@ class NeonBibleClient {
   async searchVerses(query: string, versionId: string = 'lsg1910', limit: number = 50): Promise<NeonVerse[]> {
     try {
       await this.ensureInitialized();
-      console.log('Searching verses with query:', query);
+      console.log(`🔍 Recherche de versets avec la requête: "${query}"`);
       
       const allVerses = JSON.parse(localStorage.getItem('neon_verses') || '[]');
       
       const filteredVerses = allVerses
         .filter((verse: NeonVerse) => 
           verse.version_id === versionId &&
-          verse.text.toLowerCase().includes(query.toLowerCase())
+          verse.text.toLowerCase().includes(query.toLowerCase()) &&
+          !verse.text.includes('[') && // Exclure les placeholders
+          !verse.text.includes('à compléter')
         )
         .slice(0, limit);
+      
+      console.log(`✅ ${filteredVerses.length} versets trouvés pour "${query}"`);
       
       return filteredVerses.sort((a: NeonVerse, b: NeonVerse) => {
         if (a.book_name !== b.book_name) return a.book_name.localeCompare(b.book_name);
@@ -143,7 +163,7 @@ class NeonBibleClient {
         return a.verse_number - b.verse_number;
       });
     } catch (error) {
-      console.error('Error searching verses:', error);
+      console.error('❌ Erreur lors de la recherche de versets:', error);
       return [];
     }
   }
@@ -152,12 +172,12 @@ class NeonBibleClient {
   async getVersions(): Promise<NeonBibleVersion[]> {
     try {
       await this.ensureInitialized();
-      console.log('Fetching bible versions...');
+      console.log('📖 Récupération des versions bibliques...');
       
       const versions = JSON.parse(localStorage.getItem('neon_bible_versions') || '[]');
       return versions.sort((a: NeonBibleVersion, b: NeonBibleVersion) => a.name.localeCompare(b.name));
     } catch (error) {
-      console.error('Error fetching versions:', error);
+      console.error('❌ Erreur lors de la récupération des versions:', error);
       // Fallback vers les versions par défaut
       return [
         { id: 'lsg1910', name: 'Louis Segond (1910)', abbreviation: 'LSG', language: 'fr', year: 1910 },
@@ -170,13 +190,16 @@ class NeonBibleClient {
   // Recherche par référence (ex: "Jean 3:16")
   async searchByReference(reference: string, versionId: string = 'lsg1910'): Promise<NeonVerse[]> {
     try {
-      console.log('Searching by reference:', reference);
+      console.log(`🔍 Recherche par référence: "${reference}"`);
       
       // Parser la référence (format: "Livre Chapitre:Verset")
       const refPattern = /^(.+?)\s+(\d+)(?::(\d+))?$/;
       const match = reference.trim().match(refPattern);
       
-      if (!match) return [];
+      if (!match) {
+        console.log('❌ Format de référence invalide');
+        return [];
+      }
       
       const [, bookName, chapter, verse] = match;
       
@@ -187,19 +210,28 @@ class NeonBibleClient {
         bookName.toLowerCase().includes(b.name.toLowerCase())
       );
       
-      if (!book) return [];
+      if (!book) {
+        console.log(`❌ Livre "${bookName}" non trouvé`);
+        return [];
+      }
+      
+      console.log(`✅ Livre trouvé: ${book.name} (${book.id})`);
       
       // Chercher les versets
       if (verse) {
         // Verset spécifique
         const verses = await this.getVerses(book.id, parseInt(chapter), versionId);
-        return verses.filter(v => v.verse_number === parseInt(verse));
+        const result = verses.filter(v => v.verse_number === parseInt(verse));
+        console.log(`✅ ${result.length} verset(s) trouvé(s) pour ${book.name} ${chapter}:${verse}`);
+        return result;
       } else {
         // Chapitre entier
-        return await this.getVerses(book.id, parseInt(chapter), versionId);
+        const result = await this.getVerses(book.id, parseInt(chapter), versionId);
+        console.log(`✅ ${result.length} versets trouvés pour ${book.name} ${chapter}`);
+        return result;
       }
     } catch (error) {
-      console.error('Error searching by reference:', error);
+      console.error('❌ Erreur lors de la recherche par référence:', error);
       return [];
     }
   }
@@ -208,14 +240,34 @@ class NeonBibleClient {
     const verses = await this.getVerses(bookId, chapterNumber);
     return verses.length || 15; // 15 versets par défaut si aucun trouvé
   }
+
+  // Fonction utilitaire pour vérifier la qualité des données
+  async getDataQualityReport(): Promise<any> {
+    try {
+      const allVerses = JSON.parse(localStorage.getItem('neon_verses') || '[]');
+      const totalVerses = allVerses.length;
+      const realVerses = allVerses.filter((v: NeonVerse) => 
+        !v.text.includes('[') && !v.text.includes('à compléter')
+      ).length;
+      const placeholders = totalVerses - realVerses;
+      
+      return {
+        totalVerses,
+        realVerses,
+        placeholders,
+        qualityPercentage: totalVerses > 0 ? Math.round((realVerses / totalVerses) * 100) : 0
+      };
+    } catch (error) {
+      console.error('❌ Erreur lors de la génération du rapport qualité:', error);
+      return { totalVerses: 0, realVerses: 0, placeholders: 0, qualityPercentage: 0 };
+    }
+  }
 }
 
 export const neonBibleClient = new NeonBibleClient();
 
 // Initialisation des données de test (fallback localStorage) - OBSOLÈTE
-// Cette fonction est maintenant remplacée par BibleDataInitializer
 export const initializeBibleData = () => {
   console.log('⚠️ initializeBibleData est obsolète. Utiliser BibleDataInitializer à la place.');
-  // Garder pour compatibilité mais rediriger vers le nouveau système
   return bibleDataInitializer.initializeCompleteBibleData();
 };

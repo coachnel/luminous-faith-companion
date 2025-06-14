@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface ModernCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated';
+  variant?: 'default' | 'elevated' | 'glass' | 'outlined';
   padding?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
@@ -13,6 +13,8 @@ export const ModernCard = React.forwardRef<HTMLDivElement, ModernCardProps>(
     const variants = {
       default: 'bg-[var(--bg-card)] border border-[var(--border-default)]',
       elevated: 'bg-[var(--bg-card)] border border-[var(--border-default)] shadow-lg',
+      glass: 'bg-[var(--bg-card)] backdrop-blur border border-[var(--border-default)] bg-opacity-80',
+      outlined: 'bg-transparent border-2 border-[var(--border-default)]',
     };
     
     const paddings = {

@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
-import { BookOpen, Heart, Target, Calendar, Users, MessageSquare, Bell, User } from 'lucide-react';
+import { BookOpen, Heart, Target, Calendar, Users, MessageSquare, Bell, User, Edit3 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useSupabaseData';
 
@@ -59,6 +59,20 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
       section: 'prayer-circles',
       gradient: 'from-red-500 to-red-600',
       bgColor: 'bg-red-500/10'
+    },
+    { 
+      icon: Edit3, 
+      label: 'Notes', 
+      section: 'notes',
+      gradient: 'from-indigo-500 to-indigo-600',
+      bgColor: 'bg-indigo-500/10'
+    },
+    { 
+      icon: Heart, 
+      label: 'Favoris', 
+      section: 'favorites',
+      gradient: 'from-pink-500 to-pink-600',
+      bgColor: 'bg-pink-500/10'
     }
   ];
 
@@ -180,8 +194,8 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
                 <Heart className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-[var(--text-primary)] font-medium text-sm">Prière partagée</p>
-                <p className="text-[var(--text-secondary)] text-xs">Nouvelle demande - Il y a 1h</p>
+                <p className="text-[var(--text-primary)] font-medium text-sm">Note ajoutée</p>
+                <p className="text-[var(--text-secondary)] text-xs">Réflexion sur Jean 3:16 - Il y a 1h</p>
               </div>
               <div className="text-purple-500 text-xs font-medium">23%</div>
             </div>

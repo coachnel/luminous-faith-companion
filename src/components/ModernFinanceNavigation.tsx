@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, BookOpen, Calendar, Users, Target, MessageSquare, Bell, Settings, User } from 'lucide-react';
+import { Home, BookOpen, Calendar, Users, Target, MessageSquare, Bell, Settings, User, Heart, Edit3 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface ModernFinanceNavigationProps {
@@ -17,6 +17,8 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
     { id: 'reading-plans', icon: Calendar, label: 'Plans' },
     { id: 'challenges', icon: Target, label: 'Défis' },
     { id: 'prayer-circles', icon: Users, label: 'Prières' },
+    { id: 'notes', icon: Edit3, label: 'Notes' },
+    { id: 'favorites', icon: Heart, label: 'Favoris' },
   ];
 
   return (
@@ -39,7 +41,7 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
             <button
               key={item.id}
               onClick={() => setActiveSection(item.id)}
-              className={`flex flex-col items-center gap-1 py-2 px-3 rounded-2xl transition-all duration-300 ${
+              className={`flex flex-col items-center gap-1 py-2 px-2 rounded-2xl transition-all duration-300 ${
                 isActive 
                   ? 'transform scale-110' 
                   : 'transform scale-100 hover:scale-105'
@@ -58,7 +60,7 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
                   : 'none'
               }}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
               <span className={`text-xs font-medium leading-none ${
                 isActive ? 'font-semibold' : ''
               }`}>

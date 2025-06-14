@@ -15,6 +15,8 @@ import SettingsApp from './SettingsApp';
 import DailyChallenges from './DailyChallenges';
 import ReadingPlans from './ReadingPlans';
 import Prayer from './Prayer';
+import NotesApp from './NotesApp';
+import PWAUpdatePrompt from './PWAUpdatePrompt';
 import { ThemeToggle } from './ThemeToggle';
 import { BookOpen } from 'lucide-react';
 
@@ -43,7 +45,7 @@ const MobileApp = () => {
       case 'prayer-circles':
         return <PrayerCircles />;
       case 'notes':
-        return <RichTextNotesApp />;
+        return <NotesApp />;
       case 'favorites':
         return <FavoriteVerses />;
       case 'notifications':
@@ -71,6 +73,9 @@ const MobileApp = () => {
         color: 'var(--text-primary)'
       }}
     >
+      {/* PWA Update Prompt */}
+      <PWAUpdatePrompt />
+
       {/* Header moderne simplifié */}
       {activeSection !== 'dashboard' && (
         <header 

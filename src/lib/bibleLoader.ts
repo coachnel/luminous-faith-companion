@@ -52,6 +52,17 @@ export const getChapterVerses = (bibleData: BibleData, bookName: string, chapter
   return chapter ? chapter.verses : [];
 };
 
+// Nouvelle fonction pour récupérer les versets d'un chapitre (compatible avec FavoriteVerses.tsx)
+export const getVerses = async (bookName: string, chapterNumber: number): Promise<Verse[]> => {
+  try {
+    const bibleData = await loadBibleData();
+    return getChapterVerses(bibleData, bookName, chapterNumber);
+  } catch (error) {
+    console.error('Error getting verses:', error);
+    return [];
+  }
+};
+
 export const searchVerses = (bibleData: BibleData, query: string, limit: number = 50): Verse[] => {
   const results: Verse[] = [];
   const searchQuery = query.toLowerCase();

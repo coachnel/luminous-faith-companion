@@ -5,23 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotes } from '@/hooks/useSupabaseData';
+import { useNeonNotes, NeonNote } from '@/hooks/useNeonData';
 import { toast } from '@/hooks/use-toast';
-
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-}
 
 const RichTextNotesApp = () => {
   const { user } = useAuth();
-  const { notes, addNote, updateNote, deleteNote } = useNotes();
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const { notes, addNote, updateNote, deleteNote } = useNeonNotes();
+  const [selectedNote, setSelectedNote] = useState<NeonNote | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -45,7 +35,7 @@ const RichTextNotesApp = () => {
       });
       toast({
         title: "Note créée",
-        description: "Nouvelle note ajoutée avec succès",
+        description: "Nouvelle note ajoutée avec succès sur Neon",
       });
     } catch (error) {
       toast({
@@ -56,7 +46,7 @@ const RichTextNotesApp = () => {
     }
   };
 
-  const handleEditNote = (note: Note) => {
+  const handleEditNote = (note: NeonNote) => {
     setSelectedNote(note);
     setEditTitle(note.title);
     setEditContent(note.content);
@@ -79,7 +69,7 @@ const RichTextNotesApp = () => {
       setSelectedNote(null);
       toast({
         title: "Note sauvegardée",
-        description: "Modifications enregistrées avec succès",
+        description: "Modifications enregistrées avec succès sur Neon",
       });
     } catch (error) {
       toast({
@@ -110,7 +100,7 @@ const RichTextNotesApp = () => {
     }
   };
 
-  const handleShareNote = async (note: Note) => {
+  const handleShareNote = async (note: NeonNote) => {
     const shareText = `📝 ${note.title}\n\n${note.content}\n\n#CompagnonSpirituel`;
     
     if (navigator.share) {
@@ -177,7 +167,7 @@ const RichTextNotesApp = () => {
     <div className="p-4 max-w-6xl mx-auto">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">Mes Notes Spirituelles</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Mes Notes Spirituelles (Neon)</h1>
           <Button onClick={handleCreateNote} className="spiritual-gradient text-white">
             <Plus size={16} className="mr-2" />
             Nouvelle note

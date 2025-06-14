@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useNotes } from '@/hooks/useSupabaseData';
+import { useNeonNotes } from '@/hooks/useNeonData';
 import { toast } from '@/hooks/use-toast';
 
 const NotesApp = () => {
-  const { notes, loading, addNote, deleteNote } = useNotes();
+  const { notes, loading, addNote, deleteNote } = useNeonNotes();
   const [isAdding, setIsAdding] = useState(false);
   const [newNote, setNewNote] = useState({ title: '', content: '', tags: [] });
 
@@ -69,7 +69,7 @@ const NotesApp = () => {
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <span>📝</span>
-            Journal spirituel
+            Journal spirituel (Neon)
           </CardTitle>
           <Dialog open={isAdding} onOpenChange={setIsAdding}>
             <DialogTrigger asChild>
@@ -116,7 +116,7 @@ const NotesApp = () => {
               <div className="text-6xl mb-4">📝</div>
               <h3 className="text-xl font-semibold mb-2">Aucune note pour le moment</h3>
               <p className="text-gray-600 mb-4">
-                Commencez à écrire vos réflexions spirituelles
+                Commencez à écrire vos réflexions spirituelles sur Neon
               </p>
               <Button 
                 onClick={() => setIsAdding(true)}

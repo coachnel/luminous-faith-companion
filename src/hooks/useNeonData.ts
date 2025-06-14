@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
+import { neonSql } from '@/integrations/neon/client';
 
 // Types pour les données métier sur Neon
 export interface NeonNote {
@@ -66,12 +67,16 @@ export function useNeonNotes() {
     }
 
     try {
-      // TODO: Implémenter la requête vers Neon
       console.log('Fetching notes from Neon for user:', user.id);
-      // Placeholder - sera implémenté après la migration des tables
-      setNotes([]);
+      const result = await neonSql`
+        SELECT * FROM notes 
+        WHERE user_id = ${user.id} 
+        ORDER BY created_at DESC
+      `;
+      setNotes(result as NeonNote[]);
     } catch (error) {
       console.error('Error fetching notes from Neon:', error);
+      setNotes([]);
     } finally {
       setLoading(false);
     }
@@ -82,9 +87,14 @@ export function useNeonNotes() {
   }, [user]);
 
   const addNote = async (noteData: Omit<NeonNote, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
-      // TODO: Implémenter l'ajout vers Neon
       console.log('Adding note to Neon:', noteData);
+      await neonSql`
+        INSERT INTO notes (user_id, title, content, tags)
+        VALUES (${user.id}, ${noteData.title}, ${noteData.content}, ${noteData.tags})
+      `;
       await fetchNotes();
     } catch (error) {
       console.error('Error adding note to Neon:', error);
@@ -93,9 +103,34 @@ export function useNeonNotes() {
   };
 
   const updateNote = async (id: string, noteData: Partial<Omit<NeonNote, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
-      // TODO: Implémenter la mise à jour vers Neon
       console.log('Updating note in Neon:', id, noteData);
+      const updates: string[] = [];
+      const values: any[] = [];
+      
+      if (noteData.title !== undefined) {
+        updates.push(`title = $${values.length + 1}`);
+        values.push(noteData.title);
+      }
+      if (noteData.content !== undefined) {
+        updates.push(`content = $${values.length + 1}`);
+        values.push(noteData.content);
+      }
+      if (noteData.tags !== undefined) {
+        updates.push(`tags = $${values.length + 1}`);
+        values.push(noteData.tags);
+      }
+      
+      updates.push(`updated_at = NOW()`);
+      values.push(id, user.id);
+
+      await neonSql`
+        UPDATE notes 
+        SET ${neonSql(updates.join(', '))}
+        WHERE id = ${id} AND user_id = ${user.id}
+      `;
       await fetchNotes();
     } catch (error) {
       console.error('Error updating note in Neon:', error);
@@ -104,9 +139,14 @@ export function useNeonNotes() {
   };
 
   const deleteNote = async (id: string) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
-      // TODO: Implémenter la suppression vers Neon
       console.log('Deleting note from Neon:', id);
+      await neonSql`
+        DELETE FROM notes 
+        WHERE id = ${id} AND user_id = ${user.id}
+      `;
       await fetchNotes();
     } catch (error) {
       console.error('Error deleting note from Neon:', error);
@@ -131,11 +171,16 @@ export function useNeonFavoriteVerses() {
     }
 
     try {
-      // TODO: Implémenter la requête vers Neon
       console.log('Fetching favorite verses from Neon for user:', user.id);
-      setFavoriteVerses([]);
+      const result = await neonSql`
+        SELECT * FROM favorite_verses 
+        WHERE user_id = ${user.id} 
+        ORDER BY created_at DESC
+      `;
+      setFavoriteVerses(result as NeonFavoriteVerse[]);
     } catch (error) {
       console.error('Error fetching favorite verses from Neon:', error);
+      setFavoriteVerses([]);
     } finally {
       setLoading(false);
     }
@@ -146,9 +191,19 @@ export function useNeonFavoriteVerses() {
   }, [user]);
 
   const addFavoriteVerse = async (verse: any) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
-      // TODO: Implémenter l'ajout vers Neon
       console.log('Adding favorite verse to Neon:', verse);
+      await neonSql`
+        INSERT INTO favorite_verses (
+          user_id, verse_id, book, chapter, verse, text, version, language
+        ) VALUES (
+          ${user.id}, ${verse.id || `${verse.book}-${verse.chapter}-${verse.verse}`}, 
+          ${verse.book}, ${verse.chapter}, ${verse.verse}, ${verse.text}, 
+          ${verse.version || 'LSG'}, ${verse.language || 'fr'}
+        )
+      `;
       await fetchFavoriteVerses();
     } catch (error) {
       console.error('Error adding favorite verse to Neon:', error);
@@ -157,9 +212,14 @@ export function useNeonFavoriteVerses() {
   };
 
   const removeFavoriteVerse = async (verseId: string) => {
+    if (!user) throw new Error('User not authenticated');
+
     try {
-      // TODO: Implémenter la suppression vers Neon
       console.log('Removing favorite verse from Neon:', verseId);
+      await neonSql`
+        DELETE FROM favorite_verses 
+        WHERE verse_id = ${verseId} AND user_id = ${user.id}
+      `;
       await fetchFavoriteVerses();
     } catch (error) {
       console.error('Error removing favorite verse from Neon:', error);
@@ -168,4 +228,56 @@ export function useNeonFavoriteVerses() {
   };
 
   return { favoriteVerses, loading, addFavoriteVerse, removeFavoriteVerse };
+}
+
+// Hook pour les demandes de prière sur Neon
+export function useNeonPrayerRequests() {
+  const [prayerRequests, setPrayerRequests] = useState<NeonPrayerRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const fetchPrayerRequests = async () => {
+    if (!user) {
+      setPrayerRequests([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Fetching prayer requests from Neon for user:', user.id);
+      const result = await neonSql`
+        SELECT * FROM prayer_requests 
+        WHERE user_id = ${user.id} 
+        ORDER BY created_at DESC
+      `;
+      setPrayerRequests(result as NeonPrayerRequest[]);
+    } catch (error) {
+      console.error('Error fetching prayer requests from Neon:', error);
+      setPrayerRequests([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPrayerRequests();
+  }, [user]);
+
+  const addPrayerRequest = async (requestData: Omit<NeonPrayerRequest, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'prayer_count'>) => {
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      console.log('Adding prayer request to Neon:', requestData);
+      await neonSql`
+        INSERT INTO prayer_requests (user_id, title, content, author_name, is_anonymous)
+        VALUES (${user.id}, ${requestData.title}, ${requestData.content}, ${requestData.author_name}, ${requestData.is_anonymous})
+      `;
+      await fetchPrayerRequests();
+    } catch (error) {
+      console.error('Error adding prayer request to Neon:', error);
+      throw error;
+    }
+  };
+
+  return { prayerRequests, loading, addPrayerRequest, refetch: fetchPrayerRequests };
 }

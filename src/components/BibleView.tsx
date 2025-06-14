@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Search, Book, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useBible } from '../contexts/BibleContext';
 import VerseCard from './VerseCard';
+import { useBibleReadingProgress } from '@/hooks/useReadingProgress';
 
 const BibleView: React.FC = () => {
   const {
@@ -57,6 +57,28 @@ const BibleView: React.FC = () => {
       </div>
     );
   }
+
+  const { markChapterRead } = useBibleReadingProgress();
+
+  const handleChapterRead = async (bookId: string, bookName: string, chapter: number) => {
+    try {
+      await markChapterRead(bookId, bookName, chapter);
+      console.log(`📖 Progression sauvegardée: ${bookName} ${chapter}`);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la progression:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedBook && selectedChapter && currentVerses.length > 0) {
+      // Marquer comme lu après 5 secondes sur un chapitre
+      const timer = setTimeout(() => {
+        handleChapterRead(selectedBook.id, selectedBook.name, selectedChapter);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedBook, selectedChapter, currentVerses]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">

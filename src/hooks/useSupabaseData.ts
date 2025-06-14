@@ -53,6 +53,7 @@ export interface UserPreferences {
   bible_version: string;
   language: string;
   theme: string;
+  theme_mode: 'light' | 'dark' | 'sepia';
   notification_preferences: {
     dailyVerse: boolean;
     prayerReminder: boolean;
@@ -297,6 +298,7 @@ export function useUserPreferences() {
         bible_version: data.bible_version,
         language: data.language,
         theme: data.theme,
+        theme_mode: data.theme_mode || 'light',
         notification_preferences: typeof data.notification_preferences === 'string' 
           ? JSON.parse(data.notification_preferences) 
           : data.notification_preferences,
@@ -308,6 +310,9 @@ export function useUserPreferences() {
       };
       
       setPreferences(transformedData);
+      
+      // Appliquer le thème automatiquement
+      applyTheme(transformedData.theme_mode);
     } catch (error) {
       console.error('Error fetching preferences:', error);
     } finally {
@@ -323,10 +328,42 @@ export function useUserPreferences() {
         .eq('user_id', user?.id);
 
       if (error) throw error;
+      
+      // Appliquer le nouveau thème si changé
+      if (updates.theme_mode) {
+        applyTheme(updates.theme_mode);
+      }
+      
       await fetchPreferences();
     } catch (error) {
       console.error('Error updating preferences:', error);
       throw error;
+    }
+  };
+
+  const applyTheme = (themeMode: 'light' | 'dark' | 'sepia') => {
+    const root = document.documentElement;
+    
+    // Supprimer les anciennes classes de thème
+    root.classList.remove('light', 'dark', 'sepia');
+    
+    // Ajouter la nouvelle classe de thème
+    root.classList.add(themeMode);
+    
+    // Appliquer les styles spécifiques
+    switch (themeMode) {
+      case 'dark':
+        root.style.setProperty('--background', '222.2% 84% 4.9%');
+        root.style.setProperty('--foreground', '210% 40% 98%');
+        break;
+      case 'sepia':
+        root.style.setProperty('--background', '48% 96% 89%');
+        root.style.setProperty('--foreground', '48% 19% 13%');
+        break;
+      default: // light
+        root.style.setProperty('--background', '0 0% 100%');
+        root.style.setProperty('--foreground', '222.2% 84% 4.9%');
+        break;
     }
   };
 

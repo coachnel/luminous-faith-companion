@@ -298,7 +298,7 @@ export function useUserPreferences() {
         bible_version: data.bible_version,
         language: data.language,
         theme: data.theme,
-        theme_mode: data.theme_mode || 'light',
+        theme_mode: data.theme_mode || 'light', // Utilisation d'une valeur par défaut si la colonne n'existe pas encore
         notification_preferences: typeof data.notification_preferences === 'string' 
           ? JSON.parse(data.notification_preferences) 
           : data.notification_preferences,
@@ -315,6 +315,27 @@ export function useUserPreferences() {
       applyTheme(transformedData.theme_mode);
     } catch (error) {
       console.error('Error fetching preferences:', error);
+      // En cas d'erreur, utiliser les préférences par défaut
+      const defaultPreferences: UserPreferences = {
+        user_id: user?.id || '',
+        bible_version: 'LSG',
+        language: 'fr',
+        theme: 'light',
+        theme_mode: 'light',
+        notification_preferences: {
+          dailyVerse: true,
+          prayerReminder: true,
+          readingReminder: true
+        },
+        reminder_times: {
+          prayer: ['08:00', '12:00', '20:00'],
+          reading: '07:00'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setPreferences(defaultPreferences);
+      applyTheme('light');
     } finally {
       setLoading(false);
     }

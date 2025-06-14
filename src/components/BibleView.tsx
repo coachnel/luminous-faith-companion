@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useBible } from '@/hooks/useBible';
+import { useNeonBible } from '@/hooks/useNeonBible';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,18 +12,20 @@ import { toast } from 'sonner';
 
 const BibleView = () => {
   const { 
-    books, 
-    selectedBook, 
-    selectedChapter, 
-    verses, 
-    searchQuery,
+    books,
+    currentVerses,
     searchResults,
-    isSearching,
-    handleBookSelect, 
-    handleChapterSelect, 
+    selectedBook,
+    selectedChapter,
+    searchQuery,
+    isLoading,
+    selectBook,
+    selectChapter,
     setSearchQuery,
-    clearSearch 
-  } = useBible();
+    clearSearch,
+    isSearching,
+    hasSearchResults
+  } = useNeonBible();
   
   const { markChapterRead, progress } = useBibleReadingProgress();
   const [selectedVerse, setSelectedVerse] = useState(null);
@@ -32,17 +34,15 @@ const BibleView = () => {
     if (!selectedBook || !selectedChapter) return;
     
     try {
-      // Obtenir l'ID du livre à partir de son nom
-      const bookId = String(books.indexOf(selectedBook) + 1);
-      await markChapterRead(bookId, selectedBook, selectedChapter);
-      toast.success(`${selectedBook} ${selectedChapter} marqué comme lu !`);
+      await markChapterRead(selectedBook.id, selectedBook.name, selectedChapter);
+      toast.success(`${selectedBook.name} ${selectedChapter} marqué comme lu !`);
     } catch (error) {
       toast.error('Erreur lors de la sauvegarde');
     }
   };
 
   const isChapterRead = progress.some(p => 
-    p.book_name === selectedBook && 
+    p.book_id === selectedBook?.id && 
     p.chapter_number === selectedChapter && 
     p.is_completed
   );
@@ -88,7 +88,7 @@ const BibleView = () => {
           <CardContent className="flex items-center justify-between p-4">
             <div className="flex items-center gap-4">
               <h2 className="text-xl font-semibold">
-                {selectedBook} - Chapitre {selectedChapter}
+                {selectedBook.name} - Chapitre {selectedChapter}
               </h2>
               {isChapterRead && (
                 <div className="flex items-center gap-1 text-green-600">
@@ -121,14 +121,14 @@ const BibleView = () => {
           <CardContent className="p-0">
             <ScrollArea className="h-96">
               <div className="p-4 space-y-1">
-                {books.map((book, index) => (
+                {books.map((book) => (
                   <Button
-                    key={index}
-                    variant={selectedBook === book ? "default" : "ghost"}
+                    key={book.id}
+                    variant={selectedBook?.id === book.id ? "default" : "ghost"}
                     className="w-full justify-start"
-                    onClick={() => handleBookSelect(book)}
+                    onClick={() => selectBook(book)}
                   >
-                    {book}
+                    {book.name}
                   </Button>
                 ))}
               </div>
@@ -141,11 +141,11 @@ const BibleView = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>
-                {selectedBook ? `${selectedBook}${selectedChapter ? ` - Chapitre ${selectedChapter}` : ''}` : 'Sélectionnez un livre'}
+                {selectedBook ? `${selectedBook.name}${selectedChapter ? ` - Chapitre ${selectedChapter}` : ''}` : 'Sélectionnez un livre'}
               </span>
-              {selectedBook && verses.length > 0 && (
+              {selectedBook && currentVerses.length > 0 && (
                 <span className="text-sm text-gray-500">
-                  {verses.length} versets
+                  {currentVerses.length} versets
                 </span>
               )}
             </CardTitle>
@@ -162,12 +162,12 @@ const BibleView = () => {
                   <div>
                     <h3 className="font-semibold mb-2">Chapitres disponibles :</h3>
                     <div className="grid grid-cols-10 gap-2">
-                      {Array.from({ length: 50 }, (_, i) => i + 1).map((chapter) => (
+                      {Array.from({ length: selectedBook.chapters_count || 50 }, (_, i) => i + 1).map((chapter) => (
                         <Button
                           key={chapter}
                           variant="outline"
                           size="sm"
-                          onClick={() => handleChapterSelect(chapter)}
+                          onClick={() => selectChapter(chapter)}
                         >
                           {chapter}
                         </Button>
@@ -177,12 +177,12 @@ const BibleView = () => {
                 )}
 
                 {/* Verses Display */}
-                {verses.length > 0 && (
+                {currentVerses.length > 0 && (
                   <ScrollArea className="h-96">
                     <div className="space-y-3">
-                      {verses.map((verse, index) => (
+                      {currentVerses.map((verse, index) => (
                         <div
-                          key={index}
+                          key={verse.id || index}
                           className={`p-3 rounded-lg border transition-colors cursor-pointer ${
                             selectedVerse === index ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
                           }`}
@@ -190,10 +190,10 @@ const BibleView = () => {
                         >
                           <div className="flex items-start space-x-2">
                             <span className="font-semibold text-blue-600 text-sm min-w-[2rem]">
-                              {index + 1}.
+                              {verse.verse_number || index + 1}.
                             </span>
                             <p className="text-gray-800 leading-relaxed flex-1">
-                              {verse}
+                              {verse.text}
                             </p>
                           </div>
                         </div>
@@ -214,13 +214,13 @@ const BibleView = () => {
             <CardTitle>Résultats de recherche</CardTitle>
           </CardHeader>
           <CardContent>
-            {searchResults.length > 0 ? (
+            {hasSearchResults ? (
               <ScrollArea className="h-64">
                 <div className="space-y-2">
                   {searchResults.map((result, index) => (
-                    <div key={index} className="p-3 border rounded-lg">
+                    <div key={result.id || index} className="p-3 border rounded-lg">
                       <p className="text-sm font-semibold text-blue-600">
-                        {result.book} {result.chapter}:{result.verse}
+                        {result.book_name} {result.chapter_number}:{result.verse_number}
                       </p>
                       <p className="text-gray-700 mt-1">{result.text}</p>
                     </div>

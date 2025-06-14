@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { BibleProvider } from "./contexts/BibleContext";
 import BibleView from "./components/BibleView";
-import { EnhancedBibleView } from "./components/EnhancedBibleView";
+import EnhancedBibleView from "./components/EnhancedBibleView";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import EmailConfirmation from "./components/EmailConfirmation";

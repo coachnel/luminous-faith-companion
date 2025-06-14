@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -292,13 +293,21 @@ export function useUserPreferences() {
 
       if (error) throw error;
       
+      // Validate and normalize theme_mode to ensure it's one of the allowed values
+      const normalizeThemeMode = (value: any): 'light' | 'dark' | 'sepia' => {
+        if (value === 'dark' || value === 'sepia') {
+          return value;
+        }
+        return 'light'; // Default fallback
+      };
+      
       // Transform the JSON data to match our interface
       const transformedData: UserPreferences = {
         user_id: data.user_id,
         bible_version: data.bible_version,
         language: data.language,
         theme: data.theme,
-        theme_mode: data.theme_mode || 'light', // Utilisation d'une valeur par défaut si la colonne n'existe pas encore
+        theme_mode: normalizeThemeMode(data.theme_mode),
         notification_preferences: typeof data.notification_preferences === 'string' 
           ? JSON.parse(data.notification_preferences) 
           : data.notification_preferences,

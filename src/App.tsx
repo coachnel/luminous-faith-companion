@@ -10,6 +10,7 @@ import { BibleProvider } from "./contexts/BibleContext";
 import BibleView from "./components/BibleView";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import EmailConfirmation from "./components/EmailConfirmation";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,14 @@ const App = () => (
                   <BibleProvider>
                     <BibleView />
                   </BibleProvider>
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/confirm"
+              element={
+                <ErrorBoundary>
+                  <EmailConfirmation />
                 </ErrorBoundary>
               }
             />

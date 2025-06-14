@@ -61,6 +61,8 @@ const AuthPage = () => {
           errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
         } else if (errorMessage.includes('Invalid email')) {
           errorMessage = 'Adresse email invalide';
+        } else if (errorMessage.includes('Email not confirmed')) {
+          errorMessage = 'Veuillez confirmer votre email avant de vous connecter';
         }
 
         toast({
@@ -72,13 +74,13 @@ const AuthPage = () => {
         if (!isLogin) {
           toast({
             title: "Inscription réussie ! 🎉",
-            description: "Vérifiez votre email pour confirmer votre compte. Vous pouvez aussi vous connecter directement.",
+            description: "Un email de confirmation vous a été envoyé. Cliquez sur le lien dans l'email pour activer votre compte, puis revenez vous connecter ici.",
           });
           
           // Basculer vers la connexion après inscription
           setTimeout(() => {
             setIsLogin(true);
-          }, 2000);
+          }, 3000);
         } else {
           toast({
             title: "Connexion réussie ! ✨",

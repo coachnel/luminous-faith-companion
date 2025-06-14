@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -41,168 +41,216 @@ export interface FavoriteVerse {
 export function useNeonPrayerRequests() {
   const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchPrayerRequests();
-    } else {
+  const fetchPrayerRequests = useCallback(async () => {
+    if (!user) {
       setPrayerRequests([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setError(null);
+      const { data, error: fetchError } = await supabase
+        .from('prayer_requests')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50); // Limite pour optimiser les performances
+
+      if (fetchError) throw fetchError;
+      setPrayerRequests(data || []);
+    } catch (err) {
+      console.error('Error fetching prayer requests:', err);
+      setError('Erreur lors du chargement des demandes de prière');
+    } finally {
       setLoading(false);
     }
   }, [user]);
 
-  const fetchPrayerRequests = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('prayer_requests')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+  useEffect(() => {
+    fetchPrayerRequests();
+  }, [fetchPrayerRequests]);
 
-      if (error) throw error;
-      setPrayerRequests(data || []);
-    } catch (error) {
-      console.error('Error fetching prayer requests:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const addPrayerRequest = useCallback(async (requestData: Omit<PrayerRequest, 'id' | 'user_id' | 'prayer_count' | 'created_at' | 'updated_at'>) => {
+    if (!user) throw new Error('Utilisateur non connecté');
 
-  const addPrayerRequest = async (requestData: Omit<PrayerRequest, 'id' | 'user_id' | 'prayer_count' | 'created_at' | 'updated_at'>) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('prayer_requests')
-        .insert([{ ...requestData, user_id: user?.id, prayer_count: 0 }]);
+        .insert([{ ...requestData, user_id: user.id, prayer_count: 0 }]);
 
       if (error) throw error;
       await fetchPrayerRequests();
-    } catch (error) {
-      console.error('Error adding prayer request:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error adding prayer request:', err);
+      setError('Erreur lors de l\'ajout de la demande');
+      throw err;
     }
-  };
+  }, [user, fetchPrayerRequests]);
 
-  return { prayerRequests, loading, addPrayerRequest, refetch: fetchPrayerRequests };
+  return { 
+    prayerRequests, 
+    loading, 
+    error,
+    addPrayerRequest, 
+    refetch: fetchPrayerRequests 
+  };
 }
 
 export function useNeonNotes() {
   const [notes, setNotes] = useState<NeonNote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchNotes();
-    } else {
+  const fetchNotes = useCallback(async () => {
+    if (!user) {
       setNotes([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setError(null);
+      const { data, error: fetchError } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(100); // Limite pour optimiser les performances
+
+      if (fetchError) throw fetchError;
+      setNotes(data || []);
+    } catch (err) {
+      console.error('Error fetching notes:', err);
+      setError('Erreur lors du chargement des notes');
+    } finally {
       setLoading(false);
     }
   }, [user]);
 
-  const fetchNotes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
 
-      if (error) throw error;
-      setNotes(data || []);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const addNote = useCallback(async (noteData: Omit<NeonNote, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!user) throw new Error('Utilisateur non connecté');
 
-  const addNote = async (noteData: Omit<NeonNote, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('notes')
-        .insert([{ ...noteData, user_id: user?.id }]);
+        .insert([{ ...noteData, user_id: user.id }]);
 
       if (error) throw error;
       await fetchNotes();
-    } catch (error) {
-      console.error('Error adding note:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error adding note:', err);
+      setError('Erreur lors de l\'ajout de la note');
+      throw err;
     }
-  };
+  }, [user, fetchNotes]);
 
-  const updateNote = async (id: string, noteData: Partial<Omit<NeonNote, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+  const updateNote = useCallback(async (id: string, noteData: Partial<Omit<NeonNote, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+    if (!user) throw new Error('Utilisateur non connecté');
+
     try {
+      setError(null);
       const { error } = await supabase
         .from('notes')
         .update(noteData)
         .eq('id', id)
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       await fetchNotes();
-    } catch (error) {
-      console.error('Error updating note:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error updating note:', err);
+      setError('Erreur lors de la mise à jour');
+      throw err;
     }
-  };
+  }, [user, fetchNotes]);
 
-  const deleteNote = async (id: string) => {
+  const deleteNote = useCallback(async (id: string) => {
+    if (!user) throw new Error('Utilisateur non connecté');
+
     try {
+      setError(null);
       const { error } = await supabase
         .from('notes')
         .delete()
         .eq('id', id)
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       await fetchNotes();
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error deleting note:', err);
+      setError('Erreur lors de la suppression');
+      throw err;
     }
-  };
+  }, [user, fetchNotes]);
 
-  return { notes, loading, addNote, updateNote, deleteNote, refetch: fetchNotes };
+  return { 
+    notes, 
+    loading, 
+    error,
+    addNote, 
+    updateNote, 
+    deleteNote, 
+    refetch: fetchNotes 
+  };
 }
 
 export function useNeonFavoriteVerses() {
   const [favoriteVerses, setFavoriteVerses] = useState<FavoriteVerse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchFavoriteVerses();
-    } else {
+  const fetchFavoriteVerses = useCallback(async () => {
+    if (!user) {
       setFavoriteVerses([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setError(null);
+      const { data, error: fetchError } = await supabase
+        .from('favorite_verses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(100); // Limite pour optimiser les performances
+
+      if (fetchError) throw fetchError;
+      setFavoriteVerses(data || []);
+    } catch (err) {
+      console.error('Error fetching favorite verses:', err);
+      setError('Erreur lors du chargement des versets favoris');
+    } finally {
       setLoading(false);
     }
   }, [user]);
 
-  const fetchFavoriteVerses = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('favorite_verses')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+  useEffect(() => {
+    fetchFavoriteVerses();
+  }, [fetchFavoriteVerses]);
 
-      if (error) throw error;
-      setFavoriteVerses(data || []);
-    } catch (error) {
-      console.error('Error fetching favorite verses:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const addFavoriteVerse = useCallback(async (verse: any) => {
+    if (!user) throw new Error('Utilisateur non connecté');
 
-  const addFavoriteVerse = async (verse: any) => {
     try {
+      setError(null);
       const { error } = await supabase
         .from('favorite_verses')
         .insert([{
-          user_id: user?.id,
+          user_id: user.id,
           verse_id: verse.id,
           book: verse.book,
           chapter: verse.chapter,
@@ -214,27 +262,38 @@ export function useNeonFavoriteVerses() {
 
       if (error) throw error;
       await fetchFavoriteVerses();
-    } catch (error) {
-      console.error('Error adding favorite verse:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error adding favorite verse:', err);
+      setError('Erreur lors de l\'ajout du verset');
+      throw err;
     }
-  };
+  }, [user, fetchFavoriteVerses]);
 
-  const removeFavoriteVerse = async (verseId: string) => {
+  const removeFavoriteVerse = useCallback(async (verseId: string) => {
+    if (!user) throw new Error('Utilisateur non connecté');
+
     try {
+      setError(null);
       const { error } = await supabase
         .from('favorite_verses')
         .delete()
         .eq('verse_id', verseId)
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       await fetchFavoriteVerses();
-    } catch (error) {
-      console.error('Error removing favorite verse:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error removing favorite verse:', err);
+      setError('Erreur lors de la suppression du verset');
+      throw err;
     }
-  };
+  }, [user, fetchFavoriteVerses]);
 
-  return { favoriteVerses, loading, addFavoriteVerse, removeFavoriteVerse };
+  return { 
+    favoriteVerses, 
+    loading, 
+    error,
+    addFavoriteVerse, 
+    removeFavoriteVerse 
+  };
 }

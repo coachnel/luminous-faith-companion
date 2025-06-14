@@ -1,117 +1,79 @@
 
-import React, { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useChallengeCleanup } from '@/hooks/useChallengeCleanup';
-import AuthPage from './AuthPage';
-import ModernFinanceNavigation from './ModernFinanceNavigation';
+import React, { useState, useCallback, useMemo } from 'react';
+import { ModernFinanceNavigation } from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
-import Discover from './Discover';
-import PrayerCircles from './PrayerCircles';
+import Prayer from './Prayer';
 import NotesApp from './NotesApp';
-import AdvancedNotifications from './AdvancedNotifications';
-import SettingsApp from './SettingsApp';
 import DailyChallenges from './DailyChallenges';
 import ReadingPlans from './ReadingPlans';
-import Prayer from './Prayer';
-import PWAUpdatePrompt from './PWAUpdatePrompt';
-import { ThemeToggle } from './ThemeToggle';
-import { BookOpen } from 'lucide-react';
+import Discover from './Discover';
+import PrayerCircles from './PrayerCircles';
+import SettingsApp from './SettingsApp';
+import { useAuth } from '@/hooks/useAuth';
+import AuthPage from './AuthPage';
+
+type AppSection = 'dashboard' | 'prayer' | 'notes' | 'challenges' | 'reading-plans' | 'discover' | 'prayer-circles' | 'settings';
 
 const MobileApp = () => {
-  const [activeSection, setActiveSection] = useState('dashboard');
-  const { user } = useAuth();
-  const { theme } = useTheme();
+  const { user, loading } = useAuth();
+  const [currentSection, setCurrentSection] = useState<AppSection>('dashboard');
 
-  // Utiliser le hook de nettoyage des défis
-  useChallengeCleanup();
+  const handleNavigation = useCallback((section: string) => {
+    const sectionMap: Record<string, AppSection> = {
+      '/': 'dashboard',
+      '/dashboard': 'dashboard',
+      '/prayer': 'prayer',
+      '/notes': 'notes',
+      '/challenges': 'challenges',
+      '/reading-plans': 'reading-plans',
+      '/discover': 'discover',
+      '/prayer-circles': 'prayer-circles',
+      '/settings': 'settings'
+    };
+    
+    const targetSection = sectionMap[section] || 'dashboard';
+    setCurrentSection(targetSection);
+  }, []);
+
+  // Mémoiser le rendu des sections pour optimiser les performances
+  const renderSection = useMemo(() => {
+    const sections = {
+      dashboard: <ModernDashboard onNavigate={handleNavigation} />,
+      prayer: <Prayer />,
+      notes: <NotesApp />,
+      challenges: <DailyChallenges />,
+      'reading-plans': <ReadingPlans />,
+      discover: <Discover />,
+      'prayer-circles': <PrayerCircles />,
+      settings: <SettingsApp />
+    };
+
+    return sections[currentSection] || sections.dashboard;
+  }, [currentSection, handleNavigation]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="text-gray-600 dark:text-gray-400">Chargement...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <AuthPage />;
   }
 
-  const handleNavigate = (section: string) => {
-    setActiveSection(section);
-  };
-
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'dashboard':
-        return <ModernDashboard onNavigate={handleNavigate} />;
-      case 'discover':
-        return <Discover />;
-      case 'prayer-circles':
-        return <PrayerCircles />;
-      case 'notes':
-        return <NotesApp />;
-      case 'notifications':
-        return <AdvancedNotifications />;
-      case 'settings':
-        return <SettingsApp />;
-      case 'challenges':
-        return <DailyChallenges />;
-      case 'reading-plans':
-        return <ReadingPlans />;
-      case 'prayer':
-        return <Prayer />;
-      default:
-        return <ModernDashboard onNavigate={handleNavigate} />;
-    }
-  };
-
   return (
-    <div 
-      className="min-h-screen transition-all duration-300 relative"
-      style={{ 
-        background: theme === 'dark'
-          ? 'linear-gradient(135deg, #12121A 0%, #1E1E2A 50%, #2A2A3F 100%)'
-          : 'linear-gradient(135deg, #FFFFFF 0%, #F5F5F7 50%, #F0F0F2 100%)',
-        color: 'var(--text-primary)'
-      }}
-    >
-      {/* PWA Update Prompt */}
-      <PWAUpdatePrompt />
-
-      {/* Header moderne simplifié */}
-      {activeSection !== 'dashboard' && (
-        <header 
-          className="sticky top-0 z-40 backdrop-blur-lg"
-          style={{
-            background: theme === 'dark' 
-              ? 'rgba(30, 30, 42, 0.9)' 
-              : 'rgba(255, 255, 255, 0.9)',
-            borderBottom: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
-          }}
-        >
-          <div className="px-4 py-3 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #0066FF, #0052CC)' }}
-              >
-                <BookOpen className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <h1 className="font-semibold text-sm text-[var(--text-primary)]">
-                  BibleApp
-                </h1>
-              </div>
-            </div>
-            
-            <ThemeToggle />
-          </div>
-        </header>
-      )}
-
-      <main className={`${activeSection !== 'dashboard' ? 'pb-20' : 'pb-24'} min-h-screen`}>
-        <div className="animate-fade-in">
-          {renderContent()}
-        </div>
-      </main>
-      
+    <div className="min-h-screen bg-[var(--bg-primary)]">
+      <div className="pb-20 lg:pb-0">
+        {renderSection}
+      </div>
       <ModernFinanceNavigation 
-        activeSection={activeSection} 
-        setActiveSection={setActiveSection}
+        currentSection={currentSection} 
+        onNavigate={handleNavigation}
       />
     </div>
   );

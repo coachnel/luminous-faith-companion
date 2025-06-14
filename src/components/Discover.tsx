@@ -1,26 +1,30 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
-import { Compass, Heart, MessageCircle, Bookmark, Calendar, User, Info, ThumbsUp } from 'lucide-react';
+import { Compass, Heart, MessageCircle, Bookmark, Calendar, ThumbsUp, Info, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNeonPrayerRequests, useNotes } from '@/hooks/useSupabaseData';
+import { useNeonPrayerRequests, useNeonNotes } from '@/hooks/useNeonData';
 import { toast } from 'sonner';
+
+const ITEMS_PER_PAGE = 10;
 
 const Discover = () => {
   const { user } = useAuth();
-  const { prayerRequests } = useNeonPrayerRequests();
-  const { notes } = useNotes();
+  const { prayerRequests, loading: prayersLoading } = useNeonPrayerRequests();
+  const { notes, loading: notesLoading } = useNeonNotes();
   const [activeTab, setActiveTab] = useState<'all' | 'prayers' | 'notes'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Combiner et trier tout le contenu partageable
-  const getAllContent = () => {
+  // Combiner et trier tout le contenu partageable avec optimisation
+  const allContent = useMemo(() => {
     const content: any[] = [];
     
-    // Ajouter les prières publiques (non anonymes)
+    // Ajouter les prières publiques (non anonymes) avec limitation
     prayerRequests
       .filter(prayer => !prayer.is_anonymous)
+      .slice(0, 50) // Limite pour optimiser les performances
       .forEach(prayer => {
         content.push({
           ...prayer,
@@ -32,13 +36,17 @@ const Discover = () => {
       });
 
     // Trier par date décroissante
-    return content.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  };
+    return content
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 100); // Limite globale pour optimiser
+  }, [prayerRequests]);
 
-  const allContent = getAllContent();
-  const prayersContent = allContent.filter(item => item.type === 'prayer');
+  const prayersContent = useMemo(() => 
+    allContent.filter(item => item.type === 'prayer'),
+    [allContent]
+  );
 
-  const getFilteredContent = () => {
+  const getFilteredContent = useMemo(() => {
     switch (activeTab) {
       case 'prayers':
         return prayersContent;
@@ -47,9 +55,20 @@ const Discover = () => {
       default:
         return allContent;
     }
-  };
+  }, [activeTab, prayersContent, allContent]);
 
-  const filteredContent = getFilteredContent();
+  // Pagination optimisée
+  const paginatedContent = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return getFilteredContent.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [getFilteredContent, currentPage]);
+
+  const totalPages = Math.ceil(getFilteredContent.length / ITEMS_PER_PAGE);
+
+  // Reset pagination when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   const handleLike = (contentId: string, contentType: string) => {
     toast.success('👍 Contenu aimé !');
@@ -73,14 +92,14 @@ const Discover = () => {
                 {item.type === 'prayer' ? <Heart className="h-3 w-3" /> : <MessageCircle className="h-3 w-3" />}
                 <span>{item.type === 'prayer' ? 'Prière' : 'Note'}</span>
               </Badge>
-              <span className="text-xs text-[var(--text-secondary)]">
+              <span className="text-xs text-[var(--text-secondary)] truncate">
                 par {item.author}
               </span>
             </div>
-            <h4 className="font-semibold text-[var(--text-primary)] break-words mb-2">
+            <h4 className="font-semibold text-[var(--text-primary)] break-words mb-2 line-clamp-2">
               {item.title}
             </h4>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words line-clamp-3">
               {item.content}
             </p>
           </div>
@@ -89,12 +108,12 @@ const Discover = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[var(--border-default)]">
           <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
             <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 flex-shrink-0" />
               <span>{item.createdAt.toLocaleDateString('fr-FR')}</span>
             </div>
             {item.type === 'prayer' && (
               <div className="flex items-center gap-1">
-                <Heart className="h-4 w-4" />
+                <Heart className="h-4 w-4 flex-shrink-0" />
                 <span>{item.likes} prières</span>
               </div>
             )}
@@ -105,7 +124,7 @@ const Discover = () => {
               onClick={() => handleLike(item.id, item.type)}
               size="sm"
               variant="outline"
-              className="gap-2"
+              className="gap-2 text-xs"
             >
               <ThumbsUp className="h-4 w-4" />
               <span className="hidden sm:inline">J'aime</span>
@@ -114,7 +133,7 @@ const Discover = () => {
               onClick={() => handleBookmark(item.id, item.type)}
               size="sm"
               variant="ghost"
-              className="gap-2"
+              className="gap-2 text-xs"
             >
               <Bookmark className="h-4 w-4" />
               <span className="hidden sm:inline">Sauver</span>
@@ -123,7 +142,7 @@ const Discover = () => {
               onClick={() => handleComment(item.id, item.type)}
               size="sm"
               variant="ghost"
-              className="gap-2"
+              className="gap-2 text-xs"
             >
               <MessageCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Commenter</span>
@@ -133,6 +152,8 @@ const Discover = () => {
       </div>
     </ModernCard>
   );
+
+  const loading = prayersLoading || notesLoading;
 
   return (
     <div 
@@ -203,24 +224,61 @@ const Discover = () => {
           </ModernButton>
         </div>
 
-        {/* Contenu */}
-        {filteredContent.length === 0 ? (
+        {/* Loading State */}
+        {loading ? (
           <div className="text-center py-8">
-            <Compass className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              {activeTab === 'notes' ? 'Aucune note partagée' : 'Aucun contenu à découvrir'}
-            </h4>
-            <p className="text-[var(--text-secondary)] mb-4">
-              {activeTab === 'notes' 
-                ? 'Les notes restent privées pour le moment'
-                : 'Soyez le premier à partager du contenu avec la communauté'
-              }
-            </p>
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-primary)] mx-auto mb-4" />
+            <p className="text-[var(--text-secondary)]">Chargement du contenu...</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredContent.map(renderContentCard)}
-          </div>
+          <>
+            {/* Contenu */}
+            {paginatedContent.length === 0 ? (
+              <div className="text-center py-8">
+                <Compass className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
+                <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+                  {activeTab === 'notes' ? 'Aucune note partagée' : 'Aucun contenu à découvrir'}
+                </h4>
+                <p className="text-[var(--text-secondary)] mb-4">
+                  {activeTab === 'notes' 
+                    ? 'Les notes restent privées pour le moment'
+                    : 'Soyez le premier à partager du contenu avec la communauté'
+                  }
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {paginatedContent.map(renderContentCard)}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-6 pt-6 border-t border-[var(--border-default)]">
+                    <ModernButton
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Précédent
+                    </ModernButton>
+                    <span className="text-sm text-[var(--text-secondary)]">
+                      Page {currentPage} sur {totalPages}
+                    </span>
+                    <ModernButton
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Suivant
+                    </ModernButton>
+                  </div>
+                )}
+              </>
+            )}
+          </>
         )}
       </ModernCard>
 

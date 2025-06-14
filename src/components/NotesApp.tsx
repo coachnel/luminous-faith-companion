@@ -11,7 +11,7 @@ import { useNeonNotes } from '@/hooks/useNeonData';
 import { toast } from 'sonner';
 
 const NotesApp = () => {
-  const { notes, loading, addNote, updateNote, deleteNote, refetch } = useNeonNotes();
+  const { notes, loading, addNote, updateNote, deleteNote } = useNeonNotes();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -74,7 +74,7 @@ const NotesApp = () => {
     }
   };
 
-  // Filtrage des notes
+  // Filtrage des notes avec pagination
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          note.content?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -208,7 +208,7 @@ const NotesApp = () => {
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <ModernButton
-                variant={selectedTag === '' ? 'default' : 'outline'}
+                variant={selectedTag === '' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedTag('')}
               >
@@ -217,7 +217,7 @@ const NotesApp = () => {
               {allTags.map(tag => (
                 <ModernButton
                   key={tag}
-                  variant={selectedTag === tag ? 'default' : 'outline'}
+                  variant={selectedTag === tag ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedTag(tag)}
                   className="gap-1"
@@ -249,7 +249,7 @@ const NotesApp = () => {
         </ModernCard>
       ) : (
         <div className="space-y-4">
-          {filteredNotes.map((note) => (
+          {filteredNotes.slice(0, 20).map((note) => (
             <ModernCard key={note.id} className="bg-[var(--bg-card)] border-[var(--border-default)]">
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">

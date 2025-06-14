@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useSupabaseChallenges, useSupabaseChallengeProgress } from '@/integrations/supabase/hooks';
+import { useSupabaseChallenges, useSupabaseChallengeProgress } from './useSupabaseChallenges';
 
 export interface Challenge {
   id: string;

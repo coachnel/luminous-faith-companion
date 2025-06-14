@@ -1,6 +1,7 @@
 
 // Client API pour les données bibliques stockées dans Neon
 import { neonClient } from './restClient';
+import { bibleDataInitializer } from './bibleDataInitializer';
 
 // Types pour les données bibliques Neon
 export interface NeonBook {
@@ -39,12 +40,24 @@ export interface NeonBibleVersion {
 
 // Client pour les données bibliques Neon
 class NeonBibleClient {
+  private initialized = false;
+
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await bibleDataInitializer.initializeCompleteBibleData();
+      this.initialized = true;
+    }
+  }
+
   // Récupérer tous les livres
   async getBooks(): Promise<NeonBook[]> {
     try {
+      await this.ensureInitialized();
       console.log('Fetching books from Neon...');
-      const books = await neonClient.select<NeonBook>('books');
-      return books.sort((a, b) => a.order_number - b.order_number);
+      
+      // Charger depuis le stockage local initialisé
+      const books = JSON.parse(localStorage.getItem('neon_books') || '[]');
+      return books.sort((a: NeonBook, b: NeonBook) => a.order_number - b.order_number);
     } catch (error) {
       console.error('Error fetching books:', error);
       return [];
@@ -55,8 +68,22 @@ class NeonBibleClient {
   async getChapters(bookId: string): Promise<NeonChapter[]> {
     try {
       console.log('Fetching chapters for book:', bookId);
-      const chapters = await neonClient.select<NeonChapter>('chapters', { book_id: bookId });
-      return chapters.sort((a, b) => a.chapter_number - b.chapter_number);
+      const books = await this.getBooks();
+      const book = books.find(b => b.id === bookId);
+      
+      if (!book) return [];
+
+      const chapters: NeonChapter[] = [];
+      for (let i = 1; i <= book.chapters_count; i++) {
+        chapters.push({
+          id: `${bookId}-${i}`,
+          book_id: bookId,
+          chapter_number: i,
+          verses_count: await this.getVerseCountForChapter(bookId, i)
+        });
+      }
+      
+      return chapters;
     } catch (error) {
       console.error('Error fetching chapters:', error);
       return [];
@@ -66,13 +93,29 @@ class NeonBibleClient {
   // Récupérer les versets d'un chapitre
   async getVerses(bookId: string, chapterNumber: number, versionId: string = 'lsg1910'): Promise<NeonVerse[]> {
     try {
+      await this.ensureInitialized();
       console.log('Fetching verses for book:', bookId, 'chapter:', chapterNumber, 'version:', versionId);
-      const verses = await neonClient.select<NeonVerse>('verses', { 
-        book_id: bookId, 
-        chapter_number: chapterNumber,
-        version_id: versionId
-      });
-      return verses.sort((a, b) => a.verse_number - b.verse_number);
+      
+      // Charger tous les versets depuis le stockage
+      const allVerses = JSON.parse(localStorage.getItem('neon_verses') || '[]');
+      
+      // Filtrer par livre, chapitre et version
+      let verses = allVerses.filter((verse: NeonVerse) => 
+        verse.book_id === bookId && 
+        verse.chapter_number === chapterNumber &&
+        verse.version_id === versionId
+      );
+
+      // Si aucun verset trouvé, générer des versets par défaut
+      if (verses.length === 0) {
+        verses = await bibleDataInitializer.generateMissingVerses(bookId, chapterNumber);
+        
+        // Sauvegarder les nouveaux versets
+        const updatedVerses = [...allVerses, ...verses];
+        localStorage.setItem('neon_verses', JSON.stringify(updatedVerses));
+      }
+
+      return verses.sort((a: NeonVerse, b: NeonVerse) => a.verse_number - b.verse_number);
     } catch (error) {
       console.error('Error fetching verses:', error);
       return [];
@@ -82,15 +125,19 @@ class NeonBibleClient {
   // Recherche de versets
   async searchVerses(query: string, versionId: string = 'lsg1910', limit: number = 50): Promise<NeonVerse[]> {
     try {
+      await this.ensureInitialized();
       console.log('Searching verses with query:', query);
-      // Pour le moment, utilisons une recherche simple via le client local
-      const allVerses = await neonClient.select<NeonVerse>('verses', { version_id: versionId });
+      
+      const allVerses = JSON.parse(localStorage.getItem('neon_verses') || '[]');
       
       const filteredVerses = allVerses
-        .filter(verse => verse.text.toLowerCase().includes(query.toLowerCase()))
+        .filter((verse: NeonVerse) => 
+          verse.version_id === versionId &&
+          verse.text.toLowerCase().includes(query.toLowerCase())
+        )
         .slice(0, limit);
       
-      return filteredVerses.sort((a, b) => {
+      return filteredVerses.sort((a: NeonVerse, b: NeonVerse) => {
         if (a.book_name !== b.book_name) return a.book_name.localeCompare(b.book_name);
         if (a.chapter_number !== b.chapter_number) return a.chapter_number - b.chapter_number;
         return a.verse_number - b.verse_number;
@@ -104,9 +151,11 @@ class NeonBibleClient {
   // Récupérer les versions bibliques disponibles
   async getVersions(): Promise<NeonBibleVersion[]> {
     try {
+      await this.ensureInitialized();
       console.log('Fetching bible versions...');
-      const versions = await neonClient.select<NeonBibleVersion>('bible_versions');
-      return versions.sort((a, b) => a.name.localeCompare(b.name));
+      
+      const versions = JSON.parse(localStorage.getItem('neon_bible_versions') || '[]');
+      return versions.sort((a: NeonBibleVersion, b: NeonBibleVersion) => a.name.localeCompare(b.name));
     } catch (error) {
       console.error('Error fetching versions:', error);
       // Fallback vers les versions par défaut
@@ -143,13 +192,8 @@ class NeonBibleClient {
       // Chercher les versets
       if (verse) {
         // Verset spécifique
-        const verses = await neonClient.select<NeonVerse>('verses', {
-          book_id: book.id,
-          chapter_number: parseInt(chapter),
-          verse_number: parseInt(verse),
-          version_id: versionId
-        });
-        return verses;
+        const verses = await this.getVerses(book.id, parseInt(chapter), versionId);
+        return verses.filter(v => v.verse_number === parseInt(verse));
       } else {
         // Chapitre entier
         return await this.getVerses(book.id, parseInt(chapter), versionId);
@@ -159,48 +203,19 @@ class NeonBibleClient {
       return [];
     }
   }
+
+  private async getVerseCountForChapter(bookId: string, chapterNumber: number): Promise<number> {
+    const verses = await this.getVerses(bookId, chapterNumber);
+    return verses.length || 15; // 15 versets par défaut si aucun trouvé
+  }
 }
 
 export const neonBibleClient = new NeonBibleClient();
 
-// Initialisation des données de test (fallback localStorage)
+// Initialisation des données de test (fallback localStorage) - OBSOLÈTE
+// Cette fonction est maintenant remplacée par BibleDataInitializer
 export const initializeBibleData = () => {
-  console.log('🗄️ Initialisation des données bibliques (mode développement)');
-  
-  // Créer des données de test si elles n'existent pas
-  const testBooks: NeonBook[] = [
-    { id: 'gen', name: 'Genèse', testament: 'old', chapters_count: 50, order_number: 1 },
-    { id: 'exo', name: 'Exode', testament: 'old', chapters_count: 40, order_number: 2 },
-    { id: 'mat', name: 'Matthieu', testament: 'new', chapters_count: 28, order_number: 40 },
-    { id: 'joh', name: 'Jean', testament: 'new', chapters_count: 21, order_number: 43 }
-  ];
-  
-  const testVerses: NeonVerse[] = [
-    {
-      id: 'gen-1-1',
-      book_id: 'gen',
-      book_name: 'Genèse',
-      chapter_number: 1,
-      verse_number: 1,
-      text: 'Au commencement, Dieu créa les cieux et la terre.',
-      version_id: 'lsg1910',
-      version_name: 'Louis Segond (1910)'
-    },
-    {
-      id: 'joh-3-16',
-      book_id: 'joh',
-      book_name: 'Jean',
-      chapter_number: 3,
-      verse_number: 16,
-      text: 'Car Dieu a tant aimé le monde qu\'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point, mais qu\'il ait la vie éternelle.',
-      version_id: 'lsg1910',
-      version_name: 'Louis Segond (1910)'
-    }
-  ];
-  
-  // Stocker les données de test
-  localStorage.setItem('neon_books', JSON.stringify(testBooks));
-  localStorage.setItem('neon_verses', JSON.stringify(testVerses));
-  
-  console.log('✅ Données bibliques de test initialisées');
+  console.log('⚠️ initializeBibleData est obsolète. Utiliser BibleDataInitializer à la place.');
+  // Garder pour compatibilité mais rediriger vers le nouveau système
+  return bibleDataInitializer.initializeCompleteBibleData();
 };

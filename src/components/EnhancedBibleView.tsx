@@ -32,11 +32,15 @@ const EnhancedBibleView: React.FC = () => {
     canGoToPrevious,
     canGoToNext,
     isSearching,
-    hasSearchResults
+    hasSearchResults,
+    totalBooks,
+    oldTestamentBooks,
+    newTestamentBooks,
+    currentVersesCount
   } = useNeonBible();
 
-  const oldTestamentBooks = books.filter(book => book.testament === 'old');
-  const newTestamentBooks = books.filter(book => book.testament === 'new');
+  const oldTestamentBooksFiltered = books.filter(book => book.testament === 'old');
+  const newTestamentBooksFiltered = books.filter(book => book.testament === 'new');
   const displayedVerses = isSearching ? searchResults : currentVerses;
   const currentVersion = versions.find(v => v.id === selectedVersion);
 
@@ -45,7 +49,8 @@ const EnhancedBibleView: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-purple-600 text-sm sm:text-base">Chargement de la Bible depuis Neon...</p>
+          <p className="text-purple-600 text-sm sm:text-base mb-2">Chargement de la Bible complète...</p>
+          <p className="text-purple-500 text-xs">Initialisation des 73 livres bibliques catholiques</p>
         </div>
       </div>
     );
@@ -60,9 +65,9 @@ const EnhancedBibleView: React.FC = () => {
               <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Bible Neon</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Bible Complète</h1>
               <p className="text-gray-600 text-xs sm:text-sm">
-                {books.length} livres • {currentVersion?.name || 'Version inconnue'}
+                {totalBooks} livres • {oldTestamentBooks} AT + {newTestamentBooks} NT • {currentVersion?.name || 'Version inconnue'}
               </p>
             </div>
           </div>
@@ -105,20 +110,20 @@ const EnhancedBibleView: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent className="bg-white border-purple-200 max-h-60 sm:max-h-80">
                     <div className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-500">
-                      Ancien Testament ({oldTestamentBooks.length} livres)
+                      Ancien Testament ({oldTestamentBooks} livres)
                     </div>
-                    {oldTestamentBooks.map((book) => (
+                    {oldTestamentBooksFiltered.map((book) => (
                       <SelectItem key={book.id} value={book.id} className="hover:bg-purple-50 text-sm">
-                        {book.name}
+                        {book.name} ({book.chapters_count} ch.)
                       </SelectItem>
                     ))}
                     <Separator className="my-2" />
                     <div className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-500">
-                      Nouveau Testament ({newTestamentBooks.length} livres)
+                      Nouveau Testament ({newTestamentBooks} livres)
                     </div>
-                    {newTestamentBooks.map((book) => (
+                    {newTestamentBooksFiltered.map((book) => (
                       <SelectItem key={book.id} value={book.id} className="hover:bg-purple-50 text-sm">
-                        {book.name}
+                        {book.name} ({book.chapters_count} ch.)
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -209,7 +214,8 @@ const EnhancedBibleView: React.FC = () => {
                   {selectedBook.name} - Chapitre {selectedChapter}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-600">
-                  {currentVersion?.name} • {currentVerses.length} verset{currentVerses.length !== 1 ? 's' : ''}
+                  {currentVersion?.name} • {currentVersesCount} verset{currentVersesCount !== 1 ? 's' : ''} • 
+                  {selectedBook.testament === 'old' ? ' Ancien Testament' : ' Nouveau Testament'}
                 </p>
               </CardHeader>
             </Card>
@@ -249,7 +255,10 @@ const EnhancedBibleView: React.FC = () => {
                     <>
                       <Book className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-500 text-sm sm:text-base">
-                        {selectedBook ? 'Aucun verset disponible pour ce chapitre.' : 'Sélectionnez un livre pour commencer.'}
+                        {selectedBook ? 'Versets en cours de génération...' : 'Sélectionnez un livre pour commencer.'}
+                      </p>
+                      <p className="text-gray-400 text-xs sm:text-sm mt-2">
+                        Bible complète • {totalBooks} livres disponibles
                       </p>
                     </>
                   )}

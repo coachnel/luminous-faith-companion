@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Play, CheckCircle, Clock, Target, Plus, Book, Info } from 'lucide-react';
+import { Calendar, Play, CheckCircle, Clock, Target, Plus, Book, Info, X } from 'lucide-react';
 import { useReadingPlanProgress, READING_PLANS } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
 
@@ -30,7 +30,7 @@ const BIBLE_READINGS = {
 };
 
 const ReadingPlans = () => {
-  const { plans, startPlan, markDayCompleted, getPlanStats, loading } = useReadingPlanProgress();
+  const { plans, startPlan, cancelPlan, markDayCompleted, getPlanStats, loading } = useReadingPlanProgress();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [customPlan, setCustomPlan] = useState({
@@ -48,6 +48,17 @@ const ReadingPlans = () => {
       toast.success(`Plan "${plan.name}" démarré !`);
     } catch (error) {
       toast.error('Erreur lors du démarrage du plan');
+    }
+  };
+
+  const handleCancelPlan = async (planId: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir annuler ce plan de lecture ?')) {
+      try {
+        await cancelPlan(planId);
+        toast.success('Plan de lecture annulé');
+      } catch (error) {
+        toast.error('Erreur lors de l\'annulation du plan');
+      }
     }
   };
 
@@ -136,10 +147,21 @@ const ReadingPlans = () => {
                           <span>{stats.percentage}% terminé</span>
                         </div>
                       </div>
-                      <Badge variant="default" className="flex items-center gap-1 flex-shrink-0">
-                        <Target className="h-3 w-3" />
-                        En cours
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="flex items-center gap-1 flex-shrink-0">
+                          <Target className="h-3 w-3" />
+                          En cours
+                        </Badge>
+                        <ModernButton
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelPlan(plan.id)}
+                          className="gap-1 text-red-600 hover:text-red-700"
+                        >
+                          <X className="h-3 w-3" />
+                          Annuler
+                        </ModernButton>
+                      </div>
                     </div>
 
                     {/* Barre de progression */}
@@ -310,7 +332,7 @@ const ReadingPlans = () => {
               Chaque jour, vous recevrez des passages à lire selon votre plan. 
               Marquez vos lectures comme terminées pour suivre votre progression. 
               Les textes bibliques sont intégrés directement dans les plans, vous n'avez pas besoin d'accéder à une autre section. 
-              Votre progression est sauvegardée automatiquement.
+              Votre progression est sauvegardée automatiquement. Vous pouvez annuler un plan actif à tout moment.
             </p>
           </div>
         </div>

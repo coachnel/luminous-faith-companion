@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 
@@ -106,6 +105,24 @@ export function useReadingPlanProgress() {
     }
   };
 
+  const cancelPlan = async (planId: string) => {
+    if (!user) throw new Error('Utilisateur non connecté');
+
+    try {
+      const updatedPlans = plans.map(plan => 
+        plan.id === planId 
+          ? { ...plan, is_active: false, updated_at: new Date().toISOString() }
+          : plan
+      );
+      
+      setPlans(updatedPlans);
+      localStorage.setItem(`reading_plans_${user.id}`, JSON.stringify(updatedPlans));
+    } catch (error) {
+      console.error('Erreur lors de l\'annulation du plan:', error);
+      throw error;
+    }
+  };
+
   const markDayCompleted = async (planId: string, day: number) => {
     if (!user) throw new Error('Utilisateur non connecté');
 
@@ -151,6 +168,7 @@ export function useReadingPlanProgress() {
     plans,
     loading,
     startPlan,
+    cancelPlan,
     markDayCompleted,
     getPlanStats,
     refetch: fetchPlans

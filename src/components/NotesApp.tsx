@@ -3,93 +3,96 @@ import React, { useState } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
-import { Edit3, Plus, Save, X, Calendar, User, Info } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Search, Plus, Edit, Trash, Tag, FileText, Info } from 'lucide-react';
 import { useNeonNotes } from '@/hooks/useNeonData';
 import { toast } from 'sonner';
 
 const NotesApp = () => {
-  const { user } = useAuth();
-  const { notes, addNote, updateNote, deleteNote } = useNeonNotes();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingNote, setEditingNote] = useState<string | null>(null);
-  const [newNote, setNewNote] = useState({
+  const { notes, loading, addNote, updateNote, deleteNote, refetch } = useNeonNotes();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<any>(null);
+  const [formData, setFormData] = useState({
     title: '',
     content: '',
-    tags: [] as string[]
-  });
-  const [editData, setEditData] = useState({
-    title: '',
-    content: '',
-    tags: [] as string[]
+    tags: ''
   });
 
-  const createNote = async () => {
-    if (!newNote.title.trim() || !newNote.content.trim()) {
-      toast.error('Veuillez remplir tous les champs');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.title.trim()) {
+      toast.error('Veuillez donner un titre à la note');
       return;
     }
 
     try {
-      await addNote({
-        title: newNote.title,
-        content: newNote.content,
-        tags: newNote.tags
-      });
+      const noteData = {
+        title: formData.title,
+        content: formData.content,
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      };
 
-      setNewNote({ title: '', content: '', tags: [] });
-      setShowCreateForm(false);
-      toast.success('Note créée !');
-    } catch (error) {
-      toast.error('Erreur lors de la création');
-    }
-  };
-
-  const startEdit = (note: any) => {
-    setEditingNote(note.id);
-    setEditData({
-      title: note.title,
-      content: note.content,
-      tags: note.tags || []
-    });
-  };
-
-  const saveEdit = async () => {
-    if (!editData.title.trim() || !editData.content.trim()) {
-      toast.error('Veuillez remplir tous les champs');
-      return;
-    }
-
-    try {
-      await updateNote(editingNote!, {
-        title: editData.title,
-        content: editData.content,
-        tags: editData.tags
-      });
-
+      if (editingNote) {
+        await updateNote(editingNote.id, noteData);
+        toast.success('Note mise à jour !');
+      } else {
+        await addNote(noteData);
+        toast.success('Note créée !');
+      }
+      
+      setIsDialogOpen(false);
       setEditingNote(null);
-      setEditData({ title: '', content: '', tags: [] });
-      toast.success('Note mise à jour !');
+      setFormData({ title: '', content: '', tags: '' });
     } catch (error) {
-      toast.error('Erreur lors de la mise à jour');
+      toast.error('Erreur lors de l\'enregistrement');
     }
   };
 
-  const cancelEdit = () => {
-    setEditingNote(null);
-    setEditData({ title: '', content: '', tags: [] });
+  const handleEdit = (note: any) => {
+    setEditingNote(note);
+    setFormData({
+      title: note.title,
+      content: note.content || '',
+      tags: note.tags?.join(', ') || ''
+    });
+    setIsDialogOpen(true);
   };
 
-  const handleDeleteNote = async (noteId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) {
+  const handleDelete = async (noteId: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) {
       try {
         await deleteNote(noteId);
-        toast.success('Note supprimée !');
+        toast.success('Note supprimée');
       } catch (error) {
         toast.error('Erreur lors de la suppression');
       }
     }
   };
+
+  // Filtrage des notes
+  const filteredNotes = notes.filter(note => {
+    const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         note.content?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTag = !selectedTag || note.tags?.includes(selectedTag);
+    return matchesSearch && matchesTag;
+  });
+
+  // Extraction de tous les tags
+  const allTags = Array.from(new Set(notes.flatMap(note => note.tags || [])));
+
+  if (loading) {
+    return (
+      <div className="p-4 text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p>Chargement des notes...</p>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -103,175 +106,195 @@ const NotesApp = () => {
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
             style={{ background: 'var(--accent-primary)' }}
           >
-            <Edit3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Journal</h1>
             <p className="text-sm text-[var(--text-secondary)] break-words">
-              Capturez vos pensées et réflexions
+              Organisez vos pensées et réflexions
             </p>
           </div>
-        </div>
-      </ModernCard>
-
-      {/* Actions principales */}
-      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)]">Mes notes</h3>
-            <p className="text-sm text-[var(--text-secondary)]">{notes.length} note(s) créée(s)</p>
-          </div>
-          <ModernButton 
-            onClick={() => setShowCreateForm(!showCreateForm)} 
-            className="gap-2 flex-shrink-0"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="whitespace-nowrap">Nouvelle note</span>
-          </ModernButton>
-        </div>
-
-        {/* Formulaire de création */}
-        {showCreateForm && (
-          <ModernCard className="mb-6 p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-            <div className="space-y-4">
-              <h4 className="font-semibold text-[var(--text-primary)]">Nouvelle note</h4>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <ModernButton 
+                onClick={() => {
+                  setEditingNote(null);
+                  setFormData({ title: '', content: '', tags: '' });
+                }}
+                className="gap-2 flex-shrink-0"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="whitespace-nowrap">Nouvelle note</span>
+              </ModernButton>
+            </DialogTrigger>
+            <DialogContent className="bg-[var(--bg-card)] max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-[var(--text-primary)]">
+                  {editingNote ? 'Modifier la note' : 'Créer une nouvelle note'}
+                </DialogTitle>
+              </DialogHeader>
               
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  Titre
-                </label>
-                <input
-                  type="text"
-                  value={newNote.title}
-                  onChange={(e) => setNewNote({...newNote, title: e.target.value})}
-                  placeholder="Titre de votre note..."
-                  className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  Contenu
-                </label>
-                <textarea
-                  value={newNote.content}
-                  onChange={(e) => setNewNote({...newNote, content: e.target.value})}
-                  placeholder="Écrivez votre note ici..."
-                  className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] h-32 resize-none"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <ModernButton 
-                  onClick={createNote}
-                  disabled={!newNote.title.trim() || !newNote.content.trim()}
-                  className="flex-1 gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  <span>Créer la note</span>
-                </ModernButton>
-                <ModernButton 
-                  onClick={() => setShowCreateForm(false)}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Annuler
-                </ModernButton>
-              </div>
-            </div>
-          </ModernCard>
-        )}
-
-        {/* Liste des notes */}
-        {notes.length === 0 ? (
-          <div className="text-center py-8">
-            <Edit3 className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Aucune note</h4>
-            <p className="text-[var(--text-secondary)] mb-4">Créez votre première note</p>
-            <ModernButton onClick={() => setShowCreateForm(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              <span>Créer une note</span>
-            </ModernButton>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {notes.map((note) => (
-              <ModernCard key={note.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-                {editingNote === note.id ? (
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={editData.title}
-                      onChange={(e) => setEditData({...editData, title: e.target.value})}
-                      className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] font-semibold"
-                    />
-                    <textarea
-                      value={editData.content}
-                      onChange={(e) => setEditData({...editData, content: e.target.value})}
-                      className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] h-32 resize-none"
-                    />
-                    <div className="flex gap-2">
-                      <ModernButton onClick={saveEdit} size="sm" className="gap-2">
-                        <Save className="h-4 w-4" />
-                        <span>Sauvegarder</span>
-                      </ModernButton>
-                      <ModernButton onClick={cancelEdit} size="sm" variant="outline" className="gap-2">
-                        <X className="h-4 w-4" />
-                        <span>Annuler</span>
-                      </ModernButton>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-semibold text-[var(--text-primary)] break-words">{note.title}</h4>
-                        <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words mt-2">
-                          {note.content}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[var(--border-default)]">
-                      <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{new Date(note.created_at).toLocaleDateString('fr-FR')}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          <span>Privé</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <ModernButton
-                          onClick={() => startEdit(note)}
-                          size="sm"
-                          variant="outline"
-                          className="gap-2"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          <span>Modifier</span>
-                        </ModernButton>
-                        <ModernButton
-                          onClick={() => handleDeleteNote(note.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="gap-2 text-red-600 hover:text-red-700"
-                        >
-                          <X className="h-4 w-4" />
-                          <span className="hidden sm:inline">Supprimer</span>
-                        </ModernButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </ModernCard>
-            ))}
-          </div>
-        )}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Titre *
+                  </label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Titre de la note..."
+                    className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Contenu
+                  </label>
+                  <Textarea
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    placeholder="Écrivez vos pensées..."
+                    className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
+                    rows={6}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Tags (séparés par des virgules)
+                  </label>
+                  <Input
+                    value={formData.tags}
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    placeholder="personnel, prière, méditation..."
+                    className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <ModernButton type="submit" className="flex-1">
+                    {editingNote ? 'Modifier' : 'Créer'}
+                  </ModernButton>
+                  <ModernButton 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Annuler
+                  </ModernButton>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </ModernCard>
+
+      {/* Recherche et filtres */}
+      <ModernCard className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-secondary)] h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Rechercher dans vos notes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-[var(--border-default)] bg-[var(--bg-secondary)]"
+            />
+          </div>
+          
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <ModernButton
+                variant={selectedTag === '' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedTag('')}
+              >
+                Tous
+              </ModernButton>
+              {allTags.map(tag => (
+                <ModernButton
+                  key={tag}
+                  variant={selectedTag === tag ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedTag(tag)}
+                  className="gap-1"
+                >
+                  <Tag className="h-3 w-3" />
+                  {tag}
+                </ModernButton>
+              ))}
+            </div>
+          )}
+        </div>
+      </ModernCard>
+
+      {/* Liste des notes */}
+      {filteredNotes.length === 0 ? (
+        <ModernCard className="bg-[var(--bg-card)] border-[var(--border-default)]">
+          <div className="text-center py-8">
+            <FileText className="mx-auto mb-4 text-[var(--text-secondary)]" size={48} />
+            <p className="text-[var(--text-secondary)] mb-2">
+              {searchTerm || selectedTag ? 'Aucune note trouvée' : 'Aucune note pour le moment'}
+            </p>
+            <p className="text-sm text-[var(--text-secondary)]">
+              {searchTerm || selectedTag 
+                ? 'Essayez de modifier vos critères de recherche'
+                : 'Créez votre première note pour commencer'
+              }
+            </p>
+          </div>
+        </ModernCard>
+      ) : (
+        <div className="space-y-4">
+          {filteredNotes.map((note) => (
+            <ModernCard key={note.id} className="bg-[var(--bg-card)] border-[var(--border-default)]">
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-[var(--text-primary)] break-words">{note.title}</h3>
+                    {note.content && (
+                      <p className="text-sm text-[var(--text-secondary)] mt-2 line-clamp-3 break-words">
+                        {note.content}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2 flex-shrink-0">
+                    <ModernButton variant="ghost" size="sm" onClick={() => handleEdit(note)}>
+                      <Edit className="h-4 w-4" />
+                    </ModernButton>
+                    <ModernButton 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDelete(note.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </ModernButton>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex flex-wrap gap-1">
+                    {note.tags?.map(tag => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <span className="text-xs text-[var(--text-secondary)] flex-shrink-0">
+                    {new Date(note.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </ModernCard>
+          ))}
+        </div>
+      )}
 
       {/* Comment ça marche */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
@@ -284,9 +307,9 @@ const NotesApp = () => {
               Comment ça marche ?
             </h3>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Créez des notes personnelles pour capturer vos pensées, réflexions ou idées importantes. 
-              Vous pouvez modifier ou supprimer vos notes à tout moment. 
-              Toutes vos notes sont privées et sauvegardées de manière sécurisée dans votre compte personnel.
+              Créez et organisez vos notes personnelles avec ce journal numérique. 
+              Ajoutez des tags pour catégoriser vos notes et utilisez la fonction de recherche pour retrouver rapidement ce que vous cherchez. 
+              Vos notes sont privées et sécurisées. Parfait pour noter vos réflexions, prières, ou idées importantes.
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { ModernFinanceNavigation } from './ModernFinanceNavigation';
+import ModernFinanceNavigation from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
 import Prayer from './Prayer';
 import NotesApp from './NotesApp';
@@ -11,12 +11,16 @@ import PrayerCircles from './PrayerCircles';
 import SettingsApp from './SettingsApp';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
+import { useDataCleanup } from '@/hooks/useDataCleanup';
 
 type AppSection = 'dashboard' | 'prayer' | 'notes' | 'challenges' | 'reading-plans' | 'discover' | 'prayer-circles' | 'settings';
 
 const MobileApp = () => {
   const { user, loading } = useAuth();
   const [currentSection, setCurrentSection] = useState<AppSection>('dashboard');
+  
+  // Initialiser le nettoyage automatique des données
+  useDataCleanup();
 
   const handleNavigation = useCallback((section: string) => {
     const sectionMap: Record<string, AppSection> = {
@@ -72,8 +76,8 @@ const MobileApp = () => {
         {renderSection}
       </div>
       <ModernFinanceNavigation 
-        currentSection={currentSection} 
-        onNavigate={handleNavigation}
+        activeSection={currentSection} 
+        setActiveSection={setCurrentSection}
       />
     </div>
   );

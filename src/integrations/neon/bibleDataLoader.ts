@@ -3,8 +3,8 @@
 import frApeeData from '@/data/json/fr_apee.json';
 import { NeonVerse, NeonBook, NeonBibleVersion } from './bibleClient';
 
-// Interface pour les données JSON
-interface BibleJsonEntry {
+// Interface pour les données JSON fr_apee
+interface FrApeeEntry {
   book: string;
   chapter: number;
   verse: number;
@@ -171,27 +171,31 @@ export class BibleDataLoader {
     console.log('🔄 Chargement des versets réels depuis fr_apee.json...');
     
     const verses: NeonVerse[] = [];
-    const data = frApeeData as BibleJsonEntry[];
     
-    console.log(`📊 ${data.length} versets trouvés dans fr_apee.json`);
-    
-    data.forEach((entry) => {
-      const bookId = BOOK_NAME_TO_ID[entry.book];
-      const bookName = ID_TO_FRENCH_NAME[bookId] || entry.book;
+    // Vérifier si frApeeData est un tableau
+    if (Array.isArray(frApeeData)) {
+      console.log(`📊 ${frApeeData.length} versets trouvés dans fr_apee.json`);
       
-      if (bookId && entry.text && entry.text.trim().length > 0) {
-        verses.push({
-          id: `${bookId}-${entry.chapter}-${entry.verse}`,
-          book_id: bookId,
-          book_name: bookName,
-          chapter_number: entry.chapter,
-          verse_number: entry.verse,
-          text: entry.text.trim(),
-          version_id: 'fr_apee',
-          version_name: 'Bible Française APEE'
-        });
-      }
-    });
+      frApeeData.forEach((entry: FrApeeEntry) => {
+        const bookId = BOOK_NAME_TO_ID[entry.book];
+        const bookName = ID_TO_FRENCH_NAME[bookId] || entry.book;
+        
+        if (bookId && entry.text && entry.text.trim().length > 0) {
+          verses.push({
+            id: `${bookId}-${entry.chapter}-${entry.verse}`,
+            book_id: bookId,
+            book_name: bookName,
+            chapter_number: entry.chapter,
+            verse_number: entry.verse,
+            text: entry.text.trim(),
+            version_id: 'fr_apee',
+            version_name: 'Bible Française APEE'
+          });
+        }
+      });
+    } else {
+      console.warn('Format de données fr_apee non reconnu, utilisation des données de fallback');
+    }
     
     console.log(`✅ ${verses.length} versets réels chargés et formatés`);
     

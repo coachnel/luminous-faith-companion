@@ -15,9 +15,11 @@ const ProfilePhoto = () => {
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
+      console.log('Upload started');
       setUploading(true);
       
       if (!event.target.files || event.target.files.length === 0) {
+        console.log('No file selected');
         toast({
           title: "Aucun fichier sélectionné",
           description: "Veuillez sélectionner une image",
@@ -27,6 +29,7 @@ const ProfilePhoto = () => {
       }
 
       if (!user?.id) {
+        console.log('User not authenticated');
         toast({
           title: "Erreur d'authentification",
           description: "Vous devez être connecté pour modifier votre photo",
@@ -36,9 +39,11 @@ const ProfilePhoto = () => {
       }
 
       const file = event.target.files[0];
+      console.log('File selected:', file.name, file.size, file.type);
       
       // Vérifier la taille du fichier (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
+        console.log('File too large:', file.size);
         toast({
           title: "Fichier trop volumineux",
           description: "La photo ne doit pas dépasser 5MB",
@@ -49,6 +54,7 @@ const ProfilePhoto = () => {
 
       // Vérifier le type de fichier
       if (!file.type.startsWith('image/')) {
+        console.log('Invalid file type:', file.type);
         toast({
           title: "Type de fichier non supporté",
           description: "Veuillez sélectionner une image",
@@ -60,7 +66,7 @@ const ProfilePhoto = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
 
-      console.log('Uploading file:', fileName);
+      console.log('Uploading file to path:', fileName);
 
       // Upload file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -71,7 +77,7 @@ const ProfilePhoto = () => {
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('Upload error details:', uploadError);
         throw uploadError;
       }
 
@@ -83,12 +89,14 @@ const ProfilePhoto = () => {
         .getPublicUrl(fileName);
 
       const publicUrl = urlData.publicUrl;
-      console.log('Public URL:', publicUrl);
+      console.log('Public URL generated:', publicUrl);
 
       // Update profile with new avatar URL
-      await updateProfile({
+      const updateResult = await updateProfile({
         avatar_url: publicUrl
       });
+
+      console.log('Profile update result:', updateResult);
 
       toast({
         title: "Photo mise à jour",
@@ -98,10 +106,10 @@ const ProfilePhoto = () => {
       // Reset file input
       event.target.value = '';
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      console.error('Complete error details:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour votre photo de profil. Vérifiez votre connexion et réessayez.",
+        description: `Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
         variant: "destructive",
       });
     } finally {
@@ -120,7 +128,7 @@ const ProfilePhoto = () => {
                 alt="Photo de profil"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  console.error('Error loading avatar image');
+                  console.error('Error loading avatar image:', profile.avatar_url);
                   e.currentTarget.style.display = 'none';
                 }}
               />

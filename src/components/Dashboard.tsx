@@ -81,7 +81,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         {/* Actions rapides */}
         <QuickActions onNavigate={onNavigate} />
 
-        {/* Fonctionnalités principales - Design mobile amélioré */}
+        {/* Fonctionnalités principales - Design mobile optimisé */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature, index) => (
             <Card key={index} className="glass border-white/30 bg-white/90 hover:shadow-lg transition-all duration-200">
@@ -91,16 +91,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <feature.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
                   <div className="text-center space-y-1 sm:space-y-2">
-                    <h3 className="font-semibold text-gray-800 text-sm sm:text-lg leading-tight">
+                    <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-tight px-2">
                       {feature.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-tight px-1">
+                    <p className="text-xs sm:text-sm text-gray-600 leading-snug px-1 min-h-[2.5rem] sm:min-h-[3rem] flex items-center justify-center">
                       {feature.description}
                     </p>
                   </div>
                   <Button 
                     onClick={feature.action}
-                    className="w-full text-xs sm:text-sm py-2 sm:py-2.5"
+                    className="w-full text-xs sm:text-sm py-2 sm:py-2.5 mt-auto"
                     variant="outline"
                   >
                     Découvrir

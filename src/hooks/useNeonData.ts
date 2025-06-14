@@ -73,7 +73,7 @@ export function useNeonNotes() {
         WHERE user_id = ${user.id} 
         ORDER BY created_at DESC
       `;
-      setNotes(result as NeonNote[]);
+      setNotes(result as unknown as NeonNote[]);
     } catch (error) {
       console.error('Error fetching notes from Neon:', error);
       setNotes([]);
@@ -107,31 +107,35 @@ export function useNeonNotes() {
 
     try {
       console.log('Updating note in Neon:', id, noteData);
-      const updates: string[] = [];
+      
+      const setParts: string[] = [];
       const values: any[] = [];
       
       if (noteData.title !== undefined) {
-        updates.push(`title = $${values.length + 1}`);
+        setParts.push('title = $' + (values.length + 1));
         values.push(noteData.title);
       }
       if (noteData.content !== undefined) {
-        updates.push(`content = $${values.length + 1}`);
+        setParts.push('content = $' + (values.length + 1));
         values.push(noteData.content);
       }
       if (noteData.tags !== undefined) {
-        updates.push(`tags = $${values.length + 1}`);
+        setParts.push('tags = $' + (values.length + 1));
         values.push(noteData.tags);
       }
       
-      updates.push(`updated_at = NOW()`);
-      values.push(id, user.id);
-
-      await neonSql`
-        UPDATE notes 
-        SET ${neonSql(updates.join(', '))}
-        WHERE id = ${id} AND user_id = ${user.id}
-      `;
-      await fetchNotes();
+      setParts.push('updated_at = NOW()');
+      
+      if (setParts.length > 1) {
+        values.push(id, user.id);
+        
+        await neonSql`
+          UPDATE notes 
+          SET ${neonSql.unsafe(setParts.join(', '))}
+          WHERE id = ${id} AND user_id = ${user.id}
+        `;
+        await fetchNotes();
+      }
     } catch (error) {
       console.error('Error updating note in Neon:', error);
       throw error;
@@ -177,7 +181,7 @@ export function useNeonFavoriteVerses() {
         WHERE user_id = ${user.id} 
         ORDER BY created_at DESC
       `;
-      setFavoriteVerses(result as NeonFavoriteVerse[]);
+      setFavoriteVerses(result as unknown as NeonFavoriteVerse[]);
     } catch (error) {
       console.error('Error fetching favorite verses from Neon:', error);
       setFavoriteVerses([]);
@@ -250,7 +254,7 @@ export function useNeonPrayerRequests() {
         WHERE user_id = ${user.id} 
         ORDER BY created_at DESC
       `;
-      setPrayerRequests(result as NeonPrayerRequest[]);
+      setPrayerRequests(result as unknown as NeonPrayerRequest[]);
     } catch (error) {
       console.error('Error fetching prayer requests from Neon:', error);
       setPrayerRequests([]);

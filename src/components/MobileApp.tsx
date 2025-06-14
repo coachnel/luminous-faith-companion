@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useChallengeCleanup } from '@/hooks/useChallengeCleanup';
 import AuthPage from './AuthPage';
 import ExpandedNavigation from './ExpandedNavigation';
 import RealTimeDashboard from './RealTimeDashboard';
@@ -22,42 +23,7 @@ const MobileApp = () => {
   const { user } = useAuth();
   const { theme } = useTheme();
 
-  // Activer le système de nettoyage des défis
-  const useChallengeCleanup = () => {
-    const { user } = useAuth();
-
-    useEffect(() => {
-      if (!user) return;
-
-      const cleanupExpiredChallenges = () => {
-        try {
-          const userChallenges = localStorage.getItem(`challenges_${user.id}`);
-          if (userChallenges) {
-            const challenges = JSON.parse(userChallenges);
-            const now = new Date();
-            
-            const activeChallenges = challenges.filter((challenge: any) => {
-              const createdAt = new Date(challenge.created_at);
-              const expirationDate = new Date(createdAt);
-              expirationDate.setDate(expirationDate.getDate() + challenge.target_days);
-              return expirationDate > now;
-            });
-            
-            if (activeChallenges.length !== challenges.length) {
-              localStorage.setItem(`challenges_${user.id}`, JSON.stringify(activeChallenges));
-            }
-          }
-        } catch (error) {
-          console.error('Erreur lors du nettoyage:', error);
-        }
-      };
-
-      cleanupExpiredChallenges();
-      const interval = setInterval(cleanupExpiredChallenges, 24 * 60 * 60 * 1000);
-      return () => clearInterval(interval);
-    }, [user]);
-  };
-
+  // Utiliser le hook de nettoyage des défis
   useChallengeCleanup();
 
   if (!user) {

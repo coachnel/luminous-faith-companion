@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Heart, Send, MessageCircle, User, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { triggerNotification } from '@/components/AdvancedNotifications';
 
 interface PrayerRequest {
   id: string;
@@ -113,16 +113,6 @@ const PrayerSharing = () => {
       setNewTitle('');
       setNewContent('');
       setIsAnonymous(false);
-
-      // Déclencher une notification
-      triggerNotification({
-        id: 'new-prayer-request',
-        time: new Date().toISOString(),
-        message: `${isAnonymous ? 'Un utilisateur anonyme' : getUserDisplayName()} a partagé une demande de prière.`,
-        days: [],
-        active: true,
-        type: 'prayer',
-      });
 
       toast({
         title: '🙏 Demande de prière partagée',

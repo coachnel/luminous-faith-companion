@@ -104,13 +104,15 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
             <Button
               key={index}
               variant="outline"
-              className="h-auto p-4 flex flex-col gap-2 hover:shadow-md transition-all border-gray-200 bg-white/50"
+              className="h-auto p-3 sm:p-4 flex flex-col gap-1 sm:gap-2 hover:shadow-md transition-all border-gray-200 bg-white/50 min-h-[80px] sm:min-h-[100px]"
               onClick={action.action}
             >
-              <div className={`w-10 h-10 rounded-full ${action.color} flex items-center justify-center`}>
-                <action.icon size={20} />
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${action.color} flex items-center justify-center flex-shrink-0`}>
+                <action.icon size={16} className="sm:w-5 sm:h-5" />
               </div>
-              <span className="text-sm font-medium text-gray-700">{action.label}</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-700 text-center leading-tight break-words hyphens-auto">
+                {action.label}
+              </span>
             </Button>
           ))}
         </div>

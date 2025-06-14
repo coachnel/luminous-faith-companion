@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
 import ExpandedNavigation from './ExpandedNavigation';
 import RealTimeDashboard from './RealTimeDashboard';
-import BibleReader from './BibleReader';
+import EnhancedBibleView from './EnhancedBibleView';
 import PrayerCircles from './PrayerCircles';
 import RichTextNotesApp from './RichTextNotesApp';
 import FavoriteVerses from './FavoriteVerses';
@@ -31,7 +31,7 @@ const MobileApp = () => {
       case 'dashboard':
         return <RealTimeDashboard onNavigate={handleNavigate} />;
       case 'bible':
-        return <BibleReader />;
+        return <EnhancedBibleView />;
       case 'prayer-circles':
         return <PrayerCircles />;
       case 'notes':

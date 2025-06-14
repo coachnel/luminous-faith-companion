@@ -1,0 +1,266 @@
+
+import React from 'react';
+import { Search, Book, ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { useNeonBible } from '@/hooks/useNeonBible';
+import VerseCard from './VerseCard';
+
+const EnhancedBibleView: React.FC = () => {
+  const {
+    books,
+    currentVerses,
+    searchResults,
+    versions,
+    selectedBook,
+    selectedChapter,
+    selectedVersion,
+    searchQuery,
+    isLoading,
+    selectBook,
+    selectChapter,
+    selectVersion,
+    setSearchQuery,
+    clearSearch,
+    goToPreviousChapter,
+    goToNextChapter,
+    canGoToPrevious,
+    canGoToNext,
+    isSearching,
+    hasSearchResults
+  } = useNeonBible();
+
+  const oldTestamentBooks = books.filter(book => book.testament === 'old');
+  const newTestamentBooks = books.filter(book => book.testament === 'new');
+  const displayedVerses = isSearching ? searchResults : currentVerses;
+  const currentVersion = versions.find(v => v.id === selectedVersion);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-purple-600 text-sm sm:text-base">Chargement de la Bible depuis Neon...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
+      <div className="bg-white shadow-sm border-b border-purple-100 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center">
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Bible Neon</h1>
+              <p className="text-gray-600 text-xs sm:text-sm">
+                {books.length} livres • {currentVersion?.name || 'Version inconnue'}
+              </p>
+            </div>
+          </div>
+
+          {/* Barre de recherche */}
+          <div className="relative mb-4 sm:mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
+            <Input
+              placeholder="Rechercher un verset, une référence (ex: Jean 3:16) ou un mot..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 sm:pl-10 pr-10 py-2 sm:py-3 text-sm sm:text-base border-purple-200 focus:border-purple-600 focus:ring-purple-600"
+            />
+            {isSearching && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSearch}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Contrôles de navigation */}
+          {!isSearching && (
+            <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4 mb-4">
+              {/* Sélecteur de livre */}
+              <div className="w-full">
+                <Select 
+                  value={selectedBook?.id || ''} 
+                  onValueChange={(bookId) => {
+                    const book = books.find(b => b.id === bookId);
+                    if (book) selectBook(book);
+                  }}
+                >
+                  <SelectTrigger className="border-purple-200 focus:border-purple-600 text-sm sm:text-base">
+                    <SelectValue placeholder="Sélectionner un livre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-purple-200 max-h-60 sm:max-h-80">
+                    <div className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-500">
+                      Ancien Testament ({oldTestamentBooks.length} livres)
+                    </div>
+                    {oldTestamentBooks.map((book) => (
+                      <SelectItem key={book.id} value={book.id} className="hover:bg-purple-50 text-sm">
+                        {book.name}
+                      </SelectItem>
+                    ))}
+                    <Separator className="my-2" />
+                    <div className="px-3 py-2 text-xs sm:text-sm font-semibold text-gray-500">
+                      Nouveau Testament ({newTestamentBooks.length} livres)
+                    </div>
+                    {newTestamentBooks.map((book) => (
+                      <SelectItem key={book.id} value={book.id} className="hover:bg-purple-50 text-sm">
+                        {book.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Navigation chapitre */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToPreviousChapter}
+                  disabled={!canGoToPrevious}
+                  className="border-purple-200 hover:bg-purple-50 flex-shrink-0 p-2 sm:px-3"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <Select 
+                  value={selectedChapter.toString()} 
+                  onValueChange={(value) => selectChapter(parseInt(value))}
+                >
+                  <SelectTrigger className="border-purple-200 focus:border-purple-600 text-sm sm:text-base">
+                    <SelectValue placeholder="Chapitre" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-purple-200 max-h-60">
+                    {selectedBook && Array.from({ length: selectedBook.chapters_count }, (_, i) => i + 1).map((chapter) => (
+                      <SelectItem key={chapter} value={chapter.toString()} className="hover:bg-purple-50 text-sm">
+                        Chapitre {chapter}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToNextChapter}
+                  disabled={!canGoToNext}
+                  className="border-purple-200 hover:bg-purple-50 flex-shrink-0 p-2 sm:px-3"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Sélecteur de version */}
+              <div className="w-full">
+                <Select value={selectedVersion} onValueChange={selectVersion}>
+                  <SelectTrigger className="border-purple-200 focus:border-purple-600 text-sm sm:text-base">
+                    <SelectValue placeholder="Version" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-purple-200">
+                    {versions.map((version) => (
+                      <SelectItem key={version.id} value={version.id} className="hover:bg-purple-50 text-sm">
+                        {version.name} ({version.year})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-8">
+        {/* En-tête de contenu */}
+        {isSearching ? (
+          <Card className="mb-4 sm:mb-6 bg-white border-purple-200">
+            <CardHeader className="pb-3 px-4 sm:px-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-semibold text-purple-600 flex items-center gap-2">
+                  <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Résultats pour "{searchQuery}"
+                </h2>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                  {searchResults.length} résultat{searchResults.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+            </CardHeader>
+          </Card>
+        ) : (
+          selectedBook && (
+            <Card className="mb-4 sm:mb-6 bg-white border-purple-200">
+              <CardHeader className="pb-3 px-4 sm:px-6">
+                <h2 className="text-base sm:text-lg font-semibold text-purple-600 flex items-center gap-2">
+                  <Book className="h-4 w-4 sm:h-5 sm:w-5" />
+                  {selectedBook.name} - Chapitre {selectedChapter}
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  {currentVersion?.name} • {currentVerses.length} verset{currentVerses.length !== 1 ? 's' : ''}
+                </p>
+              </CardHeader>
+            </Card>
+          )
+        )}
+
+        {/* Liste des versets */}
+        <ScrollArea className="h-[calc(100vh-280px)] sm:h-[600px]">
+          <div className="space-y-3 sm:space-y-4 pb-4">
+            {displayedVerses.length > 0 ? (
+              displayedVerses.map((verse) => (
+                <div key={`${verse.book_id}-${verse.chapter_number}-${verse.verse_number}`} className="animate-fade-in">
+                  <VerseCard 
+                    verse={{
+                      book: verse.book_name,
+                      chapter: verse.chapter_number,
+                      verse: verse.verse_number,
+                      text: verse.text
+                    }} 
+                  />
+                </div>
+              ))
+            ) : (
+              <Card className="bg-white border-purple-200">
+                <CardContent className="py-8 sm:py-12 text-center px-4">
+                  {isSearching ? (
+                    <>
+                      <Search className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 text-sm sm:text-base mb-2">
+                        Aucun verset trouvé pour "{searchQuery}"
+                      </p>
+                      <p className="text-gray-400 text-xs sm:text-sm">
+                        Essayez une référence comme "Jean 3:16" ou un mot-clé
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Book className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 text-sm sm:text-base">
+                        {selectedBook ? 'Aucun verset disponible pour ce chapitre.' : 'Sélectionnez un livre pour commencer.'}
+                      </p>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedBibleView;

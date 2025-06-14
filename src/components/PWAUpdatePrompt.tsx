@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Download, RefreshCw, X } from 'lucide-react';
+import { Download, RefreshCw, X, Monitor, Smartphone } from 'lucide-react';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
 import { usePWAPrompt } from '@/hooks/usePWAPrompt';
@@ -15,18 +15,35 @@ const PWAUpdatePrompt = () => {
     // Vérifier si l'app est déjà installée
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
-    const isInstalled = isStandalone || isInWebAppiOS;
+    const isInWebAppChrome = window.matchMedia('(display-mode: minimal-ui)').matches;
+    const isInstalled = isStandalone || isInWebAppiOS || isInWebAppChrome;
 
     // Afficher le prompt d'installation si pas installé et disponible
     if (!isInstalled && isAvailable) {
       // Délai pour éviter d'être trop intrusif
-      setTimeout(() => setShowInstallPrompt(true), 3000);
+      const timer = setTimeout(() => {
+        const installDismissed = localStorage.getItem('pwa-install-dismissed');
+        const recentlyDismissed = installDismissed && 
+          (Date.now() - parseInt(installDismissed)) < 24 * 60 * 60 * 1000; // 24h
+        
+        if (!recentlyDismissed) {
+          setShowInstallPrompt(true);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timer);
     }
 
     // Écouter les événements PWA
     const handlePWAInstallAvailable = () => {
       if (!isInstalled) {
-        setShowInstallPrompt(true);
+        const installDismissed = localStorage.getItem('pwa-install-dismissed');
+        const recentlyDismissed = installDismissed && 
+          (Date.now() - parseInt(installDismissed)) < 24 * 60 * 60 * 1000; // 24h
+        
+        if (!recentlyDismissed) {
+          setShowInstallPrompt(true);
+        }
       }
     };
 
@@ -121,27 +138,32 @@ const PWAUpdatePrompt = () => {
     }, 30 * 60 * 1000); // 30 minutes
   };
 
-  // Vérifier si l'utilisateur a déjà refusé l'installation récemment
-  const installDismissed = localStorage.getItem('pwa-install-dismissed');
-  const recentlyDismissed = installDismissed && 
-    (Date.now() - parseInt(installDismissed)) < 24 * 60 * 60 * 1000; // 24h
+  // Détecter le type d'appareil
+  const isDesktop = window.innerWidth >= 1024;
+  const DeviceIcon = isDesktop ? Monitor : Smartphone;
 
-  if ((!showInstallPrompt || recentlyDismissed) && !showUpdatePrompt) return null;
+  if (!showInstallPrompt && !showUpdatePrompt) return null;
 
   return (
     <div className="fixed top-4 left-4 right-4 z-50 flex justify-center">
       <ModernCard className="max-w-sm w-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20 backdrop-blur-md">
-        {showInstallPrompt && !recentlyDismissed && (
+        {showInstallPrompt && (
           <div className="flex items-center gap-3 p-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
               <Download className="h-6 w-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-[var(--text-primary)] text-sm">
-                Installer l'application
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-[var(--text-primary)] text-sm">
+                  Installer l'application
+                </h3>
+                <DeviceIcon className="h-4 w-4 text-[var(--text-secondary)]" />
+              </div>
               <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
-                Accès rapide depuis votre écran d'accueil, notifications et fonctionnement hors-ligne
+                {isDesktop 
+                  ? "Accès rapide depuis votre bureau, notifications et fonctionnement hors-ligne"
+                  : "Accès rapide depuis votre écran d'accueil, notifications et fonctionnement hors-ligne"
+                }
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0">

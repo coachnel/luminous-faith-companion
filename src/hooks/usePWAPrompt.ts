@@ -16,7 +16,8 @@ export function usePWAPrompt() {
     const checkInstallStatus = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       const isInWebAppiOS = (window.navigator as any).standalone === true;
-      const installed = isStandalone || isInWebAppiOS;
+      const isInWebAppChrome = window.matchMedia('(display-mode: minimal-ui)').matches;
+      const installed = isStandalone || isInWebAppiOS || isInWebAppChrome;
       setIsInstalled(installed);
       
       // Vérifier si l'installation est possible
@@ -45,56 +46,83 @@ export function usePWAPrompt() {
       setDeferredPrompt(null);
       console.log('PWA: Application installée');
       
-      // Track installation without gtag dependency
+      // Track installation without external dependencies
       console.log('PWA installation completed');
     };
 
     // Écouter les changements de mode d'affichage
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const mediaQueries = [
+      window.matchMedia('(display-mode: standalone)'),
+      window.matchMedia('(display-mode: minimal-ui)')
+    ];
+    
     const handleDisplayModeChange = () => {
       checkInstallStatus();
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
-    mediaQuery.addEventListener('change', handleDisplayModeChange);
+    
+    mediaQueries.forEach(mq => {
+      mq.addEventListener('change', handleDisplayModeChange);
+    });
 
-    // Vérification périodique pour iOS (qui ne supporte pas beforeinstallprompt)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS && !isInstalled) {
+    // Vérification pour les navigateurs desktop
+    const isDesktop = window.innerWidth >= 1024;
+    const isChrome = navigator.userAgent.includes('Chrome');
+    const isEdge = navigator.userAgent.includes('Edg');
+    
+    if ((isChrome || isEdge) && isDesktop && !isInstalled) {
+      // Délai pour permettre au prompt natif de se charger
       const timer = setTimeout(() => {
-        if (!isInstalled) {
+        if (!deferredPrompt && !isInstalled) {
           setCanInstall(true);
           window.dispatchEvent(new CustomEvent("pwa-install-available"));
         }
-      }, 2000);
+      }, 3000);
 
       return () => {
         clearTimeout(timer);
         window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
         window.removeEventListener("appinstalled", handleAppInstalled);
-        mediaQuery.removeEventListener('change', handleDisplayModeChange);
+        mediaQueries.forEach(mq => {
+          mq.removeEventListener('change', handleDisplayModeChange);
+        });
       };
     }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
-      mediaQuery.removeEventListener('change', handleDisplayModeChange);
+      mediaQueries.forEach(mq => {
+        mq.removeEventListener('change', handleDisplayModeChange);
+      });
     };
-  }, []);
+  }, [deferredPrompt, isInstalled]);
 
   // Fonction pour déclencher l'installation
   const promptInstall = useCallback(async () => {
     if (!deferredPrompt) {
-      // Pour iOS, afficher des instructions
+      // Pour les navigateurs qui ne supportent pas beforeinstallprompt
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isDesktop = window.innerWidth >= 1024;
+      
       if (isIOS) {
         alert(
           'Pour installer cette application sur iOS:\n\n' +
           '1. Appuyez sur le bouton de partage (📤)\n' +
           '2. Sélectionnez "Ajouter à l\'écran d\'accueil"\n' +
           '3. Confirmez l\'ajout'
+        );
+        return;
+      }
+      
+      if (isDesktop) {
+        alert(
+          'Pour installer cette application sur votre ordinateur:\n\n' +
+          '1. Cliquez sur l\'icône d\'installation dans la barre d\'adresse\n' +
+          '2. Ou utilisez le menu navigateur → "Installer Luminous Faith"\n' +
+          '3. Confirmez l\'installation'
         );
         return;
       }

@@ -14,13 +14,15 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2}'],
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // 15 MB
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallback: '/index.html',
+        navigateFallbackAllowlist: [/^(?!\/__).*/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.bible\.*/i,
@@ -61,7 +63,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'Luminous Faith Companion',
         short_name: 'Luminous Faith',
-        description: 'Compagnon spirituel moderne pour accompagner votre parcours de foi',
+        description: 'Compagnon spirituel moderne pour accompagner votre parcours de foi - Prière, lecture biblique, défis spirituels',
         start_url: '/',
         display: 'standalone',
         background_color: '#f5f6fe',
@@ -72,20 +74,50 @@ export default defineConfig(({ mode }) => ({
         categories: ['lifestyle', 'education', 'health'],
         icons: [
           {
-            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '48x48',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
-            sizes: '512x512',
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '256x256',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
-            src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
-            sizes: '1024x1024',
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '384x384',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
+            sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           }
@@ -98,7 +130,7 @@ export default defineConfig(({ mode }) => ({
             url: '/?section=prayer',
             icons: [
               {
-                src: '/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png',
+                src: '/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png',
                 sizes: '96x96',
                 type: 'image/png'
               }

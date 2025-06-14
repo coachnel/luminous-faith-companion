@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { neonBibleClient, NeonBook, NeonVerse, NeonBibleVersion } from '@/integrations/neon/bibleClient';
+import { optimizedBibleClient } from '@/integrations/neon/optimizedBibleClient';
+import { NeonBook, NeonVerse, NeonBibleVersion } from '@/integrations/neon/bibleClient';
 
 export function useNeonBible() {
   const [books, setBooks] = useState<NeonBook[]>([]);
@@ -9,7 +10,7 @@ export function useNeonBible() {
   const [versions, setVersions] = useState<NeonBibleVersion[]>([]);
   const [selectedBook, setSelectedBook] = useState<NeonBook | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
-  const [selectedVersion, setSelectedVersion] = useState<string>('fr_apee');
+  const [selectedVersion, setSelectedVersion] = useState<string>('lsg1910');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [dataQuality, setDataQuality] = useState<any>(null);
@@ -20,11 +21,11 @@ export function useNeonBible() {
       try {
         setIsLoading(true);
         
-        console.log('🔄 Chargement des données bibliques réelles...');
+        console.log('🔄 Chargement de la Bible complète avec système optimisé...');
         
         const [booksData, versionsData] = await Promise.all([
-          neonBibleClient.getBooks(),
-          neonBibleClient.getVersions()
+          optimizedBibleClient.getBooks(),
+          optimizedBibleClient.getVersions()
         ]);
         
         setBooks(booksData);
@@ -34,10 +35,10 @@ export function useNeonBible() {
           setSelectedBook(booksData[0]);
         }
         
-        const quality = await neonBibleClient.getDataQualityReport();
+        const quality = await optimizedBibleClient.getDataQualityReport();
         setDataQuality(quality);
         
-        console.log(`✅ Bible complète chargée: ${booksData.length} livres, ${versionsData.length} versions`);
+        console.log(`✅ Bible optimisée chargée: ${booksData.length} livres, ${quality.totalVerses} versets`);
         console.log(`📊 Qualité des données: ${quality.qualityPercentage}% de versets réels`);
         
       } catch (error) {
@@ -57,14 +58,14 @@ export function useNeonBible() {
 
       try {
         console.log(`📖 Chargement ${selectedBook.name} ${selectedChapter} (${selectedVersion})`);
-        const verses = await neonBibleClient.getVerses(
+        const verses = await optimizedBibleClient.getVerses(
           selectedBook.id, 
           selectedChapter, 
           selectedVersion
         );
         setCurrentVerses(verses);
         
-        console.log(`✅ ${verses.length} versets réels chargés pour ${selectedBook.name} ${selectedChapter}`);
+        console.log(`✅ ${verses.length} versets chargés pour ${selectedBook.name} ${selectedChapter}`);
       } catch (error) {
         console.error('Erreur lors du chargement des versets:', error);
         setCurrentVerses([]);
@@ -88,10 +89,10 @@ export function useNeonBible() {
         const refPattern = /^(.+?)\s+(\d+)(?::(\d+))?$/;
         if (refPattern.test(searchQuery.trim())) {
           console.log(`🔍 Recherche par référence: ${searchQuery}`);
-          results = await neonBibleClient.searchByReference(searchQuery, selectedVersion);
+          results = await optimizedBibleClient.searchByReference(searchQuery, selectedVersion);
         } else {
           console.log(`🔍 Recherche textuelle: ${searchQuery}`);
-          results = await neonBibleClient.searchVerses(searchQuery, selectedVersion, 30);
+          results = await optimizedBibleClient.searchVerses(searchQuery, selectedVersion, 30);
         }
         
         setSearchResults(results);
@@ -148,8 +149,12 @@ export function useNeonBible() {
   // Statistiques
   const currentVersesStats = {
     total: currentVerses.length,
-    real: currentVerses.length, // Tous les versets sont réels maintenant
-    placeholders: 0
+    real: currentVerses.filter(v => 
+      !v.text.includes('Texte à compléter') && v.text.length > 20
+    ).length,
+    placeholders: currentVerses.filter(v => 
+      v.text.includes('Texte à compléter') || v.text.length <= 20
+    ).length
   };
 
   return {
@@ -189,7 +194,7 @@ export function useNeonBible() {
     
     // Indicateurs de qualité
     hasRealVerses: currentVersesStats.real > 0,
-    isFullyReal: true, // Tous les versets sont maintenant réels
-    overallQualityPercentage: dataQuality?.qualityPercentage || 100
+    isFullyReal: currentVersesStats.real === currentVersesStats.total && currentVersesStats.total > 0,
+    overallQualityPercentage: dataQuality?.qualityPercentage || 0
   };
 }

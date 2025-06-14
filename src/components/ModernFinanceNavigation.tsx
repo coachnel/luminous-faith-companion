@@ -23,7 +23,7 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe"
+      className="fixed bottom-0 left-0 right-0 z-50 px-2 sm:px-4 pb-safe"
       style={{
         background: theme === 'dark' 
           ? 'rgba(30, 30, 42, 0.95)' 
@@ -32,7 +32,7 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
         borderTop: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
       }}
     >
-      <div className="flex items-center justify-around py-2">
+      <div className="flex items-center justify-around py-2 max-w-screen-lg mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
@@ -41,7 +41,7 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
             <button
               key={item.id}
               onClick={() => setActiveSection(item.id)}
-              className={`flex flex-col items-center gap-1 py-2 px-2 rounded-2xl transition-all duration-300 ${
+              className={`flex flex-col items-center gap-1 py-2 px-1 sm:px-2 rounded-2xl transition-all duration-300 min-w-0 flex-1 max-w-[80px] ${
                 isActive 
                   ? 'transform scale-110' 
                   : 'transform scale-100 hover:scale-105'
@@ -60,8 +60,8 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
                   : 'none'
               }}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-xs font-medium leading-none ${
+              <Icon size={16} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0" />
+              <span className={`text-xs font-medium leading-none truncate w-full text-center ${
                 isActive ? 'font-semibold' : ''
               }`}>
                 {item.label}
@@ -73,7 +73,7 @@ const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFina
       
       {/* Indicateur moderne */}
       <div 
-        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-32 h-1 rounded-full transition-all duration-300"
+        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 sm:w-32 h-1 rounded-full transition-all duration-300"
         style={{
           background: 'linear-gradient(90deg, transparent, #0066FF, transparent)',
           opacity: 0.6

@@ -1,247 +1,113 @@
 
-import React, { useEffect } from 'react';
-import { useNeonBible } from '@/hooks/useNeonBible';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useBibleReadingProgress } from '@/hooks/useReadingProgress';
-import { CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { ModernCard } from '@/components/ui/modern-card';
+import { ModernButton } from '@/components/ui/modern-button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { BookOpen, AlertTriangle } from 'lucide-react';
+import BibleLite from './BibleLite';
 
-export default function EnhancedBibleView() {
-  const {
-    books,
-    currentVerses,
-    searchResults,
-    versions,
-    selectedBook,
-    selectedChapter,
-    selectedVersion,
-    searchQuery,
-    isLoading,
-    dataQuality,
-    selectBook,
-    selectChapter,
-    selectVersion,
-    setSearchQuery,
-    clearSearch,
-    goToPreviousChapter,
-    goToNextChapter,
-    canGoToPrevious,
-    canGoToNext,
-    isSearching,
-    hasSearchResults,
-    totalBooks,
-    oldTestamentBooks,
-    newTestamentBooks,
-    currentVersesCount,
-    currentVersesStats,
-    hasRealVerses,
-    isFullyReal,
-    overallQualityPercentage
-  } = useNeonBible();
-  
-  const { markChapterRead, progress } = useBibleReadingProgress();
+const EnhancedBibleView = () => {
+  const [useLiteVersion, setUseLiteVersion] = useState(false);
 
-  const handleMarkAsRead = async () => {
-    if (!selectedBook) return;
-    
-    try {
-      await markChapterRead(selectedBook.id, selectedBook.name, selectedChapter);
-      toast.success(`${selectedBook.name} ${selectedChapter} marqué comme lu !`);
-    } catch (error) {
-      toast.error('Erreur lors de la sauvegarde');
-    }
-  };
-
-  const isChapterRead = progress.some(p => 
-    p.book_id === selectedBook?.id && 
-    p.chapter_number === selectedChapter && 
-    p.is_completed
-  );
+  if (useLiteVersion) {
+    return <BibleLite />;
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header and Navigation */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">
-            Bible
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Explorez les Écritures
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <select
-            value={selectedVersion}
-            onChange={(e) => selectVersion(e.target.value)}
-            className="border rounded px-2 py-1"
+    <div 
+      className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen"
+      style={{ background: 'var(--bg-primary)' }}
+    >
+      {/* En-tête */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-center gap-3">
+          <div 
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
+            style={{ background: 'var(--accent-primary)' }}
           >
-            {versions.map((version) => (
-              <option key={version.id} value={version.id}>
-                {version.name}
-              </option>
-            ))}
-          </select>
-          <Input
-            type="search"
-            placeholder="Rechercher un verset"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {isSearching && (
-            <Button variant="ghost" size="sm" onClick={clearSearch}>
-              Effacer
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Barre d'actions avec progression */}
-      {selectedBook && (
-        <div className="flex items-center justify-between p-4 bg-card rounded-lg border">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold">
-              {selectedBook.name} - Chapitre {selectedChapter}
-            </h2>
-            {isChapterRead && (
-              <div className="flex items-center gap-1 text-green-600">
-                <CheckCircle className="h-4 w-4" />
-                <span className="text-sm">Lu</span>
-              </div>
-            )}
+            <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToPreviousChapter}
-              disabled={!canGoToPrevious}
-            >
-              Précédent
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToNextChapter}
-              disabled={!canGoToNext}
-            >
-              Suivant
-            </Button>
-            
-            <Button
-              variant={isChapterRead ? "secondary" : "default"}
-              size="sm"
-              onClick={handleMarkAsRead}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle className="h-4 w-4" />
-              {isChapterRead ? 'Lu' : 'Marquer comme lu'}
-            </Button>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] truncate">Section Bible</h1>
+            <p className="text-sm text-[var(--text-secondary)] truncate">
+              Explorez les Écritures Saintes
+            </p>
           </div>
         </div>
-      )}
+      </ModernCard>
 
-      {/* Content Section */}
-      <div className="grid grid-cols-4 gap-4">
-        {/* Book List */}
-        <div className="col-span-1">
-          <Card className="h-[500px]">
-            <CardContent className="p-2">
-              <ScrollArea className="h-full">
-                <div className="space-y-1">
-                  {books.map((book) => (
-                    <Button
-                      key={book.id}
-                      variant="ghost"
-                      className={`w-full justify-start ${selectedBook?.id === book.id ? 'font-bold' : ''
-                        }`}
-                      onClick={() => selectBook(book)}
-                    >
-                      {book.name}
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Alerte de maintenance */}
+      <Alert className="border-orange-200 bg-orange-50">
+        <AlertTriangle className="h-4 w-4 text-orange-600" />
+        <AlertDescription className="text-orange-800">
+          <strong>Maintenance en cours :</strong> La version complète de la Bible est temporairement indisponible 
+          en raison de problèmes de données. Nous travaillons sur une solution.
+        </AlertDescription>
+      </Alert>
 
-        {/* Chapter and Verse Display */}
-        <div className="col-span-2">
-          {selectedBook ? (
-            <Card className="h-[500px]">
-              <CardContent className="space-y-4 p-4">
-                {/* Chapter Navigation */}
-                <div className="flex items-center justify-between">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={goToPreviousChapter}
-                    disabled={!canGoToPrevious}
-                  >
-                    Précédent
-                  </Button>
-                  <span>
-                    Chapitre {selectedChapter} / {selectedBook.chapters_count}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={goToNextChapter}
-                    disabled={!canGoToNext}
-                  >
-                    Suivant
-                  </Button>
-                </div>
+      {/* Options disponibles */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)] p-6">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="h-8 w-8 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Version Lite</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">
+              Nouveau Testament complet avec suivi de progression et fonctionnalités de base
+            </p>
+            <ModernButton onClick={() => setUseLiteVersion(true)} className="w-full">
+              Accéder à la Version Lite
+            </ModernButton>
+          </div>
+        </ModernCard>
 
-                {/* Verse List */}
-                <ScrollArea className="h-[350px]">
-                  <div className="space-y-2">
-                    {currentVerses.map((verse) => (
-                      <p key={verse.id} className="text-sm">
-                        <span className="font-semibold">{verse.verse_number}.</span>{' '}
-                        {verse.text}
-                      </p>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          ) : (
-            <p>Sélectionnez un livre pour commencer.</p>
-          )}
-        </div>
-
-        {/* Search Results */}
-        <div className="col-span-1">
-          <Card className="h-[500px]">
-            <CardContent className="p-2">
-              <ScrollArea className="h-full">
-                {isSearching && hasSearchResults ? (
-                  <div className="space-y-2">
-                    {searchResults.map((result) => (
-                      <p key={result.id} className="text-sm">
-                        {result.book_name} {result.chapter_number}:{result.verse_number} -{' '}
-                        {result.text}
-                      </p>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500">
-                    {isSearching
-                      ? 'Aucun résultat.'
-                      : 'Recherchez un verset pour afficher les résultats.'}
-                  </p>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
+        <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)] p-6 opacity-50">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Version Complète</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">
+              Bible complète avec Ancien et Nouveau Testament (en maintenance)
+            </p>
+            <ModernButton disabled className="w-full">
+              Bientôt disponible
+            </ModernButton>
+          </div>
+        </ModernCard>
       </div>
+
+      {/* Informations sur la version Lite */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Fonctionnalités de la Version Lite</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <h4 className="font-medium text-[var(--text-primary)]">✅ Inclus :</h4>
+              <ul className="text-sm text-[var(--text-secondary)] space-y-1">
+                <li>• Nouveau Testament complet (27 livres)</li>
+                <li>• Navigation par livre et chapitre</li>
+                <li>• Suivi de progression de lecture</li>
+                <li>• Marquage des chapitres lus</li>
+                <li>• Interface responsive et moderne</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium text-[var(--text-primary)]">🔄 À venir :</h4>
+              <ul className="text-sm text-[var(--text-secondary)] space-y-1">
+                <li>• Ancien Testament</li>
+                <li>• Recherche avancée</li>
+                <li>• Annotations personnelles</li>
+                <li>• Multiples versions</li>
+                <li>• Partage de versets</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </ModernCard>
     </div>
   );
-}
+};
+
+export default EnhancedBibleView;

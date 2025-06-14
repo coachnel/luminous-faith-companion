@@ -56,7 +56,10 @@ const Prayer = () => {
 
   if (loading) {
     return (
-      <div className="p-4 space-y-6 max-w-4xl mx-auto">
+      <div 
+        className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen"
+        style={{ background: 'var(--bg-primary)' }}
+      >
         <div className="text-center">
           <div 
             className="animate-spin w-8 h-8 border-4 border-t-transparent rounded-full mx-auto mb-4"
@@ -69,16 +72,22 @@ const Prayer = () => {
   }
 
   return (
-    <div className="p-4 space-y-6 max-w-4xl mx-auto">
+    <div 
+      className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen"
+      style={{ background: 'var(--bg-primary)' }}
+    >
       {/* En-tête */}
-      <ModernCard variant="elevated">
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
-            <Heart className="h-6 w-6 text-white" />
+          <div 
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
+            style={{ background: 'var(--accent-primary)' }}
+          >
+            <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">Centre de Prière</h1>
-            <p className="text-sm text-[var(--text-secondary)]">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] truncate">Centre de Prière</h1>
+            <p className="text-sm text-[var(--text-secondary)] truncate">
               Partagez vos intentions et priez ensemble
             </p>
           </div>
@@ -92,14 +101,14 @@ const Prayer = () => {
       />
 
       {/* Nouvelle demande de prière */}
-      <ModernCard variant="elevated">
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
-            <Plus className="h-6 w-6 text-white" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500 flex items-center justify-center">
+            <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-[var(--text-primary)]">Nouvelle demande</h3>
-            <p className="text-sm text-[var(--text-secondary)]">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] truncate">Nouvelle demande</h3>
+            <p className="text-sm text-[var(--text-secondary)] truncate">
               Ajoutez votre intention de prière
             </p>
           </div>
@@ -157,14 +166,14 @@ const Prayer = () => {
       </ModernCard>
 
       {/* Liste des demandes de prière */}
-      <ModernCard variant="elevated">
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
-            <Users className="h-6 w-6 text-white" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500 flex items-center justify-center">
+            <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-[var(--text-primary)]">Mes demandes</h3>
-            <p className="text-sm text-[var(--text-secondary)]">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] truncate">Mes demandes</h3>
+            <p className="text-sm text-[var(--text-secondary)] truncate">
               {prayerRequests.length} demande(s) de prière
             </p>
           </div>
@@ -172,7 +181,7 @@ const Prayer = () => {
         
         {prayerRequests.length === 0 ? (
           <div className="text-center py-12">
-            <Heart className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
+            <Heart className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--text-secondary)] mx-auto mb-4" />
             <p className="text-[var(--text-secondary)] mb-2">Aucune demande de prière</p>
             <p className="text-sm text-[var(--text-secondary)]">
               Commencez par ajouter votre première intention
@@ -186,31 +195,31 @@ const Prayer = () => {
                 className="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)]"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-[var(--text-primary)]">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="font-medium text-sm text-[var(--text-primary)] truncate">
                       {request.author_name}
                     </span>
-                    <span className="text-xs text-[var(--text-secondary)]">
+                    <span className="text-xs text-[var(--text-secondary)] flex-shrink-0">
                       {new Date(request.created_at).toLocaleDateString('fr-FR')}
                     </span>
                   </div>
                   {request.is_anonymous && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
+                    <span className="text-xs px-2 py-1 rounded-full bg-[var(--bg-tertiary)] text-[var(--text-secondary)] flex-shrink-0">
                       Anonyme
                     </span>
                   )}
                 </div>
                 
-                <h4 className="font-semibold mb-2 text-[var(--accent-primary)]">
+                <h4 className="font-semibold mb-2 text-[var(--accent-primary)] break-words">
                   {request.title}
                 </h4>
                 
-                <p className="text-[var(--text-primary)] mb-3 leading-relaxed">
+                <p className="text-[var(--text-primary)] mb-3 leading-relaxed break-words">
                   {request.content}
                 </p>
                 
                 <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                  <Heart className="h-4 w-4" />
+                  <Heart className="h-4 w-4 flex-shrink-0" />
                   <span>{request.prayer_count} prière(s)</span>
                 </div>
               </div>

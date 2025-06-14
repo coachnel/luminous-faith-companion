@@ -54,7 +54,7 @@ export const useNotificationSystem = () => {
       setPermission(prev => ({ ...prev, granted }));
       
       if (granted) {
-        // Demander aussi la permission pour les notifications persistantes
+        // Enregistrer le service worker pour les notifications persistantes
         if ('serviceWorker' in navigator) {
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
@@ -84,7 +84,7 @@ export const useNotificationSystem = () => {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-192x192.png',
         tag: 'bible-app-reminder',
-        requireInteraction: true, // Garde la notification visible
+        requireInteraction: false,
         ...options
       });
 
@@ -93,8 +93,8 @@ export const useNotificationSystem = () => {
         notification.close();
       };
 
-      // Auto-fermeture après 15 secondes pour les notifications persistantes
-      setTimeout(() => notification.close(), 15000);
+      // Auto-fermeture après 10 secondes
+      setTimeout(() => notification.close(), 10000);
       
       return notification;
     } catch (error) {
@@ -118,6 +118,9 @@ export const useNotificationSystem = () => {
   };
 
   const scheduleRecurringNotifications = () => {
+    // Nettoyer les anciens intervalles
+    clearOldIntervals();
+
     // Notification verset du jour à 8h00
     if (preferences?.notification_preferences?.dailyVerse) {
       scheduleDaily(8, 0, () => {
@@ -161,6 +164,18 @@ export const useNotificationSystem = () => {
     }
   };
 
+  const clearOldIntervals = () => {
+    // Nettoyer tous les anciens intervalles stockés
+    const keys = Object.keys(localStorage).filter(key => key.startsWith('notification-interval-'));
+    keys.forEach(key => {
+      const intervalId = localStorage.getItem(key);
+      if (intervalId) {
+        clearInterval(parseInt(intervalId));
+        localStorage.removeItem(key);
+      }
+    });
+  };
+
   const scheduleDaily = (hour: number, minute: number, callback: () => void) => {
     const now = new Date();
     const scheduledTime = new Date();
@@ -175,10 +190,11 @@ export const useNotificationSystem = () => {
     
     setTimeout(() => {
       callback();
-      // Programmer pour le jour suivant
+      
+      // Programmer pour le jour suivant avec un intervalle de 24h
       const intervalId = setInterval(callback, 24 * 60 * 60 * 1000);
       
-      // Sauvegarder l'ID pour pouvoir l'arrêter plus tard si nécessaire
+      // Sauvegarder l'ID de l'intervalle
       localStorage.setItem(`notification-interval-${hour}-${minute}`, intervalId.toString());
     }, delay);
   };

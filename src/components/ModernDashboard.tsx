@@ -33,12 +33,12 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
     const savedProgress = localStorage.getItem('readingProgress');
     if (savedProgress) {
       const progress = JSON.parse(savedProgress);
-      return Math.round((Object.keys(progress).length / 66) * 100); // 66 livres bibliques
+      return Math.round((Object.keys(progress).length / 66) * 100);
     }
     return 0;
   };
 
-  const getActiveChalllenges = () => {
+  const getActiveChallenges = () => {
     const savedChallenges = localStorage.getItem('dailyChallenges');
     if (savedChallenges) {
       const challenges = JSON.parse(savedChallenges);
@@ -51,9 +51,17 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
     const lastRead = localStorage.getItem('lastBibleRead');
     if (lastRead) {
       const daysDiff = Math.floor((Date.now() - new Date(lastRead).getTime()) / (1000 * 60 * 60 * 24));
-      return Math.max(0, 7 - daysDiff); // Maximum 7 jours de suite
+      return Math.max(0, 7 - daysDiff);
     }
     return 0;
+  };
+
+  const getRecentNotes = () => {
+    return notes.slice(0, 3);
+  };
+
+  const getRecentPrayers = () => {
+    return prayerRequests.slice(0, 2);
   };
 
   const stats = [
@@ -61,25 +69,29 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
       label: 'Jours de lecture', 
       value: getReadingStreak().toString(), 
       color: 'bg-blue-500',
-      trend: '+2 cette semaine'
+      trend: '+2 cette semaine',
+      action: () => onNavigate('bible')
     },
     { 
       label: 'Notes créées', 
       value: notes.length.toString(), 
       color: 'bg-purple-500',
-      trend: 'Personnel'
+      trend: 'Personnel',
+      action: () => onNavigate('notes')
     },
     { 
       label: 'Défis actifs', 
-      value: getActiveChalllenges().toString(), 
+      value: getActiveChallenges().toString(), 
       color: 'bg-green-500',
-      trend: 'En cours'
+      trend: 'En cours',
+      action: () => onNavigate('challenges')
     },
     { 
       label: 'Prières partagées', 
       value: prayerRequests.length.toString(), 
       color: 'bg-orange-500',
-      trend: 'Communauté'
+      trend: 'Communauté',
+      action: () => onNavigate('prayer-circles')
     }
   ];
 
@@ -136,14 +148,18 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
         ? `Dernière lecture: ${new Date(localStorage.getItem('lastBibleRead')!).toLocaleDateString('fr-FR')}`
         : 'Aucune lecture récente',
       color: 'bg-blue-500',
-      bgGradient: 'from-blue-500/10 to-purple-500/10'
+      bgGradient: 'from-blue-500/10 to-purple-500/10',
+      action: () => onNavigate('bible'),
+      visible: localStorage.getItem('lastBibleRead') !== null
     },
     {
       icon: Target,
       title: 'Progression des défis',
-      description: `${getActiveChalllenges()} défis en cours`,
+      description: `${getActiveChallenges()} défis en cours`,
       color: 'bg-green-500',
-      bgGradient: 'from-green-500/10 to-emerald-500/10'
+      bgGradient: 'from-green-500/10 to-emerald-500/10',
+      action: () => onNavigate('challenges'),
+      visible: getActiveChallenges() > 0
     },
     {
       icon: Edit3,
@@ -152,62 +168,70 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
         ? `${notes.length} note(s) créée(s)`
         : 'Aucune note créée',
       color: 'bg-purple-500',
-      bgGradient: 'from-purple-500/10 to-pink-500/10'
+      bgGradient: 'from-purple-500/10 to-pink-500/10',
+      action: () => onNavigate('notes'),
+      visible: notes.length > 0
     }
-  ];
+  ].filter(activity => activity.visible);
 
   return (
     <div className="flex flex-col min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-      {/* Header moderne */}
-      <div className="p-6 pb-0">
-        <div className="flex items-center justify-between mb-6">
+      {/* Header moderne responsive */}
+      <div className="p-4 sm:p-6 pb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <Avatar className="w-12 h-12 ring-2 ring-[var(--accent-primary)]/20">
+            <Avatar className="w-10 h-10 sm:w-12 sm:h-12 ring-2 ring-[var(--accent-primary)]/20 flex-shrink-0">
               <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm sm:text-base">
                 {getUserInitials()}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="text-[var(--text-secondary)] text-sm">Bonjour,</p>
-              <h1 className="text-[var(--text-primary)] font-semibold text-lg">
+            <div className="min-w-0 flex-1">
+              <p className="text-[var(--text-secondary)] text-xs sm:text-sm">Bonjour,</p>
+              <h1 className="text-[var(--text-primary)] font-semibold text-base sm:text-lg truncate">
                 {profile?.name || user?.email?.split('@')[0] || 'Utilisateur'}
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <ModernButton variant="ghost" size="sm" onClick={() => onNavigate('notifications')}>
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
             </ModernButton>
             <ModernButton variant="ghost" size="sm" onClick={() => onNavigate('settings')}>
-              <User className="h-5 w-5" />
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
             </ModernButton>
           </div>
         </div>
 
         {/* Progression générale */}
-        <div className="mb-8">
-          <p className="text-[var(--text-secondary)] text-sm mb-2">Progression générale</p>
-          <div className="flex items-baseline gap-2">
-            <h2 className="text-[var(--text-primary)] text-4xl font-bold">{getReadingProgress()}%</h2>
-            <span className="text-green-500 text-sm font-medium flex items-center gap-1">
-              <TrendingUp className="h-4 w-4" />
-              +{getReadingStreak()} jours
-            </span>
+        <div className="mb-6 sm:mb-8">
+          <p className="text-[var(--text-secondary)] text-xs sm:text-sm mb-2">Progression générale</p>
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-2">
+            <h2 className="text-[var(--text-primary)] text-3xl sm:text-4xl font-bold">{getReadingProgress()}%</h2>
+            {getReadingStreak() > 0 && (
+              <span className="text-green-500 text-sm font-medium flex items-center gap-1">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+                +{getReadingStreak()} jours
+              </span>
+            )}
           </div>
         </div>
 
         {/* Cartes de stats modernes avec données réelles */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <ModernCard key={index} className="p-4 bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-secondary)]">
+            <ModernCard 
+              key={index} 
+              className="p-3 sm:p-4 bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-secondary)] cursor-pointer hover:scale-105 transition-transform"
+              onClick={stat.action}
+            >
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[var(--text-secondary)] text-xs mb-1">{stat.label}</p>
-                  <p className="text-[var(--text-primary)] text-xl font-bold">{stat.value}</p>
-                  <p className="text-[var(--text-secondary)] text-xs">{stat.trend}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[var(--text-secondary)] text-xs mb-1 truncate">{stat.label}</p>
+                  <p className="text-[var(--text-primary)] text-lg sm:text-xl font-bold">{stat.value}</p>
+                  <p className="text-[var(--text-secondary)] text-xs truncate">{stat.trend}</p>
                 </div>
-                <div className={`w-8 h-8 rounded-lg ${stat.color} opacity-20`}></div>
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg ${stat.color} opacity-20 flex-shrink-0`}></div>
               </div>
             </ModernCard>
           ))}
@@ -215,26 +239,23 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
       </div>
 
       {/* Section Actions rapides */}
-      <div className="px-6 mb-6">
+      <div className="px-4 sm:px-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[var(--text-primary)] font-semibold text-lg">Sections</h3>
-          <ModernButton variant="ghost" size="sm">
-            <span className="text-[var(--accent-primary)] text-sm">Voir tout</span>
-          </ModernButton>
+          <h3 className="text-[var(--text-primary)] font-semibold text-base sm:text-lg">Sections</h3>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           {quickActions.map((action, index) => (
             <ModernCard 
               key={index} 
-              className={`p-4 cursor-pointer transition-all duration-200 hover:scale-105 ${action.bgColor} border-none`}
+              className={`p-3 sm:p-4 cursor-pointer transition-all duration-200 hover:scale-105 ${action.bgColor} border-none`}
               onClick={() => onNavigate(action.section)}
             >
-              <div className="flex flex-col items-center text-center gap-3">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg`}>
-                  <action.icon className="h-6 w-6 text-white" />
+              <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg`}>
+                  <action.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <span className="text-[var(--text-primary)] font-medium text-sm">{action.label}</span>
+                <span className="text-[var(--text-primary)] font-medium text-xs sm:text-sm leading-tight">{action.label}</span>
               </div>
             </ModernCard>
           ))}
@@ -242,24 +263,82 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ onNavigate }) => {
       </div>
 
       {/* Section Activité récente avec données réelles */}
-      <div className="px-6 flex-1">
-        <h3 className="text-[var(--text-primary)] font-semibold text-lg mb-4">Activité récente</h3>
-        
-        <div className="space-y-3">
-          {recentActivities.map((activity, index) => (
-            <ModernCard key={index} className={`p-4 bg-gradient-to-r ${activity.bgGradient} border-none`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full ${activity.color} flex items-center justify-center`}>
-                  <activity.icon className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[var(--text-primary)] font-medium text-sm">{activity.title}</p>
-                  <p className="text-[var(--text-secondary)] text-xs">{activity.description}</p>
-                </div>
-              </div>
-            </ModernCard>
-          ))}
+      <div className="px-4 sm:px-6 flex-1 pb-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[var(--text-primary)] font-semibold text-base sm:text-lg">Activité récente</h3>
+          {recentActivities.length > 0 && (
+            <ModernButton variant="ghost" size="sm" onClick={() => onNavigate('dashboard')}>
+              <span className="text-[var(--accent-primary)] text-xs sm:text-sm">Actualiser</span>
+            </ModernButton>
+          )}
         </div>
+        
+        {recentActivities.length === 0 ? (
+          <ModernCard className="p-6 text-center">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">Aucune activité récente</p>
+            <p className="text-[var(--text-secondary)] text-xs">Commencez par explorer une section</p>
+          </ModernCard>
+        ) : (
+          <div className="space-y-3">
+            {recentActivities.map((activity, index) => (
+              <ModernCard 
+                key={index} 
+                className={`p-3 sm:p-4 bg-gradient-to-r ${activity.bgGradient} border-none cursor-pointer hover:scale-105 transition-transform`}
+                onClick={activity.action}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${activity.color} flex items-center justify-center flex-shrink-0`}>
+                    <activity.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[var(--text-primary)] font-medium text-sm truncate">{activity.title}</p>
+                    <p className="text-[var(--text-secondary)] text-xs truncate">{activity.description}</p>
+                  </div>
+                </div>
+              </ModernCard>
+            ))}
+          </div>
+        )}
+
+        {/* Aperçu des notes récentes */}
+        {getRecentNotes().length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-[var(--text-primary)] font-medium text-sm">Notes récentes</h4>
+              <ModernButton variant="ghost" size="sm" onClick={() => onNavigate('notes')}>
+                <span className="text-[var(--accent-primary)] text-xs">Voir tout</span>
+              </ModernButton>
+            </div>
+            <div className="space-y-2">
+              {getRecentNotes().map((note, index) => (
+                <ModernCard key={index} className="p-3 cursor-pointer hover:bg-[var(--bg-secondary)]" onClick={() => onNavigate('notes')}>
+                  <p className="text-[var(--text-primary)] font-medium text-sm truncate">{note.title}</p>
+                  <p className="text-[var(--text-secondary)] text-xs truncate">{note.content}</p>
+                </ModernCard>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Aperçu des prières récentes */}
+        {getRecentPrayers().length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-[var(--text-primary)] font-medium text-sm">Prières récentes</h4>
+              <ModernButton variant="ghost" size="sm" onClick={() => onNavigate('prayer-circles')}>
+                <span className="text-[var(--accent-primary)] text-xs">Voir tout</span>
+              </ModernButton>
+            </div>
+            <div className="space-y-2">
+              {getRecentPrayers().map((prayer, index) => (
+                <ModernCard key={index} className="p-3 cursor-pointer hover:bg-[var(--bg-secondary)]" onClick={() => onNavigate('prayer-circles')}>
+                  <p className="text-[var(--text-primary)] font-medium text-sm truncate">{prayer.title}</p>
+                  <p className="text-[var(--text-secondary)] text-xs truncate">{prayer.content}</p>
+                </ModernCard>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

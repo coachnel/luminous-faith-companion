@@ -2,12 +2,13 @@
 import React from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
-import { Settings, User, Bell, Palette, Shield, Info } from 'lucide-react';
+import { Settings, User, Bell, Palette, Shield, Info, Camera, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useSupabaseData';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from './ThemeToggle';
 import NotificationSettings from './NotificationSettings';
+import PasswordChangeDialog from './PasswordChangeDialog';
 
 const SettingsApp = () => {
   const { user, signOut } = useAuth();
@@ -59,9 +60,17 @@ const SettingsApp = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-3">
-                  <ModernButton variant="outline" size="sm">Modifier le profil</ModernButton>
-                  <ModernButton variant="outline" size="sm">Changer le mot de passe</ModernButton>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <ModernButton variant="outline" size="sm" className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    Modifier la photo
+                  </ModernButton>
+                  <PasswordChangeDialog>
+                    <ModernButton variant="outline" size="sm" className="flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      Changer le mot de passe
+                    </ModernButton>
+                  </PasswordChangeDialog>
                 </div>
               </div>
             </ModernCard>

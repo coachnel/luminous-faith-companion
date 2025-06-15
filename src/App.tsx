@@ -35,13 +35,7 @@ function AppContent() {
 
   // Si l'utilisateur est connecté, affiche MobileApp directement
   if (user) {
-    return (
-      <>
-        <MobileApp />
-        <Toaster />
-        <SonnerToaster />
-      </>
-    );
+    return <MobileApp />;
   }
 
   // Si pas d'utilisateur, utilise le Router pour l'auth
@@ -54,8 +48,6 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>
       </div>
-      <Toaster />
-      <SonnerToaster />
     </Router>
   );
 }
@@ -66,6 +58,8 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <AppContent />
+          <Toaster />
+          <SonnerToaster />
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>

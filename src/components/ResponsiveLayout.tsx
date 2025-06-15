@@ -9,12 +9,9 @@ const ResponsiveLayout: React.FC = () => {
   const isMobile = useIsMobile();
 
   const handleNavigate = (path: string) => {
-    const route = path.replace('/', '') as AppRoute;
-    if (route === '') {
-      setCurrentRoute('dashboard');
-    } else {
-      setCurrentRoute(route);
-    }
+    const cleanPath = path.replace('/', '');
+    const route = cleanPath === '' ? 'dashboard' : cleanPath as AppRoute;
+    setCurrentRoute(route);
   };
 
   const handleMobileNavigate = (route: AppRoute) => {

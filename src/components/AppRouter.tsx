@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ModernDashboard from './ModernDashboard';
 import Prayer from './Prayer';
 import NotesJournal from './NotesJournal';
@@ -26,13 +26,15 @@ interface AppRouterProps {
 const AppRouter: React.FC<AppRouterProps> = ({ initialRoute = 'dashboard' }) => {
   const [currentRoute, setCurrentRoute] = useState<AppRoute>(initialRoute);
 
+  // Update internal route when initialRoute prop changes
+  useEffect(() => {
+    setCurrentRoute(initialRoute);
+  }, [initialRoute]);
+
   const handleNavigate = (path: string) => {
-    const route = path.replace('/', '') as AppRoute;
-    if (route === '') {
-      setCurrentRoute('dashboard');
-    } else {
-      setCurrentRoute(route);
-    }
+    const cleanPath = path.replace('/', '');
+    const route = cleanPath === '' ? 'dashboard' : cleanPath as AppRoute;
+    setCurrentRoute(route);
   };
 
   const renderCurrentRoute = () => {
@@ -40,19 +42,19 @@ const AppRouter: React.FC<AppRouterProps> = ({ initialRoute = 'dashboard' }) => 
       case 'dashboard':
         return <ModernDashboard onNavigate={handleNavigate} />;
       case 'prayer':
-        return <Prayer onNavigate={handleNavigate} />;
+        return <Prayer />;
       case 'notes':
-        return <NotesJournal onNavigate={handleNavigate} />;
+        return <NotesJournal />;
       case 'challenges':
-        return <EnhancedChallengesPage onNavigate={handleNavigate} />;
+        return <EnhancedChallengesPage />;
       case 'reading-plans':
-        return <EnhancedReadingPlans onNavigate={handleNavigate} />;
+        return <EnhancedReadingPlans />;
       case 'discover':
-        return <DiscoverPage onNavigate={handleNavigate} />;
+        return <DiscoverPage />;
       case 'prayer-circles':
-        return <PrayerCircles onNavigate={handleNavigate} />;
+        return <PrayerCircles />;
       case 'settings':
-        return <SettingsApp onNavigate={handleNavigate} />;
+        return <SettingsApp />;
       default:
         return <ModernDashboard onNavigate={handleNavigate} />;
     }

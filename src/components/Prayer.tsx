@@ -26,8 +26,7 @@ const Prayer = () => {
         <CardHeader className="p-3 sm:p-4 lg:p-6">
           <div className="flex items-center gap-2 sm:gap-3">
             <div 
-              className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'var(--accent-primary)' }}
+              className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0"
             >
               <Heart className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
             </div>
@@ -43,7 +42,7 @@ const Prayer = () => {
         </CardHeader>
       </Card>
 
-      {/* Onglets modernes avec style cohérent du menu principal */}
+      {/* Onglets modernes avec style cohérent - maintenant avec fond bleu solide */}
       <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-card)] border-[var(--border-default)] m-2 sm:m-3 h-auto rounded-xl p-1">
@@ -51,7 +50,7 @@ const Prayer = () => {
               value="prayer" 
               className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'prayer' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                  ? 'bg-blue-600 text-white shadow-lg border-0' 
                   : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
               }`}
             >
@@ -62,7 +61,7 @@ const Prayer = () => {
               value="sharing" 
               className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'sharing' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                  ? 'bg-blue-600 text-white shadow-lg border-0' 
                   : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
               }`}
             >
@@ -73,7 +72,7 @@ const Prayer = () => {
               value="settings" 
               className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'settings' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                  ? 'bg-blue-600 text-white shadow-lg border-0' 
                   : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
               }`}
             >

@@ -99,8 +99,8 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
           onClick={action.action}
           type="button"
         >
-          <div className={`w-8 h-8 sm:w-10 sm:h-10 mb-2 rounded-lg ${action.bgColor} flex items-center justify-center`}>
-            <action.icon size={16} className={action.iconColor} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 mb-2 rounded-full bg-blue-600 flex items-center justify-center">
+            <action.icon size={20} className="text-white" />
           </div>
           <span className="text-xs sm:text-sm font-medium text-center leading-tight">{action.label}</span>
         </button>

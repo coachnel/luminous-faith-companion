@@ -17,40 +17,13 @@ interface DashboardProps {
 const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   const { user } = useAuth();
   const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Hooks de données, appelés inconditionnellement pour respecter les règles de React
+  // Appeler tous les hooks de manière inconditionnelle (règle de React)
   const prayerData = useNeonPrayerRequests();
   const notesData = useNeonNotes();
   const plansData = useReadingPlanProgress();
   const challengesData = useSupabaseChallenges();
   useDataCleanup();
-
-  // Extraction sécurisée des données et des états de chargement
-  const prayerRequests = prayerData?.prayerRequests || [];
-  const prayersLoading = prayerData?.loading ?? true;
-  const prayersError = prayerData?.error ?? null;
-
-  const notes = notesData?.notes || [];
-  const notesLoading = notesData?.loading ?? true;
-  const notesError = notesData?.error ?? null;
-
-  const plans = plansData.plans || [];
-  const plansLoading = plansData.loading;
-  const plansError = plansData.error;
-
-  const challenges = challengesData.challenges || [];
-  const challengesLoading = challengesData.loading;
-  const challengesError = challengesData.error;
-
-  useEffect(() => {
-    const anyError = prayersError || notesError || plansError || challengesError;
-    if (anyError) {
-      console.error('Erreur lors du chargement des données du tableau de bord:', anyError);
-      setError('Une erreur est survenue lors du chargement des données.');
-    }
-  }, [prayersError, notesError, plansError, challengesError]);
-
 
   // Vérification de l'état de l'utilisateur
   useEffect(() => {
@@ -62,7 +35,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
     }
   }, [user]);
 
-  // Si pas d'utilisateur
+  // Si pas d'utilisateur connecté
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
@@ -81,23 +54,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
     );
   }
 
-  // Si erreur
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
-        <div className="text-red-500 mb-4">⚠️</div>
-        <p className="text-lg font-semibold text-red-700 mb-2">Erreur de chargement</p>
-        <p className="text-gray-600 text-sm mb-4">{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Recharger la page
-        </button>
-      </div>
-    );
-  }
-
   // Si pas encore prêt
   if (!isReady) {
     return (
@@ -109,87 +65,58 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
     );
   }
 
-  // Calcul sécurisé des statistiques
+  // Extraction sécurisée des données
+  const prayerRequests = prayerData?.prayerRequests || [];
+  const notes = notesData?.notes || [];
+  const plans = plansData?.plans || [];
+  const challenges = challengesData?.challenges || [];
+
+  // Calcul des statistiques
   const stats = useMemo(() => {
-    try {
-      return {
-        prayers: prayerRequests.length,
-        notes: notes.length,
-        activePlans: plans.filter(plan => plan && plan.is_active).length,
-        activeChallenges: challenges.filter(challenge => challenge && challenge.is_active).length,
-        publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
-      };
-    } catch (err) {
-      console.error('Erreur calcul stats:', err);
-      return {
-        prayers: 0,
-        notes: 0,
-        activePlans: 0,
-        activeChallenges: 0,
-        publicContent: 0
-      };
-    }
+    return {
+      prayers: prayerRequests.length,
+      notes: notes.length,
+      activePlans: plans.filter(plan => plan?.is_active).length,
+      activeChallenges: challenges.filter(challenge => challenge?.is_active).length,
+      publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
+    };
   }, [prayerRequests, notes, plans, challenges]);
 
-  const loading = prayersLoading || notesLoading || plansLoading || challengesLoading;
+  const loading = prayerData?.loading || notesData?.loading || plansData?.loading || challengesData?.loading;
 
-  // Actions rapides sécurisées
+  // Actions rapides
   const quickActions = [
     {
       icon: Heart,
       title: "Nouvelle prière",
       description: "Ajouter une intention",
       color: "from-red-500 to-pink-500",
-      action: () => {
-        try {
-          onNavigate('/prayer');
-        } catch (err) {
-          console.error('Erreur navigation:', err);
-        }
-      }
+      action: () => onNavigate('/prayer')
     },
     {
       icon: Plus,
       title: "Créer une note",
       description: "Noter vos réflexions",
       color: "from-blue-500 to-indigo-500",
-      action: () => {
-        try {
-          onNavigate('/notes');
-        } catch (err) {
-          console.error('Erreur navigation:', err);
-        }
-      }
+      action: () => onNavigate('/notes')
     },
     {
       icon: Target,
       title: "Nouveau défi",
       description: "Se lancer un défi",
       color: "from-green-500 to-emerald-500",
-      action: () => {
-        try {
-          onNavigate('/challenges');
-        } catch (err) {
-          console.error('Erreur navigation:', err);
-        }
-      }
+      action: () => onNavigate('/challenges')
     },
     {
       icon: BookOpen,
       title: "Plan de lecture",
       description: "Commencer à lire",
       color: "from-purple-500 to-violet-500",
-      action: () => {
-        try {
-          onNavigate('/reading-plans');
-        } catch (err) {
-          console.error('Erreur navigation:', err);
-        }
-      }
+      action: () => onNavigate('/reading-plans')
     }
   ];
 
-  // Cartes de navigation sécurisées
+  // Cartes de navigation
   const navigationCards = [
     {
       icon: Heart,
@@ -247,17 +174,11 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
     }
   ];
 
-  // Rendu sécurisé du nom d'utilisateur
   const getUserName = () => {
-    try {
-      if (user && user.email) {
-        return user.email.split('@')[0];
-      }
-      return 'Ami';
-    } catch (err) {
-      console.error('Erreur getUserName:', err);
-      return 'Utilisateur';
+    if (user?.email) {
+      return user.email.split('@')[0];
     }
+    return 'Ami';
   };
 
   return (
@@ -285,13 +206,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
           <ModernButton 
             variant="ghost" 
             size="sm"
-            onClick={() => {
-              try {
-                onNavigate('/settings');
-              } catch (err) {
-                console.error('Erreur navigation settings:', err);
-              }
-            }}
+            onClick={() => onNavigate('/settings')}
             className="gap-2"
           >
             <Settings className="h-4 w-4" />
@@ -369,13 +284,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
             <ModernCard
               key={index}
               className={`p-6 cursor-pointer transition-all duration-200 hover:scale-105 bg-gradient-to-br ${card.color} ${card.borderColor}`}
-              onClick={() => {
-                try {
-                  onNavigate(card.route);
-                } catch (err) {
-                  console.error('Erreur navigation card:', err);
-                }
-              }}
+              onClick={() => onNavigate(card.route)}
             >
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-white/80 dark:bg-black/20`}>

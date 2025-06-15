@@ -2,13 +2,16 @@
 import React from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
-import { Settings, User, Bell, Palette, Shield, Info, Camera, Lock } from 'lucide-react';
+import { Settings, User, Bell, Palette, Shield, Info, Camera, Lock, Edit, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useSupabaseData';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from './ThemeToggle';
 import NotificationSettings from './NotificationSettings';
 import PasswordChangeDialog from './PasswordChangeDialog';
+import ProfileNameEditor from './ProfileNameEditor';
+import NotificationTester from './NotificationTester';
+import { toast } from '@/hooks/use-toast';
 
 const SettingsApp = () => {
   const { user, signOut } = useAuth();
@@ -22,10 +25,38 @@ const SettingsApp = () => {
     return user?.email?.[0]?.toUpperCase() || 'U';
   };
 
+  const handleSignOut = async () => {
+    try {
+      toast({
+        title: "Déconnexion en cours...",
+        description: "Veuillez patienter",
+      });
+      
+      await signOut();
+      
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de se déconnecter. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'notifications':
-        return <NotificationSettings />;
+        return (
+          <div className="space-y-6">
+            <NotificationSettings />
+            <NotificationTester />
+          </div>
+        );
       case 'general':
       default:
         return (
@@ -52,9 +83,14 @@ const SettingsApp = () => {
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <div className="font-medium text-lg text-[var(--text-primary)]">
+                  <div className="flex-1">
+                    <div className="font-medium text-lg text-[var(--text-primary)] flex items-center gap-2">
                       {profile?.name || user?.email?.split('@')[0] || 'Utilisateur'}
+                      <ProfileNameEditor>
+                        <ModernButton variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </ModernButton>
+                      </ProfileNameEditor>
                     </div>
                     <div className="text-sm text-[var(--text-secondary)]">{user?.email}</div>
                   </div>
@@ -105,7 +141,7 @@ const SettingsApp = () => {
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-[var(--text-primary)]">Actions</h3>
+                  <h3 className="text-xl font-semibold text-[var(--text-primary)]">Actions du compte</h3>
                   <p className="text-sm text-[var(--text-secondary)]">
                     Gérez votre compte
                   </p>
@@ -114,9 +150,10 @@ const SettingsApp = () => {
               
               <ModernButton 
                 variant="outline" 
-                onClick={signOut}
-                className="w-full border-red-500 text-red-500 hover:bg-red-50"
+                onClick={handleSignOut}
+                className="w-full border-red-500 text-red-500 hover:bg-red-50 flex items-center gap-2"
               >
+                <LogOut className="h-4 w-4" />
                 Se déconnecter
               </ModernButton>
             </ModernCard>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,10 +52,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* En-tête de bienvenue */}
+        {/* En-tête de bienvenue - Texte corrigé */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Bienvenue, {profile?.name || user?.email?.split('@')[0] || 'Utilisateur'} 🙏
+            Bienvenue dans votre espace, {profile?.name || user?.email?.split('@')[0] || 'Utilisateur'} 🙏
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
             Que votre journée soit bénie et remplie de paix

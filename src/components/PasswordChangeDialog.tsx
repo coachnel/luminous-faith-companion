@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -14,13 +14,18 @@ interface PasswordChangeDialogProps {
 
 const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const resetForm = () => {
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,26 +51,44 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
     setLoading(true);
 
     try {
+      console.log('Tentative de changement de mot de passe...');
+      
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        throw error;
+      }
+
+      console.log('Mot de passe changé avec succès');
 
       toast({
         title: "Succès",
         description: "Votre mot de passe a été modifié avec succès",
       });
 
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      resetForm();
       setOpen(false);
     } catch (error: any) {
       console.error('Error changing password:', error);
+      
+      let errorMessage = "Impossible de modifier le mot de passe";
+      
+      if (error.message) {
+        if (error.message.includes('Same password')) {
+          errorMessage = "Le nouveau mot de passe doit être différent de l'ancien";
+        } else if (error.message.includes('weak')) {
+          errorMessage = "Le mot de passe est trop faible. Utilisez au moins 8 caractères avec des lettres et des chiffres";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Erreur",
-        description: error.message || "Impossible de modifier le mot de passe",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -73,8 +96,21 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
     }
   };
 
+  const passwordStrength = () => {
+    if (newPassword.length === 0) return null;
+    if (newPassword.length < 6) return { level: 'weak', text: 'Trop court', color: 'text-red-500' };
+    if (newPassword.length < 8) return { level: 'medium', text: 'Moyen', color: 'text-yellow-500' };
+    if (newPassword.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)) return { level: 'strong', text: 'Fort', color: 'text-green-500' };
+    return { level: 'medium', text: 'Moyen', color: 'text-yellow-500' };
+  };
+
+  const strength = passwordStrength();
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      setOpen(newOpen);
+      if (!newOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -88,33 +124,6 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
         
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password">Mot de passe actuel</Label>
-            <div className="relative">
-              <Input
-                id="current-password"
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                className="pr-10"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                {showCurrentPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="new-password">Nouveau mot de passe</Label>
             <div className="relative">
               <Input
@@ -125,6 +134,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
                 required
                 minLength={6}
                 className="pr-10"
+                placeholder="Au moins 6 caractères"
               />
               <Button
                 type="button"
@@ -140,6 +150,16 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
                 )}
               </Button>
             </div>
+            {strength && (
+              <div className={`text-sm flex items-center gap-1 ${strength.color}`}>
+                {strength.level === 'strong' ? (
+                  <CheckCircle className="h-3 w-3" />
+                ) : (
+                  <AlertCircle className="h-3 w-3" />
+                )}
+                Force : {strength.text}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -153,6 +173,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
                 required
                 minLength={6}
                 className="pr-10"
+                placeholder="Retapez le mot de passe"
               />
               <Button
                 type="button"
@@ -168,6 +189,12 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
                 )}
               </Button>
             </div>
+            {confirmPassword && newPassword !== confirmPassword && (
+              <div className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                Les mots de passe ne correspondent pas
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -181,7 +208,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ children })
             </Button>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || newPassword !== confirmPassword || newPassword.length < 6}
               className="flex-1"
             >
               {loading ? 'Modification...' : 'Modifier'}

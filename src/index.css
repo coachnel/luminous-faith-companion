@@ -68,7 +68,7 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-/* Mobile optimizations - CRITIQUE pour petits écrans */
+/* Mobile optimizations - Enhanced for better responsiveness */
 input, textarea, button {
   font-size: 16px;
   -webkit-appearance: none;
@@ -88,13 +88,13 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Safe area pour navigation mobile - ESSENTIEL */
+/* Safe area pour navigation mobile - Enhanced */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 8px);
   padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
 }
 
-/* Navigation mobile - Force l'affichage sur TOUS les écrans */
+/* Navigation mobile - Enhanced for all screen sizes */
 nav[class*="fixed bottom-0"] {
   display: flex !important;
   visibility: visible !important;
@@ -106,19 +106,18 @@ nav[class*="fixed bottom-0"] {
   min-height: 64px !important;
 }
 
-/* ... keep existing code (breakpoints and responsive rules) */
-
-/* Breakpoints critiques pour petits écrans */
+/* Enhanced responsive breakpoints */
 @media (max-width: 280px) {
-  .xxs\:text-\[9px\] { font-size: 9px !important; }
-  .xxs\:text-\[8px\] { font-size: 8px !important; }
+  .text-xs { font-size: 9px !important; line-height: 12px !important; }
+  .text-sm { font-size: 10px !important; line-height: 14px !important; }
   
   nav[class*="fixed bottom-0"] {
     min-height: 56px !important;
+    padding: 4px 8px !important;
   }
   
   nav[class*="fixed bottom-0"] .flex span {
-    font-size: 7px !important;
+    font-size: 8px !important;
     line-height: 1 !important;
   }
   
@@ -128,19 +127,23 @@ nav[class*="fixed bottom-0"] {
   }
   
   nav[class*="fixed bottom-0"] button {
-    min-width: 28px !important;
-    padding: 4px 1px !important;
+    min-width: 32px !important;
+    padding: 4px 2px !important;
   }
+  
+  .p-3 { padding: 0.5rem !important; }
+  .gap-3 { gap: 0.5rem !important; }
+  .space-y-4 > * + * { margin-top: 0.75rem !important; }
 }
 
-/* Tecno Spark 20 et écrans similaires (320px) */
+/* Tecno Spark 20 and similar devices (320px) */
 @media (max-width: 320px) {
-  .p-3 { padding: 0.5rem !important; }
-  .p-4 { padding: 0.75rem !important; }
-  .space-y-4 > * + * { margin-top: 0.75rem !important; }
-  .space-y-6 > * + * { margin-top: 1rem !important; }
-  .gap-3 { gap: 0.5rem !important; }
-  .gap-4 { gap: 0.75rem !important; }
+  .p-3 { padding: 0.75rem !important; }
+  .p-4 { padding: 1rem !important; }
+  .space-y-4 > * + * { margin-top: 1rem !important; }
+  .space-y-6 > * + * { margin-top: 1.25rem !important; }
+  .gap-3 { gap: 0.75rem !important; }
+  .gap-4 { gap: 1rem !important; }
   
   .text-xl { font-size: 1.125rem !important; }
   .text-2xl { font-size: 1.25rem !important; }
@@ -150,26 +153,26 @@ nav[class*="fixed bottom-0"] {
   }
   
   nav[class*="fixed bottom-0"] button {
-    min-width: 30px !important;
-    max-width: 44px !important;
-    padding: 5px 2px !important;
+    min-width: 36px !important;
+    max-width: 48px !important;
+    padding: 6px 4px !important;
   }
   
   nav[class*="fixed bottom-0"] span {
-    font-size: 8px !important;
+    font-size: 9px !important;
   }
   
   nav[class*="fixed bottom-0"] svg {
-    width: 15px !important;
-    height: 15px !important;
+    width: 16px !important;
+    height: 16px !important;
   }
 }
 
-/* Écrans moyens (375px) */
+/* Medium screens (375px) */
 @media (max-width: 375px) {
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
+    gap: 1rem;
   }
   
   nav[class*="fixed bottom-0"] {
@@ -177,13 +180,22 @@ nav[class*="fixed bottom-0"] {
   }
   
   nav[class*="fixed bottom-0"] button {
-    min-width: 34px !important;
-    max-width: 48px !important;
-    padding: 6px 2px !important;
+    min-width: 40px !important;
+    max-width: 52px !important;
+    padding: 8px 4px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] span {
+    font-size: 10px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] svg {
+    width: 18px !important;
+    height: 18px !important;
   }
 }
 
-/* Prevent horizontal scroll sur TOUS les petits écrans */
+/* Prevent horizontal scroll on all small screens */
 @media (max-width: 640px) {
   * {
     max-width: 100%;
@@ -194,16 +206,28 @@ nav[class*="fixed bottom-0"] {
     overflow-x: hidden;
   }
   
-  /* Assurer la navigation visible */
+  /* Ensure navigation visibility */
   nav[class*="fixed bottom-0"] {
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
     position: fixed !important;
   }
+  
+  /* Better text wrapping */
+  h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  p, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 }
 
-/* Cartes modernes - design sobre */
+/* Enhanced cards design */
 .modern-card, .rounded-xl {
   border-radius: 0.75rem !important;
   background: var(--bg-card);
@@ -220,7 +244,7 @@ nav[class*="fixed bottom-0"] {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Transitions douces */
+/* Smooth transitions */
 button[class*="rounded"], .modern-card button {
   transition: box-shadow 0.16s, transform 0.16s;
 }
@@ -229,7 +253,7 @@ button:hover {
   transform: translateY(-1px);
 }
 
-/* Responsive pour cartes */
+/* Enhanced responsive card borders */
 @media (max-width: 375px) {
   .rounded-xl, .modern-card {
     border-radius: 0.5rem !important;
@@ -258,7 +282,7 @@ button:hover {
   }
 }
 
-/* PWA spécifique */
+/* PWA specific optimizations */
 @media (display-mode: standalone) {
   body {
     -webkit-user-select: none;
@@ -270,12 +294,12 @@ button:hover {
   }
 }
 
-/* Force le texte lisible sur tous les écrans */
+/* Enhanced text readability */
 .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
 .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
 .text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
 
-/* Assurer visibilité boutons */
+/* Button touch targets */
 button {
   min-height: 44px !important;
   touch-action: manipulation;
@@ -285,4 +309,58 @@ button {
   button {
     min-height: 40px !important;
   }
+}
+
+/* Enhanced grid responsiveness */
+@media (max-width: 480px) {
+  .grid-cols-2 {
+    gap: 0.75rem !important;
+  }
+  
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+  
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .md\:grid-cols-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Better contrast enforcement */
+.text-white {
+  color: #ffffff !important;
+}
+
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+/* Ensure proper text visibility on colored backgrounds */
+.bg-blue-600 * {
+  color: #ffffff !important;
+}
+
+.bg-white * {
+  color: inherit;
 }

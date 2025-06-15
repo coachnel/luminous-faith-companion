@@ -27,20 +27,20 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   useDataCleanup();
 
   // Extraction sécurisée des données et des états de chargement
-  const prayerRequests = prayerData.prayerRequests || [];
-  const prayersLoading = prayerData.loading || false;
-  const prayersError = prayerData.error;
+  const prayerRequests = prayerData?.prayerRequests || [];
+  const prayersLoading = prayerData?.loading ?? true;
+  const prayersError = prayerData?.error ?? null;
 
-  const notes = notesData.notes || [];
-  const notesLoading = notesData.loading || false;
-  const notesError = notesData.error;
+  const notes = notesData?.notes || [];
+  const notesLoading = notesData?.loading ?? true;
+  const notesError = notesData?.error ?? null;
 
-  const plans = plansData.plans || null;
-  const plansLoading = plansData.loading || false;
+  const plans = plansData.plans || [];
+  const plansLoading = plansData.loading;
   const plansError = plansData.error;
 
-  const challenges = challengesData.challenges || null;
-  const challengesLoading = challengesData.loading || false;
+  const challenges = challengesData.challenges || [];
+  const challengesLoading = challengesData.loading;
   const challengesError = challengesData.error;
 
   useEffect(() => {
@@ -113,11 +113,11 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   const stats = useMemo(() => {
     try {
       return {
-        prayers: Array.isArray(prayerRequests) ? prayerRequests.length : 0,
-        notes: Array.isArray(notes) ? notes.length : 0,
-        activePlans: plans && Array.isArray(plans) ? plans.filter(plan => plan && plan.is_active).length : 0,
-        activeChallenges: challenges && Array.isArray(challenges) ? challenges.filter(challenge => challenge && challenge.is_active).length : 0,
-        publicContent: Array.isArray(prayerRequests) ? prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length : 0
+        prayers: prayerRequests.length,
+        notes: notes.length,
+        activePlans: plans.filter(plan => plan && plan.is_active).length,
+        activeChallenges: challenges.filter(challenge => challenge && challenge.is_active).length,
+        publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
       };
     } catch (err) {
       console.error('Erreur calcul stats:', err);

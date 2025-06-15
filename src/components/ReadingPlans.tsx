@@ -77,17 +77,26 @@ const ReadingPlans = () => {
   const progress = currentPlan ? getPlanStats(currentPlan) : { completedDays: 0 };
 
   const handleJoinPlan = (planId: string) => {
-    console.log('Joining plan:', planId); // Test de clic
+    console.log('Rejoindre plan:', planId);
     const planData = readingPlans.find(p => p.id === planId);
     if (planData) {
       startPlan(planId, planData.title);
-      toast.success('🎉 Plan de lecture rejoint avec succès !');
+      toast.success(`🎉 Plan "${planData.title}" activé avec succès !`);
+    } else {
+      console.error('Plan non trouvé:', planId);
+      toast.error('Erreur lors de l\'activation du plan');
     }
   };
 
   const handleContinueReading = () => {
-    console.log('Continue reading clicked'); // Test de clic
-    toast.success('Reprise de la lecture !');
+    console.log('Continuer la lecture');
+    toast.success('📖 Reprise de la lecture !');
+  };
+
+  const handleCreateCustomPlan = () => {
+    console.log('Créer un plan personnalisé');
+    setShowCustomPlans(true);
+    toast.success('✨ Ouverture du créateur de plan personnalisé');
   };
 
   const getPlanDuration = (planId: string) => {
@@ -104,7 +113,7 @@ const ReadingPlans = () => {
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
                 onClick={() => setShowCustomPlans(false)}
-                className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
+                className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200"
               >
                 ← Retour aux plans
               </button>
@@ -134,14 +143,11 @@ const ReadingPlans = () => {
             </div>
           </div>
           <button
-            onClick={() => {
-              console.log('Create custom plan clicked'); // Test de clic
-              setShowCustomPlans(true);
-            }}
-            className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2"
+            onClick={handleCreateCustomPlan}
+            className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 transform hover:scale-105"
           >
             <Plus className="h-4 w-4" />
-            + Créer mon plan personnalisé
+            + Créer un plan personnalisé
           </button>
         </div>
       </ModernCard>
@@ -174,7 +180,7 @@ const ReadingPlans = () => {
             
             <button 
               onClick={handleContinueReading}
-              className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2 w-full sm:w-auto"
+              className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 w-full sm:w-auto transform hover:scale-105"
             >
               <Play className="h-4 w-4" />
               Continuer la lecture
@@ -187,17 +193,17 @@ const ReadingPlans = () => {
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="space-y-3">
           <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Catégories</h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => {
-                    console.log('Category selected:', category.id); // Test de clic
+                    console.log('Catégorie sélectionnée:', category.id);
                     setSelectedCategory(category.id);
                   }}
-                  className={`flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 transform hover:scale-105 ${
                     selectedCategory === category.id 
                       ? 'shadow-lg shadow-blue-600/25 scale-105' 
                       : ''
@@ -251,7 +257,7 @@ const ReadingPlans = () => {
                 <button
                   onClick={() => handleJoinPlan(plan.id)}
                   disabled={currentPlan?.plan_id === plan.id}
-                  className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2 w-full sm:w-auto"
+                  className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 w-full sm:w-auto transform hover:scale-105 disabled:transform-none"
                 >
                   {currentPlan?.plan_id === plan.id ? (
                     <>
@@ -270,6 +276,21 @@ const ReadingPlans = () => {
           </ModernCard>
         ))}
       </div>
+
+      {/* Bouton supplémentaire pour créer un plan personnalisé */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)] text-center">
+        <div className="py-4">
+          <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Créez votre propre parcours</h4>
+          <p className="text-sm text-[var(--text-secondary)] mb-4">Concevez un plan de lecture adapté à vos besoins et rythme</p>
+          <button
+            onClick={handleCreateCustomPlan}
+            className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-6 py-3 text-sm font-semibold transition-all duration-200 flex items-center gap-2 mx-auto transform hover:scale-105"
+          >
+            <Plus className="h-4 w-4" />
+            + Créer un plan personnalisé
+          </button>
+        </div>
+      </ModernCard>
 
       {filteredPlans.length === 0 && (
         <ModernCard className="bg-[var(--bg-card)] border-[var(--border-default)]">

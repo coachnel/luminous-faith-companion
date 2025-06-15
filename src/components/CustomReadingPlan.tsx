@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface CustomPlan {
   id: string;
@@ -47,13 +47,10 @@ const CustomReadingPlan = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Plan form submitted:', formData); // Test de clic
+    console.log('Soumission du formulaire de plan:', formData);
     
     if (!formData.name.trim() || !formData.books.trim()) {
-      toast({
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive",
-      });
+      toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
@@ -74,10 +71,7 @@ const CustomReadingPlan = () => {
           : plan
       );
       savePlans(updatedPlans);
-      toast({
-        title: "Plan modifié",
-        description: "Votre plan de lecture a été mis à jour avec succès",
-      });
+      toast.success("✏️ Plan modifié avec succès");
     } else {
       // Créer un nouveau plan
       const newPlan: CustomPlan = {
@@ -92,10 +86,7 @@ const CustomReadingPlan = () => {
       };
       
       savePlans([...customPlans, newPlan]);
-      toast({
-        title: "📖 Plan créé",
-        description: `Votre plan de lecture personnalisé a été créé${formData.isPublic ? ' et partagé avec la communauté' : ''}`,
-      });
+      toast.success(`📖 Plan "${formData.name}" créé avec succès${formData.isPublic ? ' et partagé avec la communauté' : ''}`);
     }
 
     // Réinitialiser le formulaire
@@ -105,7 +96,7 @@ const CustomReadingPlan = () => {
   };
 
   const handleEdit = (plan: CustomPlan) => {
-    console.log('Editing plan:', plan.id); // Test de clic
+    console.log('Modification du plan:', plan.id);
     setEditingPlan(plan);
     setFormData({
       name: plan.name,
@@ -118,16 +109,14 @@ const CustomReadingPlan = () => {
   };
 
   const handleDelete = (planId: string) => {
-    console.log('Deleting plan:', planId); // Test de clic
+    console.log('Suppression du plan:', planId);
     const updatedPlans = customPlans.filter(plan => plan.id !== planId);
     savePlans(updatedPlans);
-    toast({
-      description: "Plan de lecture supprimé",
-    });
+    toast.success("🗑️ Plan de lecture supprimé");
   };
 
   const startCustomPlan = (plan: CustomPlan) => {
-    console.log('Starting custom plan:', plan.id); // Test de clic
+    console.log('Démarrage du plan personnalisé:', plan.id);
     // Créer un planning basé sur le plan personnalisé
     const schedule = plan.books.map((book, index) => ({
       day: index + 1,
@@ -154,10 +143,7 @@ const CustomReadingPlan = () => {
     localStorage.setItem('readingPlanProgress', JSON.stringify(progress));
     localStorage.setItem('currentCustomPlan', JSON.stringify(readingPlan));
 
-    toast({
-      title: "📚 Plan démarré",
-      description: `Votre plan "${plan.name}" a été lancé`,
-    });
+    toast.success(`📚 Plan "${plan.name}" activé avec succès !`);
   };
 
   return (
@@ -169,11 +155,11 @@ const CustomReadingPlan = () => {
           <DialogTrigger asChild>
             <button
               onClick={() => {
-                console.log('New plan button clicked'); // Test de clic
+                console.log('Nouveau plan cliqué');
                 setEditingPlan(null);
                 setFormData({ name: '', description: '', books: '', duration: 30, isPublic: false });
               }}
-              className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2"
+              className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 flex items-center gap-2 transform hover:scale-105"
             >
               <Plus size={16} />
               Nouveau plan
@@ -252,14 +238,14 @@ const CustomReadingPlan = () => {
               <div className="flex gap-2">
                 <button 
                   type="submit" 
-                  className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex-1"
+                  className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 flex-1 transform hover:scale-105"
                 >
                   {editingPlan ? 'Modifier' : 'Créer'}
                 </button>
                 <button 
                   type="button"
                   onClick={() => setIsDialogOpen(false)}
-                  className="bg-gray-300 text-gray-700 hover:bg-gray-400 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
+                  className="bg-gray-300 text-gray-700 hover:bg-gray-400 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200"
                 >
                   Annuler
                 </button>
@@ -287,11 +273,11 @@ const CustomReadingPlan = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold text-gray-900">{plan.name}</h4>
                       <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
                         Personnalisé
                       </span>
                       {plan.isPublic && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
                           Public
                         </span>
                       )}
@@ -303,13 +289,13 @@ const CustomReadingPlan = () => {
                   <div className="flex gap-1 ml-4">
                     <button
                       onClick={() => handleEdit(plan)}
-                      className="bg-gray-100 text-gray-600 hover:bg-gray-200 rounded p-1 transition-all duration-200"
+                      className="bg-gray-100 text-gray-600 hover:bg-gray-200 rounded p-1 transition-all duration-200 transform hover:scale-110"
                     >
                       <Edit size={14} />
                     </button>
                     <button 
                       onClick={() => handleDelete(plan.id)}
-                      className="bg-red-100 text-red-600 hover:bg-red-200 rounded p-1 transition-all duration-200"
+                      className="bg-red-100 text-red-600 hover:bg-red-200 rounded p-1 transition-all duration-200 transform hover:scale-110"
                     >
                       <Trash size={14} />
                     </button>
@@ -333,7 +319,7 @@ const CustomReadingPlan = () => {
                   </div>
                   <button 
                     onClick={() => startCustomPlan(plan)}
-                    className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
+                    className="bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-200 transform hover:scale-105"
                   >
                     Commencer
                   </button>

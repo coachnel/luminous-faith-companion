@@ -105,8 +105,7 @@ export const useNotificationSystem = () => {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-192x192.png',
         tag: 'test-notification',
-        requireInteraction: false,
-        vibrate: [200, 100, 200]
+        requireInteraction: false
       });
 
       // Auto fermeture

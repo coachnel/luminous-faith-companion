@@ -1,10 +1,11 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Design system variables for consistent theming */
+  /* Design system variables */
   --bg-primary: #FAFAFA;
   --bg-secondary: #F5F5F7;
   --bg-card: #FFFFFF;
@@ -58,7 +59,7 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations - CRITIQUE pour petits écrans */
 input, textarea, button {
   font-size: 16px;
   -webkit-appearance: none;
@@ -78,20 +79,13 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Glass effect for cards */
-.glass {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-/* Safe area for mobile navigation - CRITICAL FIX */
+/* Safe area pour navigation mobile - ESSENTIEL */
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+  padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
 }
 
-/* Navigation mobile - Force l'affichage */
+/* Navigation mobile - Force l'affichage sur TOUS les écrans */
 nav[class*="fixed bottom-0"] {
   display: flex !important;
   visibility: visible !important;
@@ -100,99 +94,85 @@ nav[class*="fixed bottom-0"] {
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(12px) !important;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1) !important;
+  min-height: 64px !important;
 }
 
-/* Responsive breakpoints */
+/* Breakpoints critiques pour petits écrans */
 @media (max-width: 280px) {
-  .xxs\:text-xs { font-size: 0.75rem; }
-  .xxs\:inline { display: inline; }
-  .xxs\:text-\[10px\] { font-size: 10px; }
-  .xxs\:text-\[8px\] { font-size: 8px; }
-  .xxs\:px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
-  .xxs\:px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
-  .xxs\:min-w-\[1\.25rem\] { min-width: 1.25rem; }
+  .xxs\:text-\[9px\] { font-size: 9px !important; }
+  .xxs\:text-\[8px\] { font-size: 8px !important; }
   
-  /* Navigation ultra-petits écrans */
+  nav[class*="fixed bottom-0"] {
+    min-height: 56px !important;
+  }
+  
   nav[class*="fixed bottom-0"] .flex span {
-    font-size: 8px !important;
+    font-size: 7px !important;
+    line-height: 1 !important;
   }
   
   nav[class*="fixed bottom-0"] .flex svg {
-    width: 16px !important;
-    height: 16px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] button {
+    min-width: 28px !important;
+    padding: 4px 1px !important;
   }
 }
 
-/* Very small screen optimizations */
+/* Tecno Spark 20 et écrans similaires (320px) */
+@media (max-width: 320px) {
+  .p-3 { padding: 0.5rem !important; }
+  .p-4 { padding: 0.75rem !important; }
+  .space-y-4 > * + * { margin-top: 0.75rem !important; }
+  .space-y-6 > * + * { margin-top: 1rem !important; }
+  .gap-3 { gap: 0.5rem !important; }
+  .gap-4 { gap: 0.75rem !important; }
+  
+  .text-xl { font-size: 1.125rem !important; }
+  .text-2xl { font-size: 1.25rem !important; }
+  
+  nav[class*="fixed bottom-0"] {
+    min-height: 58px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] button {
+    min-width: 30px !important;
+    max-width: 44px !important;
+    padding: 5px 2px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] span {
+    font-size: 8px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+}
+
+/* Écrans moyens (375px) */
 @media (max-width: 375px) {
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
   }
   
-  .p-4 {
-    padding: 0.75rem;
-  }
-  
-  .text-2xl {
-    font-size: 1.5rem;
-  }
-  
-  .gap-4 {
-    gap: 0.75rem;
-  }
-  
-  /* Navigation ajustements */
   nav[class*="fixed bottom-0"] {
-    padding: 4px 2px !important;
+    min-height: 60px !important;
   }
   
   nav[class*="fixed bottom-0"] button {
-    min-width: 36px !important;
+    min-width: 34px !important;
+    max-width: 48px !important;
     padding: 6px 2px !important;
   }
 }
 
-/* Extra small screen support (Tecno Spark 20 and similar) */
-@media (max-width: 320px) {
-  .p-4 {
-    padding: 0.5rem;
-  }
-  
-  .space-y-6 > * + * {
-    margin-top: 1rem;
-  }
-  
-  .grid-cols-2 {
-    gap: 0.5rem;
-  }
-  
-  .text-lg {
-    font-size: 1rem;
-  }
-  
-  .text-2xl {
-    font-size: 1.25rem;
-  }
-  
-  /* Navigation Tecno Spark 20 */
-  nav[class*="fixed bottom-0"] {
-    height: 56px !important;
-    min-height: 56px !important;
-  }
-  
-  nav[class*="fixed bottom-0"] button {
-    min-width: 32px !important;
-    padding: 4px 1px !important;
-  }
-  
-  nav[class*="fixed bottom-0"] span {
-    font-size: 7px !important;
-    line-height: 1 !important;
-  }
-}
-
-/* Prevent horizontal scroll on small screens */
+/* Prevent horizontal scroll sur TOUS les petits écrans */
 @media (max-width: 640px) {
   * {
     max-width: 100%;
@@ -203,7 +183,7 @@ nav[class*="fixed bottom-0"] {
     overflow-x: hidden;
   }
   
-  /* Force navigation visible on all mobile screens */
+  /* Assurer la navigation visible */
   nav[class*="fixed bottom-0"] {
     left: 0 !important;
     right: 0 !important;
@@ -212,91 +192,65 @@ nav[class*="fixed bottom-0"] {
   }
 }
 
-/* Modern card styling */
-.modern-card, .glass, .rounded-2xl {
-  border-radius: 1rem !important;
+/* Cartes modernes - design sobre */
+.modern-card, .rounded-xl {
+  border-radius: 0.75rem !important;
   background: var(--bg-card);
-  box-shadow: 0 4px 16px 0 rgba(120, 80, 200, 0.09);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-default) !important;
 }
 
-.bg-gradient-to-br {
-  background-repeat: no-repeat;
+.shadow, .shadow-lg, .shadow-md, .shadow-sm {
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
 }
 
-.shadow, .shadow-lg, .shadow-md {
-  box-shadow: 0 4px 18px 0 rgba(120, 80, 200, 0.10), 0 2px 3px rgba(0,0,0,0.06);
-}
-
-button[class*="rounded-2xl"], .modern-card button {
+/* Transitions douces */
+button[class*="rounded"], .modern-card button {
   transition: box-shadow 0.16s, transform 0.16s;
-  box-shadow: 0 2px 8px rgba(120,80,200,.05);
 }
 
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* Responsive pour cartes */
 @media (max-width: 375px) {
-  .rounded-2xl, .modern-card, .glass {
-    border-radius: 0.75rem !important;
-  }
-}
-
-@media (max-width: 320px) {
-  .rounded-2xl, .modern-card, .glass {
+  .rounded-xl, .modern-card {
     border-radius: 0.5rem !important;
   }
 }
 
-/* Make sure gradients never cause overflow */
-.bg-gradient-to-br {
-  background-size: 110% 110%;
-}
-
-/* Restore lively card padding for homepage/Discover cards */
-.p-4, .sm\:p-6, .p-6 {
-  padding-top: 1rem !important;
-  padding-bottom: 1rem !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-}
-
-/* Typo reinforcement */
-.text-2xl, .font-bold {
-  letter-spacing: -0.015em;
-}
-
-/* Ensure bold “Discover” cards keep their background even in dark mode */
-[data-theme="dark"] .modern-card, 
-[data-theme="dark"] .rounded-2xl,
-[data-theme="dark"] .glass {
-  background: #191926 !important;
-  border-color: #2A2A3F !important;
-}
-
 @media (max-width: 320px) {
-  .p-4 { padding: 0.5rem !important; }
+  .rounded-xl, .modern-card {
+    border-radius: 0.375rem !important;
+  }
 }
 
-/* PWA specific fixes */
+/* PWA spécifique */
 @media (display-mode: standalone) {
   body {
     -webkit-user-select: none;
     -webkit-touch-callout: none;
   }
   
-  /* Assurer que la navigation reste visible en mode PWA */
   nav[class*="fixed bottom-0"] {
     padding-bottom: env(safe-area-inset-bottom, 8px) !important;
   }
 }
 
-/* Force reload indicator */
-.update-available {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 10000;
-  background: #4CAF50;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
+/* Force le texte lisible sur tous les écrans */
+.text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+.text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+.text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+
+/* Assurer visibilité boutons */
+button {
+  min-height: 44px !important;
+  touch-action: manipulation;
+}
+
+@media (max-width: 320px) {
+  button {
+    min-height: 40px !important;
+  }
 }

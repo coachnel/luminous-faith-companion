@@ -16,11 +16,11 @@ const ResponsiveLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Contenu principal avec padding bottom pour mobile */}
-      <div className={`${isMobile ? 'pb-20' : ''} min-h-screen`}>
+      <div className={`${isMobile ? 'pb-16 sm:pb-20' : ''} min-h-screen`}>
         <AppRouter initialRoute={currentRoute} />
       </div>
 
-      {/* Navigation mobile - toujours visible sur mobile */}
+      {/* Navigation mobile - visible uniquement sur mobile */}
       {isMobile && (
         <MobileNavigation 
           currentRoute={currentRoute} 

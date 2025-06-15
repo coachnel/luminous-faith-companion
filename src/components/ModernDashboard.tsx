@@ -17,66 +17,65 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   const { user } = useAuth();
   const [isReady, setIsReady] = useState(false);
 
-  // Tous les hooks doivent être appelés de manière inconditionnelle
+  // CORRECTION: Appeler tous les hooks de manière inconditionnelle
   const prayerData = useNeonPrayerRequests();
   const notesData = useNeonNotes();
   const plansData = useReadingPlanProgress();
   const challengesData = useSupabaseChallenges();
   useDataCleanup();
 
-  // Calcul des statistiques avec useMemo - appelé de manière inconditionnelle
+  // Calcul des statistiques sécurisé
   const stats = useMemo(() => {
-    if (!user || !prayerData || !notesData || !plansData || !challengesData) {
-      return {
-        prayers: 0,
-        notes: 0,
-        activePlans: 0,
-        activeChallenges: 0,
-        publicContent: 0
-      };
+    const defaultStats = {
+      prayers: 0,
+      notes: 0,
+      activePlans: 0,
+      activeChallenges: 0,
+      publicContent: 0
+    };
+
+    if (!user || !prayerData?.prayerRequests || !notesData?.notes || !plansData?.plans || !challengesData?.challenges) {
+      return defaultStats;
     }
 
-    const prayerRequests = prayerData.prayerRequests || [];
-    const notes = notesData.notes || [];
-    const plans = plansData.plans || [];
-    const challenges = challengesData.challenges || [];
+    try {
+      const prayerRequests = Array.isArray(prayerData.prayerRequests) ? prayerData.prayerRequests : [];
+      const notes = Array.isArray(notesData.notes) ? notesData.notes : [];
+      const plans = Array.isArray(plansData.plans) ? plansData.plans : [];
+      const challenges = Array.isArray(challengesData.challenges) ? challengesData.challenges : [];
 
-    return {
-      prayers: prayerRequests.length,
-      notes: notes.length,
-      activePlans: plans.filter(plan => plan?.is_active).length,
-      activeChallenges: challenges.filter(challenge => challenge?.is_active).length,
-      publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
-    };
+      return {
+        prayers: prayerRequests.length,
+        notes: notes.length,
+        activePlans: plans.filter(plan => plan?.is_active).length,
+        activeChallenges: challenges.filter(challenge => challenge?.is_active).length,
+        publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
+      };
+    } catch (error) {
+      console.error('Erreur calcul stats:', error);
+      return defaultStats;
+    }
   }, [user, prayerData?.prayerRequests, notesData?.notes, plansData?.plans, challengesData?.challenges]);
 
-  // Effect pour la préparation - appelé de manière inconditionnelle
+  // Effect de préparation sécurisé
   useEffect(() => {
     if (user) {
       const timer = setTimeout(() => {
         setIsReady(true);
-      }, 500);
+      }, 300); // Réduit le délai
       return () => clearTimeout(timer);
     } else {
       setIsReady(false);
     }
   }, [user]);
 
-  // Affichage conditionnel basé sur les états
+  // Rendu conditionnel sécurisé
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
-        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-lg font-semibold text-purple-700 mb-2">Connexion en cours...</p>
-        <p className="text-gray-600 text-sm">
-          Vérification de votre session...<br/>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-2 text-purple-600 underline"
-          >
-            Actualiser si ça prend trop de temps
-          </button>
-        </p>
+        <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+        <p className="text-base font-medium text-gray-700 mb-2">Connexion...</p>
+        <p className="text-gray-500 text-sm">Vérification de votre session</p>
       </div>
     );
   }
@@ -84,16 +83,16 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   if (!isReady) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-lg font-semibold text-blue-700 mb-2">Chargement du tableau de bord...</p>
-        <p className="text-gray-600 text-sm">Préparation de votre espace personnel...</p>
+        <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+        <p className="text-base font-medium text-gray-700 mb-2">Chargement...</p>
+        <p className="text-gray-500 text-sm">Préparation de votre espace</p>
       </div>
     );
   }
 
   const loading = prayerData?.loading || notesData?.loading || plansData?.loading || challengesData?.loading;
 
-  // Actions rapides - design sobre et clean
+  // Actions rapides - design sobre et propre
   const quickActions = [
     {
       icon: Heart,
@@ -133,7 +132,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
     }
   ];
 
-  // Cartes de navigation principales - design sobre
+  // Cartes de navigation principales
   const navigationCards = [
     {
       icon: Heart,
@@ -225,19 +224,19 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   };
 
   return (
-    <div className="p-4 space-y-6 max-w-6xl mx-auto min-h-screen bg-gray-50">
-      {/* En-tête sobre */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
-            <Zap className="h-6 w-6 text-blue-600" />
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-6xl mx-auto min-h-screen bg-gray-50">
+      {/* En-tête sobre et propre */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100">
+            <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
           </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               Bonjour {getUserName()}
             </h1>
-            <p className="text-gray-600">
-              Bienvenue dans votre espace spirituel personnel
+            <p className="text-gray-600 text-sm sm:text-base">
+              Bienvenue dans votre espace spirituel
             </p>
           </div>
           <ModernButton 
@@ -252,20 +251,20 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Quick Actions - design sobre */}
+      {/* Quick Actions - responsive */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {quickActions.map((action, index) => {
           const Icon = action.icon;
           return (
             <button
               key={index}
-              className={`transition-all duration-200 rounded-lg p-4 ${action.color} ${action.borderColor} border hover:shadow-md flex flex-col items-center min-h-[100px]`}
+              className={`transition-all duration-200 rounded-xl p-3 sm:p-4 ${action.color} ${action.borderColor} border hover:shadow-md flex flex-col items-center min-h-[90px] sm:min-h-[100px]`}
               onClick={action.action}
             >
-              <div className={`w-10 h-10 mb-2 rounded-lg flex items-center justify-center ${action.color}`}>
-                <Icon className={`h-5 w-5 ${action.iconColor}`} />
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 mb-2 rounded-lg flex items-center justify-center ${action.color}`}>
+                <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${action.iconColor}`} />
               </div>
-              <div className="font-medium text-sm text-gray-900 text-center mb-1">{action.title}</div>
+              <div className="font-medium text-xs sm:text-sm text-gray-900 text-center mb-1">{action.title}</div>
               <div className="text-xs text-gray-600 text-center">{action.description}</div>
             </button>
           );
@@ -273,56 +272,56 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       </div>
 
       {/* Statistiques */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Votre activité</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Votre activité</h2>
           <p className="text-sm text-gray-600">Aperçu de votre parcours spirituel</p>
         </div>
         
         {loading ? (
-          <div className="text-center py-8">
+          <div className="text-center py-6">
             <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
             <p className="text-gray-600">Chargement...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-2xl font-bold text-blue-600">{stats.prayers}</div>
-              <div className="text-sm text-gray-600">Prières</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.prayers}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Prières</div>
             </div>
-            <div className="text-center p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-2xl font-bold text-blue-600">{stats.notes}</div>
-              <div className="text-sm text-gray-600">Notes</div>
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.notes}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Notes</div>
             </div>
-            <div className="text-center p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-2xl font-bold text-blue-600">{stats.activeChallenges}</div>
-              <div className="text-sm text-gray-600">Défis actifs</div>
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.activeChallenges}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Défis actifs</div>
             </div>
-            <div className="text-center p-4 rounded-lg bg-gray-50 border border-gray-100">
-              <div className="text-2xl font-bold text-blue-600">{stats.activePlans}</div>
-              <div className="text-sm text-gray-600">Plans actifs</div>
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.activePlans}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Plans actifs</div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Sections principales - design sobre */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Sections principales - responsive */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {navigationCards.map((card, index) => {
           const Icon = card.icon;
           return (
             <div
               key={index}
-              className={`p-6 cursor-pointer transition-all duration-200 hover:shadow-md rounded-lg ${card.color} ${card.borderColor} border`}
+              className={`p-4 sm:p-6 cursor-pointer transition-all duration-200 hover:shadow-md rounded-xl ${card.color} ${card.borderColor} border`}
               onClick={() => onNavigate(card.route)}
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${card.iconBg} border border-gray-100`}>
-                  <Icon className={`h-6 w-6 ${card.iconColor}`} />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center ${card.iconBg} border border-gray-100`}>
+                  <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${card.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 mb-1 truncate">{card.title}</h3>
-                  <p className="text-sm text-gray-600 truncate">{card.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-1 truncate text-sm sm:text-base">{card.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">{card.description}</p>
                 </div>
               </div>
             </div>

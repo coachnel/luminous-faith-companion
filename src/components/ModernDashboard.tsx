@@ -2,7 +2,7 @@
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
-import { Heart, BookOpen, Target, Compass, Users, Plus, Zap, Settings, Calendar } from 'lucide-react';
+import { Heart, BookOpen, Target, Compass, Users, Plus, Zap, Settings, Calendar, MessageSquare, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNeonPrayerRequests, useNeonNotes } from '@/hooks/useNeonData';
 import { useReadingPlanProgress } from '@/hooks/useReadingProgress';
@@ -117,11 +117,11 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       action: () => onNavigate('challenges')
     },
     {
-      icon: BookOpen,
-      title: "Plan de lecture",
-      description: "Commencer à lire",
+      icon: Star,
+      title: "Témoignage",
+      description: "Partager votre expérience",
       color: "from-purple-500 to-violet-500",
-      action: () => onNavigate('reading-plans')
+      action: () => onNavigate('testimony')
     }
   ];
 
@@ -164,9 +164,27 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       route: "reading-plans"
     },
     {
+      icon: MessageSquare,
+      title: "Communauté",
+      description: "Partagez et découvrez ensemble",
+      color: "from-teal-50 to-cyan-50",
+      borderColor: "border-teal-200",
+      textColor: "text-teal-600",
+      route: "community"
+    },
+    {
+      icon: Star,
+      title: "Témoignages",
+      description: "Histoires de foi inspirantes",
+      color: "from-yellow-50 to-orange-50",
+      borderColor: "border-yellow-200",
+      textColor: "text-yellow-600",
+      route: "testimony"
+    },
+    {
       icon: Compass,
       title: "Découvrir",
-      description: `Contenu partagé par la communauté`,
+      description: "Contenu partagé par la communauté",
       color: "from-orange-50 to-amber-50",
       borderColor: "border-orange-200",
       textColor: "text-orange-600",
@@ -176,9 +194,9 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Users,
       title: "Cercles de Prière",
       description: "Prier ensemble en communauté",
-      color: "from-teal-50 to-cyan-50",
-      borderColor: "border-teal-200",
-      textColor: "text-teal-600",
+      color: "from-indigo-50 to-purple-50",
+      borderColor: "border-indigo-200",
+      textColor: "text-indigo-600",
       route: "prayer-circles"
     }
   ];

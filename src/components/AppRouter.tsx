@@ -8,6 +8,8 @@ import EnhancedReadingPlans from './EnhancedReadingPlans';
 import DiscoverPage from './DiscoverPage';
 import PrayerCircles from './PrayerCircles';
 import SettingsApp from './SettingsApp';
+import CommunityPage from './CommunityPage';
+import TestimonyPage from './TestimonyPage';
 
 export type AppRoute = 
   | 'dashboard'
@@ -17,6 +19,8 @@ export type AppRoute =
   | 'reading-plans'
   | 'discover'
   | 'prayer-circles'
+  | 'community'
+  | 'testimony'
   | 'settings';
 
 interface AppRouterProps {
@@ -53,6 +57,10 @@ const AppRouter: React.FC<AppRouterProps> = ({ initialRoute = 'dashboard' }) => 
         return <DiscoverPage />;
       case 'prayer-circles':
         return <PrayerCircles />;
+      case 'community':
+        return <CommunityPage />;
+      case 'testimony':
+        return <TestimonyPage />;
       case 'settings':
         return <SettingsApp />;
       default:

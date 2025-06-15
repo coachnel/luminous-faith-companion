@@ -43,30 +43,30 @@ const Prayer = () => {
         </CardHeader>
       </Card>
 
-      {/* Onglets modernes - Responsive */}
+      {/* Onglets modernes - Responsive avec meilleure accessibilité */}
       <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-secondary)] border-[var(--border-default)] m-2 sm:m-3 h-auto">
+          <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-secondary)] border-[var(--border-default)] m-2 sm:m-3 h-auto rounded-lg p-1">
             <TabsTrigger 
               value="prayer" 
-              className="gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)]"
+              className="gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 hover:bg-white/50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm cursor-pointer"
             >
               <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xxs:inline">Prière</span>
+              <span className="hidden xxs:inline font-medium">Prière</span>
             </TabsTrigger>
             <TabsTrigger 
               value="sharing" 
-              className="gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)]"
+              className="gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 hover:bg-white/50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm cursor-pointer"
             >
               <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xxs:inline">Partage</span>
+              <span className="hidden xxs:inline font-medium">Partage</span>
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)]"
+              className="gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 hover:bg-white/50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm cursor-pointer"
             >
               <SettingsIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xxs:inline">Horaires</span>
+              <span className="hidden xxs:inline font-medium">Horaires</span>
             </TabsTrigger>
           </TabsList>
 

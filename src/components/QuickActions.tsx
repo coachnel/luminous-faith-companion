@@ -11,7 +11,7 @@ interface QuickActionsProps {
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
-  // Clean design with proper contrast - white cards with colored icons
+  // Clean design with proper contrast - white cards with colored icons and blue buttons
   const actions = [
     {
       icon: Book,
@@ -95,14 +95,14 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
       {actions.map((action, i) => (
         <button
           key={i}
-          className={`bg-white rounded-lg shadow-sm border transition-all duration-200 hover:shadow-md ${action.borderColor} p-3 sm:p-4 min-h-[80px] sm:min-h-[90px] flex flex-col items-center justify-center hover:scale-105`}
+          className={`bg-white rounded-lg shadow-sm border transition-all duration-200 hover:shadow-md ${action.borderColor} p-3 sm:p-4 min-h-[80px] sm:min-h-[90px] flex flex-col items-center justify-center hover:scale-105 text-gray-700 hover:text-gray-900`}
           onClick={action.action}
           type="button"
         >
           <div className={`w-8 h-8 sm:w-10 sm:h-10 mb-2 rounded-lg ${action.bgColor} flex items-center justify-center`}>
             <action.icon size={16} className={action.iconColor} />
           </div>
-          <span className={`text-xs sm:text-sm font-medium text-gray-700 text-center leading-tight`}>{action.label}</span>
+          <span className="text-xs sm:text-sm font-medium text-center leading-tight">{action.label}</span>
         </button>
       ))}
     </div>

@@ -18,7 +18,7 @@ export const ModernButton = React.forwardRef<HTMLButtonElement, ModernButtonProp
     const variants = {
       primary: 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-600',
       secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200',
-      ghost: 'hover:bg-gray-100 text-gray-700 hover:text-gray-900',
+      ghost: 'hover:bg-gray-100 text-gray-700 hover:text-gray-900 bg-white border border-gray-200',
       outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900',
     };
     

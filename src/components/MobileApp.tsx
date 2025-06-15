@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import ModernFinanceNavigation from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
@@ -95,10 +96,7 @@ const MobileApp = () => {
       <div className="pb-16 xxs:pb-14 xs:pb-20 lg:pb-0">
         {renderSection}
       </div>
-      <ModernFinanceNavigation 
-        activeSection={currentSection} 
-        setActiveSection={handleNavigationFromNav}
-      />
+      <ModernFinanceNavigation />
     </div>
   );
 };

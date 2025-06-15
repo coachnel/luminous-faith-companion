@@ -64,9 +64,9 @@ export function ChallengesSection() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Target className="h-6 w-6" />
-            Défis spirituels
+            Défis personnels
           </h2>
-          <p className="text-gray-600">Créez et suivez vos objectifs spirituels</p>
+          <p className="text-gray-600">Créez et suivez vos objectifs personnels</p>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -80,7 +80,7 @@ export function ChallengesSection() {
             <DialogHeader>
               <DialogTitle>Créer un nouveau défi</DialogTitle>
               <DialogDescription>
-                Définissez un objectif spirituel personnel à atteindre
+                Définissez un objectif personnel à atteindre
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -145,7 +145,7 @@ export function ChallengesSection() {
             <CardContent className="text-center py-8">
               <Target className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <p className="text-gray-600">Aucun défi en cours</p>
-              <p className="text-sm text-gray-500">Créez votre premier défi spirituel !</p>
+              <p className="text-sm text-gray-500">Créez votre premier défi personnel !</p>
             </CardContent>
           </Card>
         ) : (

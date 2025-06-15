@@ -67,9 +67,9 @@ export function EnhancedChallengesSection() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2 text-[var(--text-primary)]">
             <Target className="h-6 w-6" />
-            Défis spirituels
+            Défis personnels
           </h2>
-          <p className="text-[var(--text-secondary)]">Créez et suivez vos objectifs spirituels</p>
+          <p className="text-[var(--text-secondary)]">Créez et suivez vos objectifs personnels</p>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -83,7 +83,7 @@ export function EnhancedChallengesSection() {
             <DialogHeader>
               <DialogTitle className="text-[var(--text-primary)]">Créer un nouveau défi</DialogTitle>
               <DialogDescription className="text-[var(--text-secondary)]">
-                Définissez un objectif spirituel personnel à atteindre
+                Définissez un objectif personnel à atteindre
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -151,7 +151,7 @@ export function EnhancedChallengesSection() {
             <div className="text-center py-8">
               <Target className="h-12 w-12 mx-auto text-[var(--text-secondary)] mb-4" />
               <p className="text-[var(--text-secondary)]">Aucun défi en cours</p>
-              <p className="text-sm text-[var(--text-secondary)]">Créez votre premier défi spirituel !</p>
+              <p className="text-sm text-[var(--text-secondary)]">Créez votre premier défi personnel !</p>
             </div>
           </ModernCard>
         ) : (
@@ -191,9 +191,9 @@ export function EnhancedChallengesSection() {
               Comment ça marche ?
             </h3>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Créez des défis spirituels personnels (exemple : "Prier chaque matin pendant 30 jours"). 
+              Créez des défis personnels (exemple : "Prier chaque matin pendant 30 jours"). 
               Choisissez de les garder privés ou de les partager avec la communauté pour encourager d'autres personnes. 
-              Validez chaque jour votre progression pour maintenir votre motivation et voir votre croissance spirituelle.
+              Validez chaque jour votre progression pour maintenir votre motivation et voir votre croissance personnelle.
               Suivez la progression globale des défis communautaires pour vous inspirer mutuellement.
             </p>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Clock, Bell, CheckCircle, Heart, Calendar, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,7 +83,7 @@ const PrayerReminder: React.FC<PrayerReminderProps> = ({ reminderTimes, onPrayer
         const { error } = await supabase
           .from('user_preferences')
           .update({
-            last_prayer_date: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           })
           .eq('user_id', user.id);
 

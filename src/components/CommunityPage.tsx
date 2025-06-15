@@ -40,34 +40,34 @@ const CommunityPage = () => {
             value="feed" 
             className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
               activeTab === 'feed' 
-                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'hover:bg-gray-50 text-[var(--text-primary)]'
+                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
             }`}
           >
-            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden xxs:inline">Découvrir</span>
+            <Users className={`h-3 w-3 sm:h-4 sm:w-4 ${activeTab === 'feed' ? 'text-white' : ''}`} />
+            <span className={`hidden xxs:inline ${activeTab === 'feed' ? 'text-white' : ''}`}>Découvrir</span>
           </TabsTrigger>
           <TabsTrigger 
             value="publish" 
             className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
               activeTab === 'publish' 
-                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'hover:bg-gray-50 text-[var(--text-primary)]'
+                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
             }`}
           >
-            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden xxs:inline">Publier</span>
+            <Plus className={`h-3 w-3 sm:h-4 sm:w-4 ${activeTab === 'publish' ? 'text-white' : ''}`} />
+            <span className={`hidden xxs:inline ${activeTab === 'publish' ? 'text-white' : ''}`}>Publier</span>
           </TabsTrigger>
           <TabsTrigger 
             value="notifications" 
             className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer relative ${
               activeTab === 'notifications' 
-                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'hover:bg-gray-50 text-[var(--text-primary)]'
+                ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
             }`}
           >
-            <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden xxs:inline">Notifications</span>
+            <Bell className={`h-3 w-3 sm:h-4 sm:w-4 ${activeTab === 'notifications' ? 'text-white' : ''}`} />
+            <span className={`hidden xxs:inline ${activeTab === 'notifications' ? 'text-white' : ''}`}>Notifications</span>
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] xxs:text-[10px] xs:text-xs rounded-full px-1 xxs:px-1.5 py-0.5 min-w-[1rem] xxs:min-w-[1.25rem] h-4 xxs:h-5 flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}

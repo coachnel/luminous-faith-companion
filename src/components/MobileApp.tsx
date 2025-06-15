@@ -95,9 +95,9 @@ const MobileApp = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[var(--bg-primary)]">
+    <div className="min-h-screen w-full bg-[var(--bg-primary)] relative">
       <PWAUpdatePrompt />
-      <div className="pb-16 sm:pb-20 w-full overflow-x-hidden">
+      <div className="pb-16 sm:pb-20 w-full min-h-screen">
         {renderSection}
       </div>
       <ModernFinanceNavigation 

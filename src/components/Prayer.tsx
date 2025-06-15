@@ -51,34 +51,34 @@ const Prayer = () => {
               value="prayer" 
               className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'prayer' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                  : 'hover:bg-gray-50 text-[var(--text-primary)]'
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                  : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
               }`}
             >
-              <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xxs:inline">Prière</span>
+              <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${activeTab === 'prayer' ? 'text-white' : ''}`} />
+              <span className={`hidden xxs:inline ${activeTab === 'prayer' ? 'text-white' : ''}`}>Prière</span>
             </TabsTrigger>
             <TabsTrigger 
               value="sharing" 
               className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'sharing' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                  : 'hover:bg-gray-50 text-[var(--text-primary)]'
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                  : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
               }`}
             >
-              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xxs:inline">Partage</span>
+              <Users className={`h-3 w-3 sm:h-4 sm:w-4 ${activeTab === 'sharing' ? 'text-white' : ''}`} />
+              <span className={`hidden xxs:inline ${activeTab === 'sharing' ? 'text-white' : ''}`}>Partage</span>
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
               className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'settings' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                  : 'hover:bg-gray-50 text-[var(--text-primary)]'
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg border-0' 
+                  : 'hover:bg-gray-50 text-[var(--text-primary)] bg-transparent border-0'
               }`}
             >
-              <SettingsIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xxs:inline">Horaires</span>
+              <SettingsIcon className={`h-3 w-3 sm:h-4 sm:w-4 ${activeTab === 'settings' ? 'text-white' : ''}`} />
+              <span className={`hidden xxs:inline ${activeTab === 'settings' ? 'text-white' : ''}`}>Horaires</span>
             </TabsTrigger>
           </TabsList>
 

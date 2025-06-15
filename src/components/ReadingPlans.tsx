@@ -5,21 +5,23 @@ import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Calendar, CheckCircle, Clock, Users, Trophy, Play } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle, Clock, Users, Trophy, Play, Settings } from 'lucide-react';
 import { useReadingPlanProgress, READING_PLANS } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
+import CustomReadingPlan from './CustomReadingPlan';
 
 interface ReadingPlan {
   id: string;
   title: string;
   description: string;
-  duration: number; // en jours
+  duration: number;
   category: 'bible-complete' | 'nouveau-testament' | 'ancien-testament' | 'thematique';
 }
 
 const ReadingPlans = () => {
   const { plans, startPlan, getPlanStats } = useReadingPlanProgress();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showCustomPlans, setShowCustomPlans] = useState(false);
 
   const readingPlans: ReadingPlan[] = [
     {
@@ -82,12 +84,32 @@ const ReadingPlans = () => {
     }
   };
 
-  // Helper function to get plan duration
   const getPlanDuration = (planId: string) => {
     const readingPlan = readingPlans.find(p => p.id === planId);
     const hookPlan = READING_PLANS.find(p => p.id === planId);
     return readingPlan?.duration || hookPlan?.duration || 365;
   };
+
+  if (showCustomPlans) {
+    return (
+      <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+        <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <ModernButton
+                onClick={() => setShowCustomPlans(false)}
+                variant="outline"
+                size="sm"
+              >
+                ← Retour aux plans
+              </ModernButton>
+            </div>
+          </div>
+        </ModernCard>
+        <CustomReadingPlan />
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
@@ -106,6 +128,15 @@ const ReadingPlans = () => {
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Structurez votre étude biblique quotidienne</p>
             </div>
           </div>
+          <ModernButton
+            onClick={() => setShowCustomPlans(true)}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Plans personnalisés
+          </ModernButton>
         </div>
       </ModernCard>
 

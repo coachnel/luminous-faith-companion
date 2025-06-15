@@ -4,8 +4,9 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Search, TrendingUp, Heart, BookOpen, Users, Calendar, Star, Eye, MessageCircle } from 'lucide-react';
+import { Sparkles, Search, TrendingUp, Heart, BookOpen, Users, Star } from 'lucide-react';
 import { useCommunityContent } from '@/hooks/useCommunityContent';
+import CommunityContentCard from './CommunityContentCard';
 
 const Discover = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,7 +21,6 @@ const Discover = () => {
     { id: 'note', label: 'Réflexions', icon: Star }
   ];
 
-  // Filtrer le contenu basé sur la catégorie et la recherche
   const filteredContent = content.filter(item => {
     const matchesCategory = selectedCategory === 'all' || item.type === selectedCategory;
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -29,15 +29,15 @@ const Discover = () => {
     return matchesCategory && matchesSearch;
   });
 
-  // Calculer les sujets tendance basés sur le contenu réel
   const getTrendingTopics = () => {
+    if (content.length === 0) return [];
+    
     const topicCounts = new Map();
     
     content.forEach(item => {
-      // Extraire des mots-clés du titre et du contenu
       const words = [...item.title.toLowerCase().split(' '), ...item.content.toLowerCase().split(' ')]
-        .filter(word => word.length > 3)
-        .slice(0, 5); // Limiter pour éviter trop de mots
+        .filter(word => word.length > 4 && !['dans', 'avec', 'pour', 'cette', 'celui', 'celle', 'tous', 'toutes', 'faire', 'avoir', 'être', 'sera', 'était', 'seront', 'étaient'].includes(word))
+        .slice(0, 3);
       
       words.forEach(word => {
         topicCounts.set(word, (topicCounts.get(word) || 0) + 1);
@@ -45,42 +45,13 @@ const Discover = () => {
     });
 
     return Array.from(topicCounts.entries())
+      .filter(([word, count]) => count > 1)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
+      .slice(0, 6)
       .map(([word, count]) => ({ name: word, count }));
   };
 
   const trendingTopics = getTrendingTopics();
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'prayer': return Heart;
-      case 'verse': return BookOpen;
-      case 'testimony': return Users;
-      case 'note': return Star;
-      default: return Sparkles;
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'prayer': return 'Prière';
-      case 'verse': return 'Verset';
-      case 'testimony': return 'Témoignage';
-      case 'note': return 'Réflexion';
-      default: return 'Contenu';
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'prayer': return 'bg-red-100 text-red-700 border-red-200';
-      case 'verse': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'testimony': return 'bg-green-100 text-green-700 border-green-200';
-      case 'note': return 'bg-purple-100 text-purple-700 border-purple-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
 
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
@@ -140,13 +111,13 @@ const Discover = () => {
         </div>
       </ModernCard>
 
-      {/* Sujets tendance - seulement si on a du contenu */}
+      {/* Sujets tendance */}
       {trendingTopics.length > 0 && (
         <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--accent-primary)]" />
-              <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Tendances</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Tendances de la communauté</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {trendingTopics.map((topic, index) => (
@@ -157,7 +128,7 @@ const Discover = () => {
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium text-[var(--text-primary)] break-words capitalize">{topic.name}</span>
                     <Badge variant="outline" className="text-xs">
-                      {topic.count}
+                      {topic.count} fois
                     </Badge>
                   </div>
                 </div>
@@ -167,10 +138,15 @@ const Discover = () => {
         </ModernCard>
       )}
 
-      {/* Contenu mis en avant */}
+      {/* Contenu de la communauté */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="space-y-4">
-          <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Contenu de la communauté</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Contenu de la communauté</h3>
+            <Badge variant="outline" className="text-xs">
+              {filteredContent.length} publications
+            </Badge>
+          </div>
           
           {loading ? (
             <div className="space-y-4">
@@ -180,43 +156,9 @@ const Discover = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredContent.map((item) => {
-                const TypeIcon = getTypeIcon(item.type);
-                return (
-                  <ModernCard 
-                    key={item.id} 
-                    className="p-3 sm:p-4 bg-[var(--bg-secondary)] border-[var(--border-default)] hover:shadow-md transition-all"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <Badge className={`text-xs ${getTypeColor(item.type)}`}>
-                              <TypeIcon className="h-3 w-3 mr-1" />
-                              {getTypeLabel(item.type)}
-                            </Badge>
-                            <span className="text-xs text-[var(--text-secondary)]">par {item.author_name}</span>
-                            <span className="text-xs text-[var(--text-secondary)]">• {new Date(item.created_at).toLocaleDateString('fr-FR')}</span>
-                          </div>
-                          <h4 className="font-semibold text-[var(--text-primary)] mb-1 text-sm sm:text-base break-words">{item.title}</h4>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2 break-words leading-relaxed">{item.content}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-[var(--border-default)] text-xs text-[var(--text-secondary)]">
-                        <div className="flex items-center gap-1">
-                          <Heart className="h-3 w-3" />
-                          <span>{item.likes_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageCircle className="h-3 w-3" />
-                          <span>{item.comments_count}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </ModernCard>
-                );
-              })}
+              {filteredContent.map((item) => (
+                <CommunityContentCard key={item.id} item={item} />
+              ))}
             </div>
           )}
 
@@ -226,7 +168,7 @@ const Discover = () => {
               <h4 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun contenu trouvé</h4>
               <p className="text-[var(--text-secondary)] text-sm px-4">
                 {content.length === 0 
-                  ? "Aucun contenu n'a encore été partagé par la communauté"
+                  ? "Soyez le premier à partager du contenu avec la communauté !"
                   : "Essayez d'autres mots-clés ou changez de catégorie"
                 }
               </p>

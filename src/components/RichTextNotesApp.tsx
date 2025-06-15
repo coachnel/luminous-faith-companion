@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNotes } from '@/hooks/useSupabaseData';
 import { useCommunityContent } from '@/hooks/useCommunityContent';
 import { toast } from '@/hooks/use-toast';
+import LinkPreview from '@/components/ui/LinkPreview';
 
 const RichTextNotesApp = () => {
   const { user } = useAuth();
@@ -82,7 +83,6 @@ const RichTextNotesApp = () => {
         shared_at: isPublic ? new Date().toISOString() : null,
       });
 
-      // Si la note est rendue publique, la publier dans la communauté
       if (isPublic && !selectedNote.is_public) {
         try {
           await publishContent({
@@ -173,34 +173,33 @@ const RichTextNotesApp = () => {
     setNewLinkInput('');
   };
 
-  const formatText = (type: string) => {
-    const textarea = document.getElementById('note-content') as HTMLTextAreaElement;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = editContent.substring(start, end);
+  const renderLinksInContent = (content: string, links: string[] = []) => {
+    let displayContent = content;
     
-    let formattedText = '';
-    switch (type) {
-      case 'bold':
-        formattedText = `**${selectedText}**`;
-        break;
-      case 'italic':
-        formattedText = `*${selectedText}*`;
-        break;
-      case 'underline':
-        formattedText = `__${selectedText}__`;
-        break;
-      case 'list':
-        formattedText = `\n• ${selectedText}`;
-        break;
-      default:
-        formattedText = selectedText;
+    // Ajouter les liens à la fin du contenu
+    if (links.length > 0) {
+      displayContent += '\n\nLiens utiles:\n' + links.map(link => `• ${link}`).join('\n');
     }
+    
+    return displayContent;
+  };
 
-    const newContent = editContent.substring(0, start) + formattedText + editContent.substring(end);
-    setEditContent(newContent);
+  const renderLinksPreview = (links: string[] = []) => {
+    if (links.length === 0) return null;
+    
+    return (
+      <div className="mt-2 space-y-1">
+        <span className="text-xs font-medium text-gray-500">Liens:</span>
+        {links.slice(0, 2).map((link, index) => (
+          <div key={index}>
+            <LinkPreview url={link} className="text-xs" />
+          </div>
+        ))}
+        {links.length > 2 && (
+          <span className="text-xs text-gray-400">+{links.length - 2} autres liens</span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -277,25 +276,9 @@ const RichTextNotesApp = () => {
                   <p className="text-xs text-gray-600 line-clamp-2 mb-2">
                     {note.content || 'Aucun contenu'}
                   </p>
-                  {note.links && note.links.length > 0 && (
-                    <div className="mb-2">
-                      {note.links.slice(0, 2).map((link, index) => (
-                        <a
-                          key={index}
-                          href={link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline block"
-                        >
-                          <Link size={10} className="inline mr-1" />
-                          {link.length > 30 ? link.substring(0, 30) + '...' : link}
-                        </a>
-                      ))}
-                      {note.links.length > 2 && (
-                        <span className="text-xs text-gray-400">+{note.links.length - 2} autres liens</span>
-                      )}
-                    </div>
-                  )}
+                  
+                  {renderLinksPreview(note.links)}
+                  
                   <div className="flex flex-wrap gap-1 mb-2">
                     {note.tags.map((tag, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
@@ -341,49 +324,6 @@ const RichTextNotesApp = () => {
                     placeholder="Titre de la note"
                     className="glass border-white/30 bg-white/90"
                   />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Mise en forme
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => formatText('bold')}
-                      className="font-bold"
-                    >
-                      B
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => formatText('italic')}
-                      className="italic"
-                    >
-                      I
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => formatText('underline')}
-                      className="underline"
-                    >
-                      U
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => formatText('list')}
-                    >
-                      •
-                    </Button>
-                  </div>
                 </div>
 
                 <div>

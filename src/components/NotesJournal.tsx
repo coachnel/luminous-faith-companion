@@ -281,8 +281,7 @@ const NotesJournal = () => {
           <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div 
-                className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'var(--accent-primary)' }}
+                className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-600"
               >
                 <PenTool className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
               </div>
@@ -299,7 +298,7 @@ const NotesJournal = () => {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  className="w-full xs:w-auto flex-shrink-0 text-xs sm:text-sm"
+                  className="w-full xs:w-auto flex-shrink-0 text-xs sm:text-sm bg-blue-600 text-white hover:bg-blue-700"
                   onClick={() => {
                     setEditingNote(null);
                     setFormData({ title: '', content: '', tags: '', isPublic: false });

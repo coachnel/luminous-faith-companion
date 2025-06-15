@@ -1,10 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash, BookOpen, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 
@@ -15,6 +16,7 @@ interface CustomPlan {
   books: string[];
   duration: number;
   createdAt: string;
+  isPublic?: boolean;
 }
 
 const CustomReadingPlan = () => {
@@ -25,7 +27,8 @@ const CustomReadingPlan = () => {
     name: '',
     description: '',
     books: '',
-    duration: 30
+    duration: 30,
+    isPublic: false
   });
 
   useEffect(() => {
@@ -62,7 +65,8 @@ const CustomReadingPlan = () => {
               name: formData.name,
               description: formData.description,
               books: booksArray,
-              duration: formData.duration
+              duration: formData.duration,
+              isPublic: formData.isPublic
             }
           : plan
       );
@@ -79,18 +83,19 @@ const CustomReadingPlan = () => {
         description: formData.description,
         books: booksArray,
         duration: formData.duration,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        isPublic: formData.isPublic
       };
       
       savePlans([...customPlans, newPlan]);
       toast({
         title: "📖 Plan créé",
-        description: "Votre plan de lecture personnalisé a été créé",
+        description: `Votre plan de lecture personnalisé a été créé${formData.isPublic ? ' et partagé avec la communauté' : ''}`,
       });
     }
 
     // Réinitialiser le formulaire
-    setFormData({ name: '', description: '', books: '', duration: 30 });
+    setFormData({ name: '', description: '', books: '', duration: 30, isPublic: false });
     setEditingPlan(null);
     setIsDialogOpen(false);
   };
@@ -101,7 +106,8 @@ const CustomReadingPlan = () => {
       name: plan.name,
       description: plan.description,
       books: plan.books.join(', '),
-      duration: plan.duration
+      duration: plan.duration,
+      isPublic: plan.isPublic || false
     });
     setIsDialogOpen(true);
   };
@@ -156,14 +162,14 @@ const CustomReadingPlan = () => {
           <DialogTrigger asChild>
             <Button onClick={() => {
               setEditingPlan(null);
-              setFormData({ name: '', description: '', books: '', duration: 30 });
+              setFormData({ name: '', description: '', books: '', duration: 30, isPublic: false });
             }}>
               <Plus size={16} className="mr-2" />
               Nouveau plan
             </Button>
           </DialogTrigger>
           
-          <DialogContent className="bg-white max-w-md">
+          <DialogContent className="bg-white max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingPlan ? 'Modifier le plan' : 'Créer un plan de lecture'}
@@ -215,6 +221,22 @@ const CustomReadingPlan = () => {
                   className="border-gray-300"
                 />
               </div>
+
+              <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
+                <Switch
+                  id="share-plan"
+                  checked={formData.isPublic}
+                  onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })}
+                />
+                <div className="flex-1">
+                  <Label htmlFor="share-plan" className="text-sm font-medium cursor-pointer">
+                    Partager avec la communauté
+                  </Label>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Permettre aux autres utilisateurs de découvrir et utiliser votre plan
+                  </p>
+                </div>
+              </div>
               
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">
@@ -248,7 +270,14 @@ const CustomReadingPlan = () => {
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-spiritual-700">{plan.name}</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-spiritual-700">{plan.name}</h4>
+                      {plan.isPublic && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                          Public
+                        </span>
+                      )}
+                    </div>
                     {plan.description && (
                       <p className="text-sm text-gray-600 mt-1">{plan.description}</p>
                     )}

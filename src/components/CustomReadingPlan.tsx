@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash, BookOpen, Calendar } from 'lucide-react';
+import { Plus, Edit, Trash, BookOpen, Calendar, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ interface CustomPlan {
   duration: number;
   createdAt: string;
   isPublic?: boolean;
+  isCustom: boolean;
 }
 
 const CustomReadingPlan = () => {
@@ -45,6 +47,7 @@ const CustomReadingPlan = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Plan form submitted:', formData); // Test de clic
     
     if (!formData.name.trim() || !formData.books.trim()) {
       toast({
@@ -84,7 +87,8 @@ const CustomReadingPlan = () => {
         books: booksArray,
         duration: formData.duration,
         createdAt: new Date().toISOString(),
-        isPublic: formData.isPublic
+        isPublic: formData.isPublic,
+        isCustom: true
       };
       
       savePlans([...customPlans, newPlan]);
@@ -101,6 +105,7 @@ const CustomReadingPlan = () => {
   };
 
   const handleEdit = (plan: CustomPlan) => {
+    console.log('Editing plan:', plan.id); // Test de clic
     setEditingPlan(plan);
     setFormData({
       name: plan.name,
@@ -113,6 +118,7 @@ const CustomReadingPlan = () => {
   };
 
   const handleDelete = (planId: string) => {
+    console.log('Deleting plan:', planId); // Test de clic
     const updatedPlans = customPlans.filter(plan => plan.id !== planId);
     savePlans(updatedPlans);
     toast({
@@ -121,6 +127,7 @@ const CustomReadingPlan = () => {
   };
 
   const startCustomPlan = (plan: CustomPlan) => {
+    console.log('Starting custom plan:', plan.id); // Test de clic
     // Créer un planning basé sur le plan personnalisé
     const schedule = plan.books.map((book, index) => ({
       day: index + 1,
@@ -154,19 +161,23 @@ const CustomReadingPlan = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Plans personnalisés</h3>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h3 className="text-xl font-bold text-[var(--text-primary)]">Mes plans personnalisés</h3>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => {
-              setEditingPlan(null);
-              setFormData({ name: '', description: '', books: '', duration: 30, isPublic: false });
-            }}>
-              <Plus size={16} className="mr-2" />
+            <button
+              onClick={() => {
+                console.log('New plan button clicked'); // Test de clic
+                setEditingPlan(null);
+                setFormData({ name: '', description: '', books: '', duration: 30, isPublic: false });
+              }}
+              className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2"
+            >
+              <Plus size={16} />
               Nouveau plan
-            </Button>
+            </button>
           </DialogTrigger>
           
           <DialogContent className="bg-white max-w-md max-h-[90vh] overflow-y-auto">
@@ -239,16 +250,19 @@ const CustomReadingPlan = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
+                <button 
+                  type="submit" 
+                  className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex-1"
+                >
                   {editingPlan ? 'Modifier' : 'Créer'}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                </button>
+                <button 
+                  type="button"
                   onClick={() => setIsDialogOpen(false)}
+                  className="bg-gray-300 text-gray-700 hover:bg-gray-400 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
                 >
                   Annuler
-                </Button>
+                </button>
               </div>
             </form>
           </DialogContent>
@@ -256,7 +270,7 @@ const CustomReadingPlan = () => {
       </div>
 
       {customPlans.length === 0 ? (
-        <Card className="glass border-white/30">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardContent className="p-6 text-center">
             <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
             <p className="text-gray-600 mb-2">Aucun plan personnalisé</p>
@@ -264,14 +278,18 @@ const CustomReadingPlan = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-4">
           {customPlans.map((plan) => (
-            <Card key={plan.id} className="glass border-white/30">
+            <Card key={plan.id} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-spiritual-700">{plan.name}</h4>
+                      <h4 className="font-semibold text-gray-900">{plan.name}</h4>
+                      <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                        Personnalisé
+                      </span>
                       {plan.isPublic && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                           Public
@@ -283,17 +301,18 @@ const CustomReadingPlan = () => {
                     )}
                   </div>
                   <div className="flex gap-1 ml-4">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(plan)}>
+                    <button
+                      onClick={() => handleEdit(plan)}
+                      className="bg-gray-100 text-gray-600 hover:bg-gray-200 rounded p-1 transition-all duration-200"
+                    >
                       <Edit size={14} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    </button>
+                    <button 
                       onClick={() => handleDelete(plan.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="bg-red-100 text-red-600 hover:bg-red-200 rounded p-1 transition-all duration-200"
                     >
                       <Trash size={14} />
-                    </Button>
+                    </button>
                   </div>
                 </div>
                 
@@ -312,13 +331,12 @@ const CustomReadingPlan = () => {
                   <div className="text-xs text-gray-500">
                     Créé le {new Date(plan.createdAt).toLocaleDateString()}
                   </div>
-                  <Button 
-                    size="sm" 
+                  <button 
                     onClick={() => startCustomPlan(plan)}
-                    className="spiritual-gradient"
+                    className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
                   >
                     Commencer
-                  </Button>
+                  </button>
                 </div>
               </CardContent>
             </Card>

@@ -77,11 +77,17 @@ const ReadingPlans = () => {
   const progress = currentPlan ? getPlanStats(currentPlan) : { completedDays: 0 };
 
   const handleJoinPlan = (planId: string) => {
+    console.log('Joining plan:', planId); // Test de clic
     const planData = readingPlans.find(p => p.id === planId);
     if (planData) {
       startPlan(planId, planData.title);
       toast.success('🎉 Plan de lecture rejoint avec succès !');
     }
+  };
+
+  const handleContinueReading = () => {
+    console.log('Continue reading clicked'); // Test de clic
+    toast.success('Reprise de la lecture !');
   };
 
   const getPlanDuration = (planId: string) => {
@@ -128,11 +134,14 @@ const ReadingPlans = () => {
             </div>
           </div>
           <button
-            onClick={() => setShowCustomPlans(true)}
+            onClick={() => {
+              console.log('Create custom plan clicked'); // Test de clic
+              setShowCustomPlans(true);
+            }}
             className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Créer un plan personnalisé
+            + Créer mon plan personnalisé
           </button>
         </div>
       </ModernCard>
@@ -164,6 +173,7 @@ const ReadingPlans = () => {
             </div>
             
             <button 
+              onClick={handleContinueReading}
               className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2 w-full sm:w-auto"
             >
               <Play className="h-4 w-4" />
@@ -183,11 +193,14 @@ const ReadingPlans = () => {
               return (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  onClick={() => {
+                    console.log('Category selected:', category.id); // Test de clic
+                    setSelectedCategory(category.id);
+                  }}
+                  className={`flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     selectedCategory === category.id 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 scale-105' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'shadow-lg shadow-blue-600/25 scale-105' 
+                      : ''
                   }`}
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />

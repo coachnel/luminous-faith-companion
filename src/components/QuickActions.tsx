@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Book, Plus, Heart, Calendar, Bell, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,78 +10,68 @@ interface QuickActionsProps {
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
+  // Redesigned: visually distinctive rounded glass cards, colored gradients per action
   const actions = [
     {
       icon: Book,
       label: 'Lire la Bible',
+      color: 'from-blue-500 via-blue-300 to-blue-100',
+      textColor: 'text-blue-900',
       action: () => {
         onNavigate('bible');
         localStorage.setItem('lastBibleRead', new Date().toDateString());
-        toast({
-          title: "📖 Bible ouverte",
-          description: "Bonne lecture spirituelle !",
-        });
-      },
-      color: 'text-blue-600 bg-blue-100'
+        toast({ title: "📖 Bible ouverte", description: "Bonne lecture spirituelle !" });
+      }
     },
     {
       icon: Plus,
       label: 'Nouvelle note',
+      color: 'from-green-500 via-green-300 to-green-100',
+      textColor: 'text-green-900',
       action: () => {
         onNavigate('notes');
-        toast({
-          title: "📝 Créer une note",
-          description: "Partagez vos réflexions spirituelles",
-        });
-      },
-      color: 'text-green-600 bg-green-100'
+        toast({ title: "📝 Créer une note", description: "Partagez vos réflexions spirituelles" });
+      }
     },
     {
       icon: Heart,
       label: 'Mes favoris',
+      color: 'from-pink-500 via-pink-300 to-pink-100',
+      textColor: 'text-pink-900',
       action: () => {
         const favorites = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
         if (favorites.length === 0) {
-          toast({
-            description: "Vous n'avez pas encore de versets favoris",
-            variant: "destructive",
-          });
+          toast({ description: "Vous n'avez pas encore de versets favoris", variant: "destructive" });
         } else {
-          toast({
-            title: `⭐ ${favorites.length} favoris`,
-            description: "Vos versets préférés vous attendent",
-          });
+          toast({ title: `⭐ ${favorites.length} favoris`, description: "Vos versets préférés vous attendent" });
         }
-      },
-      color: 'text-red-600 bg-red-100'
+      }
     },
     {
       icon: Calendar,
       label: 'Plans lecture',
+      color: 'from-purple-500 via-indigo-300 to-purple-100',
+      textColor: 'text-purple-900',
       action: () => {
         onNavigate('plans');
-        toast({
-          title: "📅 Plans de lecture",
-          description: "Organisez votre parcours spirituel",
-        });
-      },
-      color: 'text-purple-600 bg-purple-100'
+        toast({ title: "📅 Plans de lecture", description: "Organisez votre parcours spirituel" });
+      }
     },
     {
       icon: Bell,
       label: 'Notifications',
+      color: 'from-orange-500 via-orange-300 to-orange-100',
+      textColor: 'text-orange-900',
       action: () => {
         onNavigate('notifications');
-        toast({
-          title: "🔔 Notifications",
-          description: "Configurez vos rappels spirituels",
-        });
-      },
-      color: 'text-orange-600 bg-orange-100'
+        toast({ title: "🔔 Notifications", description: "Configurez vos rappels spirituels" });
+      }
     },
     {
       icon: Search,
       label: 'Verset aléatoire',
+      color: 'from-indigo-500 via-indigo-300 to-indigo-100',
+      textColor: 'text-indigo-900',
       action: () => {
         const verse = getDailyVerse();
         toast({
@@ -90,34 +79,26 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
           description: `"${verse.text.substring(0, 60)}${verse.text.length > 60 ? '...' : ''}"`,
           duration: 8000,
         });
-      },
-      color: 'text-indigo-600 bg-indigo-100'
+      }
     }
   ];
 
   return (
-    <Card className="glass border-white/30 bg-white/90">
-      <CardContent className="p-3 sm:p-4">
-        <h3 className="font-semibold text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Actions rapides</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-          {actions.map((action, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="h-auto p-2 sm:p-3 flex flex-col gap-1 hover:shadow-md transition-all border-gray-200 bg-white/50 min-h-[70px] sm:min-h-[90px]"
-              onClick={action.action}
-            >
-              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full ${action.color} flex items-center justify-center flex-shrink-0`}>
-                <action.icon size={14} className="sm:w-4 sm:h-4" />
-              </div>
-              <span className="text-[10px] sm:text-xs font-medium text-gray-700 text-center leading-tight break-words px-1 max-w-full overflow-hidden">
-                {action.label}
-              </span>
-            </Button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+      {actions.map((action, i) => (
+        <button
+          key={i}
+          className={`rounded-2xl shadow-md glass ring-2 bg-gradient-to-br ${action.color} hover:scale-105 transition-all duration-200 px-0 pt-3 pb-2 min-h-[80px] flex flex-col items-center select-none`}
+          onClick={action.action}
+          type="button"
+        >
+          <div className="w-8 h-8 mb-1 rounded-xl bg-white/80 flex items-center justify-center shadow-sm">
+            <action.icon size={16} className={action.textColor} />
+          </div>
+          <span className={`text-xs font-semibold ${action.textColor}`}>{action.label}</span>
+        </button>
+      ))}
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-
 // Enregistrement du service worker avec mise à jour forcée
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
@@ -13,11 +12,17 @@ if ('serviceWorker' in navigator) {
       // Forcer la mise à jour immédiatement
       await registration.update();
 
-      // Vérifier immédiatement s'il y a une mise à jour en attente
+      // Ajout: forcer les assets à recharger à chaque maj
       if (registration.waiting) {
-        console.log('Service Worker en attente détecté - activation forcée');
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         window.location.reload();
+      } else {
+        // Pour les cas où controllerchange ne déclenche pas
+        setTimeout(() => {
+          if (navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        }, 1500);
       }
 
       // Vérifier les mises à jour plus fréquemment

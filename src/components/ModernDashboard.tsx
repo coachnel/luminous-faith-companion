@@ -1,4 +1,3 @@
-
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -99,29 +98,33 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Heart,
       title: "Nouvelle prière",
       description: "Ajouter une intention",
-      color: "from-red-500 to-pink-500",
-      action: () => onNavigate('prayer')
+      color: "from-red-500 via-pink-400 to-pink-300",
+      ring: "ring-red-200",
+      action: () => onNavigate('prayer'),
     },
     {
       icon: Plus,
       title: "Créer une note",
       description: "Noter vos réflexions",
-      color: "from-blue-500 to-indigo-500",
-      action: () => onNavigate('notes')
+      color: "from-blue-500 via-indigo-400 to-blue-200",
+      ring: "ring-blue-200",
+      action: () => onNavigate('notes'),
     },
     {
       icon: Target,
       title: "Nouveau défi",
       description: "Se lancer un défi",
-      color: "from-green-500 to-emerald-500",
-      action: () => onNavigate('challenges')
+      color: "from-green-500 via-emerald-400 to-green-200",
+      ring: "ring-green-200",
+      action: () => onNavigate('challenges'),
     },
     {
       icon: Star,
       title: "Témoignage",
       description: "Partager votre expérience",
-      color: "from-purple-500 to-violet-500",
-      action: () => onNavigate('testimony')
+      color: "from-purple-500 via-amber-400 to-yellow-200",
+      ring: "ring-yellow-200",
+      action: () => onNavigate('testimony'),
     }
   ];
 
@@ -210,7 +213,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
 
   return (
     <div className="p-4 space-y-6 max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* En-tête avec message de bienvenue */}
+      {/* En-tête */}
       <ModernCard variant="elevated" className="bg-white/90 backdrop-blur-sm border-white/30">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
@@ -236,32 +239,32 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         </div>
       </ModernCard>
 
-      {/* Actions rapides */}
-      <ModernCard variant="elevated" className="bg-white/90 backdrop-blur-sm border-white/30">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Actions rapides</h2>
-          <p className="text-sm text-gray-600">Commencez quelque chose de nouveau</p>
-        </div>
-        
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <ModernCard
-                key={index}
-                className={`p-4 cursor-pointer transition-all duration-200 hover:scale-105 bg-gradient-to-br ${action.color} border-0 shadow-lg`}
-                onClick={action.action}
-              >
-                <div className="text-center text-white">
-                  <Icon className="h-8 w-8 mx-auto mb-2" />
-                  <h3 className="font-semibold text-sm mb-1">{action.title}</h3>
-                  <p className="text-xs opacity-90">{action.description}</p>
-                </div>
-              </ModernCard>
-            );
-          })}
-        </div>
-      </ModernCard>
+      {/* Quick Actions - strong card visuals */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        {quickActions.map((action, index) => {
+          const Icon = action.icon;
+          return (
+            <button
+              key={index}
+              className={
+                `transition-all duration-200 rounded-2xl px-0 pt-4 pb-2 shadow-md
+                 bg-gradient-to-br ${action.color} ${action.ring} ring-2
+                 flex flex-col items-center hover:scale-105 focus-visible:ring-4 min-h-[104px] sm:min-h-[108px]`
+              }
+              onClick={action.action}
+              style={{ minWidth: 0 }}
+            >
+              <div className="w-12 h-12 mb-1 rounded-xl flex items-center justify-center bg-white/70 shadow">
+                <Icon className="h-6 w-6 text-gray-900" />
+              </div>
+              <div className="font-semibold text-xs sm:text-sm text-gray-900 text-center">{action.title}</div>
+              <div className="text-[10px] sm:text-xs text-gray-700 opacity-80 leading-tight text-center">
+                {action.description}
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Statistiques */}
       <ModernCard variant="elevated" className="bg-white/90 backdrop-blur-sm border-white/30">
@@ -304,7 +307,10 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
           return (
             <ModernCard
               key={index}
-              className={`p-6 cursor-pointer transition-all duration-200 hover:scale-105 bg-gradient-to-br ${card.color} ${card.borderColor} shadow-lg`}
+              className={
+                `p-6 cursor-pointer transition-all duration-200 hover:scale-105
+                 bg-gradient-to-br ${card.color} ${card.borderColor} shadow-lg border-0`
+              }
               onClick={() => onNavigate(card.route)}
             >
               <div className="flex items-center gap-4">

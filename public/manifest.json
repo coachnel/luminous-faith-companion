@@ -3,11 +3,12 @@
   "name": "Compagnon Spirituel",
   "short_name": "Compagnon",
   "description": "Votre compagnon spirituel pour la prière, la méditation et le partage de témoignages",
-  "start_url": "/",
+  "start_url": "/?v=20250615",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#8b5cf6",
   "orientation": "portrait",
+  "version": "20250615",
   "icons": [
     {
       "src": "/icon-192x192.png",

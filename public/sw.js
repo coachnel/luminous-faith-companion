@@ -1,83 +1,117 @@
 
-const CACHE_NAME = 'compagnon-spirituel-v2';
+const CACHE_VERSION = 'compagnon-spirituel-v3-20250615';
+const CACHE_NAME = CACHE_VERSION;
 const urlsToCache = [
   '/',
+  '/?v=20250615',
   '/static/css/main.css',
   '/static/js/main.js',
-  '/manifest.json'
+  '/manifest.json?v=20250615'
 ];
 
-// Force update on install
+// Force update on install with updated version
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installation en cours...');
-  // Skip waiting pour forcer l'activation immédiate
+  console.log('[SW] Installing... (v20250615)');
   self.skipWaiting();
-  
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Service Worker: Mise en cache des ressources');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Clean old caches and take control immediately
+// Purge all old caches when activating new version
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activation en cours...');
-  
+  console.log('[SW] Activating v20250615...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Service Worker: Suppression ancien cache', cacheName);
-            return caches.delete(cacheName);
+        cacheNames.map((c) => {
+          if (c !== CACHE_NAME) {
+            return caches.delete(c);
           }
         })
       );
-    }).then(() => {
-      // Prendre le contrôle immédiatement
-      return self.clients.claim();
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Network first strategy for main app files
+// Cache-busting on fetch
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
+  const requestURL = new URL(event.request.url);
+
+  // Bypass cache for HTML entrypoints (force reload, bust old cache)
+  if (requestURL.pathname === '/' || requestURL.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Update cache for HTML
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Always cache versioned manifest/JS/CSS
+  if (
+    requestURL.pathname.endsWith('.js') ||
+    requestURL.pathname.endsWith('.css') ||
+    requestURL.pathname.endsWith('manifest.json')
+  ) {
+    // Append ?v=version to bust cache
+    let bustRequest = event.request;
+    if (!requestURL.searchParams.get('v')) {
+      const url = new URL(event.request.url);
+      url.searchParams.set('v', '20250615');
+      bustRequest = new Request(url, event.request);
+    }
+    event.respondWith(
+      caches.open(CACHE_NAME)
+        .then((cache) =>
+          cache.match(bustRequest).then((res) => {
+            if (res) return res;
+            return fetch(bustRequest).then((response) => {
+              if (response && response.status === 200) {
+                cache.put(bustRequest, response.clone());
+              }
+              return response;
+            });
+          })
+        )
+    );
+    return;
+  }
+
+  // Default: network first, fallback cache
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Si la requête réussit, mettre en cache et retourner
         if (response.status === 200) {
           const responseClone = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseClone);
-            });
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
         }
         return response;
       })
-      .catch(() => {
-        // Si la requête échoue, chercher en cache
-        return caches.match(event.request)
-          .then((response) => {
-            return response || new Response('Contenu non disponible hors ligne');
-          });
-      })
+      .catch(() =>
+        caches.match(event.request).then(res => res || new Response('Offline...'))
+      )
   );
 });
 
-// Handle skip waiting message
+// Handle skip waiting
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('Service Worker: Skip waiting demandé');
     self.skipWaiting();
   }
-  
   if (event.data && event.data.type === 'CACHE_UPDATE') {
-    console.log('Service Worker: Mise à jour du cache demandée');
-    // Notifier qu'une mise à jour est disponible
     event.ports[0].postMessage({ type: 'UPDATE_AVAILABLE' });
   }
 });
@@ -94,8 +128,5 @@ self.addEventListener('push', (event) => {
       primaryKey: 1
     }
   };
-
-  event.waitUntil(
-    self.registration.showNotification('Compagnon Spirituel', options)
-  );
+  event.waitUntil(self.registration.showNotification('Compagnon Spirituel', options));
 });

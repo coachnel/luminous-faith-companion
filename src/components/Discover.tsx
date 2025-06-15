@@ -4,7 +4,7 @@ import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Search, TrendingUp, Heart, BookOpen, Users, Star } from 'lucide-react';
+import { Sparkles, Search, TrendingUp, Heart, Users, Star } from 'lucide-react';
 import { useCommunityContent } from '@/hooks/useCommunityContent';
 import CommunityContentCard from './CommunityContentCard';
 
@@ -13,10 +13,10 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { content, loading } = useCommunityContent();
 
+  // CORRECTION : Suppression de la catégorie "Versets" - Bible supprimée
   const categories = [
     { id: 'all', label: 'Tout', icon: Sparkles },
     { id: 'prayer', label: 'Prières', icon: Heart },
-    { id: 'verse', label: 'Versets', icon: BookOpen },
     { id: 'testimony', label: 'Témoignages', icon: Users },
     { id: 'note', label: 'Réflexions', icon: Star }
   ];
@@ -67,7 +67,7 @@ const Discover = () => {
             </div>
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] break-words">Découvrir</h1>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Explorez le contenu de la communauté compagnon</p>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Explorez les témoignages et réflexions de la communauté</p>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ const Discover = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
           <Input
             type="text"
-            placeholder="Rechercher du contenu compagnon..."
+            placeholder="Rechercher des témoignages et réflexions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 text-sm"
@@ -117,7 +117,7 @@ const Discover = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--accent-primary)]" />
-              <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Tendances de la communauté</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Sujets tendance</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {trendingTopics.map((topic, index) => (
@@ -168,7 +168,7 @@ const Discover = () => {
               <h4 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun contenu trouvé</h4>
               <p className="text-[var(--text-secondary)] text-sm px-4">
                 {content.length === 0 
-                  ? "Soyez le premier à partager du contenu avec la communauté !"
+                  ? "Soyez le premier à partager un témoignage ou une réflexion !"
                   : "Essayez d'autres mots-clés ou changez de catégorie"
                 }
               </p>

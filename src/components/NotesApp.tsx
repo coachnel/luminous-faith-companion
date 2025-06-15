@@ -6,12 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Plus, Edit, Trash, Tag, FileText, Info } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Search, Plus, Edit, Trash, Tag, FileText, Info, Heart, Share, Globe, Lock } from 'lucide-react';
 import { useNeonNotes } from '@/hooks/useNeonData';
+import { useCommunityContent } from '@/hooks/useCommunityContent';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const NotesApp = () => {
   const { notes, loading, addNote, updateNote, deleteNote } = useNeonNotes();
+  const { publishContent } = useCommunityContent();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -19,7 +25,8 @@ const NotesApp = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    tags: ''
+    tags: '',
+    shareAsTestimony: false
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,11 +50,26 @@ const NotesApp = () => {
       } else {
         await addNote(noteData);
         toast.success('Note créée !');
+
+        // Partager comme témoignage si demandé
+        if (formData.shareAsTestimony && user) {
+          try {
+            await publishContent({
+              type: 'testimony',
+              title: formData.title,
+              content: formData.content,
+              is_public: true
+            });
+            toast.success('✨ Note créée et partagée comme témoignage !');
+          } catch (error) {
+            toast.error('Note créée mais erreur lors du partage');
+          }
+        }
       }
       
       setIsDialogOpen(false);
       setEditingNote(null);
-      setFormData({ title: '', content: '', tags: '' });
+      setFormData({ title: '', content: '', tags: '', shareAsTestimony: false });
     } catch (error) {
       toast.error('Erreur lors de l\'enregistrement');
     }
@@ -58,7 +80,8 @@ const NotesApp = () => {
     setFormData({
       title: note.title,
       content: note.content || '',
-      tags: note.tags?.join(', ') || ''
+      tags: note.tags?.join(', ') || '',
+      shareAsTestimony: false
     });
     setIsDialogOpen(true);
   };
@@ -74,7 +97,26 @@ const NotesApp = () => {
     }
   };
 
-  // Filtrage des notes avec pagination
+  const handleShareAsTestimony = async (note: any) => {
+    if (!user) {
+      toast.error('Vous devez être connecté pour partager');
+      return;
+    }
+
+    try {
+      await publishContent({
+        type: 'testimony',
+        title: note.title,
+        content: note.content,
+        is_public: true
+      });
+      toast.success('✨ Note partagée comme témoignage !');
+    } catch (error) {
+      toast.error('Erreur lors du partage');
+    }
+  };
+
+  // Filtrage des notes
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          note.content?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,9 +151,9 @@ const NotesApp = () => {
             <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Journal</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Journal Spirituel</h1>
             <p className="text-sm text-[var(--text-secondary)] break-words">
-              Organisez vos pensées et réflexions
+              Écrivez vos réflexions et partagez vos témoignages
             </p>
           </div>
           
@@ -120,58 +162,77 @@ const NotesApp = () => {
               <ModernButton 
                 onClick={() => {
                   setEditingNote(null);
-                  setFormData({ title: '', content: '', tags: '' });
+                  setFormData({ title: '', content: '', tags: '', shareAsTestimony: false });
                 }}
                 className="gap-2 flex-shrink-0"
               >
                 <Plus className="h-4 w-4" />
-                <span className="whitespace-nowrap">Nouvelle note</span>
+                <span className="whitespace-nowrap">Nouvelle réflexion</span>
               </ModernButton>
             </DialogTrigger>
             <DialogContent className="bg-[var(--bg-card)] max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-[var(--text-primary)]">
-                  {editingNote ? 'Modifier la note' : 'Créer une nouvelle note'}
+                  {editingNote ? 'Modifier la réflexion' : 'Créer une nouvelle réflexion'}
                 </DialogTitle>
               </DialogHeader>
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  <Label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                     Titre *
-                  </label>
+                  </Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Titre de la note..."
+                    placeholder="Titre de votre réflexion..."
                     className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  <Label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                     Contenu
-                  </label>
+                  </Label>
                   <Textarea
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Écrivez vos pensées..."
+                    placeholder="Partagez vos pensées spirituelles..."
                     className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
                     rows={6}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  <Label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                     Tags (séparés par des virgules)
-                  </label>
+                  </Label>
                   <Input
                     value={formData.tags}
                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    placeholder="personnel, prière, méditation..."
+                    placeholder="gratitude, prière, foi, espoir..."
                     className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
                   />
                 </div>
+
+                {!editingNote && user && (
+                  <div className="flex items-center space-x-2 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                    <Switch
+                      id="share-testimony"
+                      checked={formData.shareAsTestimony}
+                      onCheckedChange={(checked) => setFormData({ ...formData, shareAsTestimony: checked })}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor="share-testimony" className="text-sm font-medium cursor-pointer flex items-center gap-2 break-words">
+                        <Heart className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span className="text-green-700">Partager comme témoignage</span>
+                      </Label>
+                      <p className="text-xs text-green-600 mt-1 break-words">
+                        Votre réflexion sera visible dans la section "Découvrir" pour encourager la communauté
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex gap-2">
                   <ModernButton type="submit" className="flex-1">
@@ -198,7 +259,7 @@ const NotesApp = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-secondary)] h-4 w-4" />
             <Input
               type="text"
-              placeholder="Rechercher dans vos notes..."
+              placeholder="Rechercher dans vos réflexions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 border-[var(--border-default)] bg-[var(--bg-secondary)]"
@@ -219,7 +280,7 @@ const NotesApp = () => {
                   key={tag}
                   variant={selectedTag === tag ? 'primary' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedTag(tag)}
+                  onClick={() => setSelectedTag(selectedTag === tag ? '' : tag)}
                   className="gap-1"
                 >
                   <Tag className="h-3 w-3" />
@@ -237,12 +298,12 @@ const NotesApp = () => {
           <div className="text-center py-8">
             <FileText className="mx-auto mb-4 text-[var(--text-secondary)]" size={48} />
             <p className="text-[var(--text-secondary)] mb-2">
-              {searchTerm || selectedTag ? 'Aucune note trouvée' : 'Aucune note pour le moment'}
+              {searchTerm || selectedTag ? 'Aucune réflexion trouvée' : 'Aucune réflexion pour le moment'}
             </p>
             <p className="text-sm text-[var(--text-secondary)]">
               {searchTerm || selectedTag 
                 ? 'Essayez de modifier vos critères de recherche'
-                : 'Créez votre première note pour commencer'
+                : 'Commencez à écrire vos premières réflexions spirituelles'
               }
             </p>
           </div>
@@ -266,6 +327,16 @@ const NotesApp = () => {
                     <ModernButton variant="ghost" size="sm" onClick={() => handleEdit(note)}>
                       <Edit className="h-4 w-4" />
                     </ModernButton>
+                    {user && (
+                      <ModernButton 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleShareAsTestimony(note)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        <Share className="h-4 w-4" />
+                      </ModernButton>
+                    )}
                     <ModernButton 
                       variant="ghost" 
                       size="sm" 
@@ -304,13 +375,38 @@ const NotesApp = () => {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Comment ça marche ?
+              Comment utiliser votre journal spirituel ?
             </h3>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Créez et organisez vos notes personnelles avec ce journal numérique. 
-              Ajoutez des tags pour catégoriser vos notes et utilisez la fonction de recherche pour retrouver rapidement ce que vous cherchez. 
-              Vos notes sont privées et sécurisées. Parfait pour noter vos réflexions, prières, ou idées importantes.
-            </p>
+            <div className="space-y-3 text-sm text-[var(--text-secondary)] leading-relaxed">
+              <div className="flex items-start gap-2">
+                <FileText className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Écrivez vos réflexions</p>
+                  <p>Notez vos pensées spirituelles, prières exaucées, moments de gratitude et leçons apprises.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Tag className="h-4 w-4 mt-0.5 text-green-500 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Organisez avec des tags</p>
+                  <p>Utilisez des mots-clés comme "gratitude", "prière", "foi" pour retrouver facilement vos notes.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Heart className="h-4 w-4 mt-0.5 text-red-500 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Partagez vos témoignages</p>
+                  <p>Activez l'option "Partager comme témoignage" pour encourager la communauté avec votre expérience.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Lock className="h-4 w-4 mt-0.5 text-gray-500 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Vos notes restent privées</p>
+                  <p>Seules les notes que vous choisissez de partager comme témoignages sont visibles par la communauté.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </ModernCard>

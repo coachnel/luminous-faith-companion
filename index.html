@@ -1,54 +1,42 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/heart.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luminous Faith Companion</title>
-    <meta name="description" content="Compagnon spirituel moderne pour accompagner votre parcours de foi - Prière, lecture biblique, défis spirituels" />
-    <meta name="author" content="Nel Brunel MANKOU pour la communauté chrétienne" />
-    <meta name="keywords" content="spiritualité, bible, prière, foi, chrétien, lecture biblique, défis spirituels" />
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Luminous Faith Companion" />
-    <meta property="og:description" content="Compagnon spirituel moderne pour accompagner votre parcours de foi" />
-    <meta property="og:image" content="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png" />
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="Luminous Faith Companion" />
-    <meta property="twitter:description" content="Compagnon spirituel moderne pour accompagner votre parcours de foi" />
-    <meta property="twitter:image" content="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png" />
-
-    <!-- Favicons -->
-    <link rel="icon" href="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png" type="image/png">
-    <link rel="shortcut icon" href="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png" type="image/png">
-    <link rel="apple-touch-icon" href="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png">
+    <title>Compagnon Spirituel</title>
+    <meta name="description" content="Votre compagnon spirituel pour la prière, la méditation et le partage de témoignages" />
     
-    <!-- PWA -->
+    <!-- PWA Configuration -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#4f6df5" />
-    <meta name="background-color" content="#f5f6fe" />
-    <meta name="display" content="standalone" />
-    <meta name="orientation" content="portrait" />
-    
-    <!-- iOS PWA -->
+    <meta name="theme-color" content="#8b5cf6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Luminous Faith" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png" />
+    <meta name="apple-mobile-web-app-title" content="Compagnon Spirituel" />
     
-    <!-- Android PWA -->
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
+    
+    <!-- Additional PWA meta tags -->
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="application-name" content="Luminous Faith" />
+    <meta name="application-name" content="Compagnon Spirituel" />
     
-    <!-- Desktop PWA improvements -->
-    <meta name="msapplication-TileColor" content="#4f6df5" />
-    <meta name="msapplication-TileImage" content="/lovable-uploads/d6c3af4c-2502-4cca-a5db-8be7f75ca80e.png" />
-    <meta name="msapplication-config" content="none" />
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </head>
-
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

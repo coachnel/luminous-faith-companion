@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 
@@ -52,6 +53,7 @@ export const READING_PLANS = [
 export function useReadingPlanProgress() {
   const [plans, setPlans] = useState<ReadingPlanProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
   const fetchPlans = async () => {
@@ -62,6 +64,7 @@ export function useReadingPlanProgress() {
     }
 
     try {
+      setError(null);
       // Utiliser localStorage temporairement
       const storedPlans = localStorage.getItem(`reading_plans_${user.id}`);
       if (storedPlans) {
@@ -69,6 +72,7 @@ export function useReadingPlanProgress() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement des plans:', error);
+      setError(error as Error);
       setPlans([]);
     } finally {
       setLoading(false);
@@ -101,6 +105,7 @@ export function useReadingPlanProgress() {
       localStorage.setItem(`reading_plans_${user.id}`, JSON.stringify(updatedPlans));
     } catch (error) {
       console.error('Erreur lors du démarrage du plan:', error);
+      setError(error as Error);
       throw error;
     }
   };
@@ -119,6 +124,7 @@ export function useReadingPlanProgress() {
       localStorage.setItem(`reading_plans_${user.id}`, JSON.stringify(updatedPlans));
     } catch (error) {
       console.error('Erreur lors de l\'annulation du plan:', error);
+      setError(error as Error);
       throw error;
     }
   };
@@ -147,6 +153,7 @@ export function useReadingPlanProgress() {
       localStorage.setItem(`reading_plans_${user.id}`, JSON.stringify(updatedPlans));
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
+      setError(error as Error);
       throw error;
     }
   };
@@ -167,6 +174,7 @@ export function useReadingPlanProgress() {
   return {
     plans,
     loading,
+    error,
     startPlan,
     cancelPlan,
     markDayCompleted,

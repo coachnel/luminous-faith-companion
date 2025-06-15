@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 
@@ -28,6 +27,7 @@ export function useSupabaseChallenges() {
   const [challenges, setChallenges] = useState<SpiritualChallenge[]>([]);
   const [publicChallenges, setPublicChallenges] = useState<SpiritualChallenge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
   const fetchChallenges = async () => {
@@ -39,6 +39,7 @@ export function useSupabaseChallenges() {
     }
 
     try {
+      setError(null);
       // Nettoyer les défis expirés avant de les récupérer
       await cleanupExpiredChallenges();
 
@@ -56,6 +57,7 @@ export function useSupabaseChallenges() {
       }
     } catch (error) {
       console.error('Erreur lors du chargement des défis:', error);
+      setError(error as Error);
       setChallenges([]);
       setPublicChallenges([]);
     } finally {
@@ -94,6 +96,7 @@ export function useSupabaseChallenges() {
       }
     } catch (error) {
       console.error('Erreur lors du nettoyage des défis expirés:', error);
+      setError(error as Error);
     }
   };
 
@@ -140,6 +143,7 @@ export function useSupabaseChallenges() {
       await fetchChallenges();
     } catch (error) {
       console.error('Erreur lors de la création du défi:', error);
+      setError(error as Error);
       throw error;
     }
   };
@@ -170,6 +174,7 @@ export function useSupabaseChallenges() {
       }
     } catch (error) {
       console.error('Erreur lors de la validation du défi:', error);
+      setError(error as Error);
       throw error;
     }
   };
@@ -178,6 +183,7 @@ export function useSupabaseChallenges() {
     challenges,
     publicChallenges,
     loading,
+    error,
     createChallenge,
     markChallengeCompleted,
     refetch: fetchChallenges
@@ -187,6 +193,7 @@ export function useSupabaseChallenges() {
 export function useSupabaseChallengeProgress(challengeId: string) {
   const [progress, setProgress] = useState<ChallengeProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -198,6 +205,7 @@ export function useSupabaseChallengeProgress(challengeId: string) {
       }
 
       try {
+        setError(null);
         const storedProgress = localStorage.getItem(`challenge_progress_${challengeId}`);
         if (storedProgress) {
           const progressData = JSON.parse(storedProgress);
@@ -205,6 +213,7 @@ export function useSupabaseChallengeProgress(challengeId: string) {
         }
       } catch (error) {
         console.error('Erreur lors du chargement de la progression:', error);
+        setError(error as Error);
         setProgress([]);
       } finally {
         setLoading(false);
@@ -226,7 +235,7 @@ export function useSupabaseChallengeProgress(challengeId: string) {
     };
   };
 
-  return { progress, loading, getStats };
+  return { progress, loading, error, getStats };
 }
 
 // Fonctions utilitaires pour calculer les séquences

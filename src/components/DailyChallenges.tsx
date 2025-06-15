@@ -1,445 +1,428 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ModernButton } from '@/components/ui/modern-button';
+import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Target, CheckCircle, Calendar, Trophy, Info, Plus, Users, Lock, TrendingUp, Sparkles } from 'lucide-react';
-import { useSupabaseChallenges, useSupabaseChallengeProgress } from '@/hooks/useSupabaseChallenges';
+import { Target, Plus, Calendar, Users, Trophy, CheckCircle, Clock, Share2, Info, Sparkles } from 'lucide-react';
 import { useMonthlyChallenges } from '@/hooks/useMonthlyChallenges';
-import { useEnhancedNotifications } from '@/hooks/useEnhancedNotifications';
+import { useChallenges } from '@/hooks/useChallenges';
+import { useCommunityContent } from '@/hooks/useCommunityContent';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const DailyChallenges = () => {
-  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted, refetch } = useSupabaseChallenges();
-  const { monthlyChallenges, loading: monthlyLoading } = useMonthlyChallenges();
-  const { sendCommunityNotification } = useEnhancedNotifications();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { user } = useAuth();
+  const { suggestedChallenges, loading: suggestedLoading } = useMonthlyChallenges();
+  const { challenges, createChallenge, joinChallenge, completeChallenge, loading } = useChallenges();
+  const { publishContent } = useCommunityContent();
+  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newChallenge, setNewChallenge] = useState({
     title: '',
     description: '',
-    is_public: false,
-    target_days: 30
+    targetDays: 30,
+    isPublic: false
   });
 
-  const handleCreateChallenge = async () => {
+  const handleCreateChallenge = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChallenge.title.trim()) {
+      toast.error('Veuillez donner un titre à votre défi');
+      return;
+    }
+
     try {
-      if (!newChallenge.title.trim()) {
-        toast.error('Le titre du défi est requis');
-        return;
+      const challengeData = {
+        title: newChallenge.title,
+        description: newChallenge.description,
+        target_days: newChallenge.targetDays,
+        is_public: newChallenge.isPublic
+      };
+
+      await createChallenge(challengeData);
+
+      // Si le défi est public, le publier dans la communauté
+      if (newChallenge.isPublic) {
+        try {
+          await publishContent({
+            type: 'challenge' as any,
+            title: newChallenge.title,
+            content: newChallenge.description,
+            is_public: true,
+          });
+        } catch (error) {
+          console.warn('Erreur lors de la publication du défi dans la communauté:', error);
+        }
       }
 
-      await createChallenge(newChallenge);
-      
-      // Envoyer notification si c'est un défi public
-      if (newChallenge.is_public) {
-        await sendCommunityNotification({
-          type: 'challenge',
-          title: newChallenge.title,
-          content: newChallenge.description || 'Nouveau défi spirituel',
-          authorName: 'Utilisateur' // À remplacer par le vrai nom
-        });
-      }
-      
-      setIsCreateOpen(false);
-      setNewChallenge({ title: '', description: '', is_public: false, target_days: 30 });
-      toast.success('Défi créé avec succès !');
-      refetch();
+      setNewChallenge({ title: '', description: '', targetDays: 30, isPublic: false });
+      setIsDialogOpen(false);
+      toast.success('🎯 Défi créé avec succès !');
     } catch (error) {
+      console.error('Erreur lors de la création du défi:', error);
       toast.error('Erreur lors de la création du défi');
+    }
+  };
+
+  const handleJoinSuggestedChallenge = async (challenge: any) => {
+    try {
+      const challengeData = {
+        title: challenge.title,
+        description: challenge.description,
+        target_days: challenge.duration || 30,
+        is_public: false
+      };
+
+      await createChallenge(challengeData);
+      toast.success(`🎯 Vous avez rejoint le défi "${challenge.title}" !`);
+    } catch (error) {
+      console.error('Erreur lors de la participation au défi:', error);
+      toast.error('Erreur lors de la participation au défi');
+    }
+  };
+
+  const handleJoinChallenge = async (challengeId: string) => {
+    try {
+      await joinChallenge(challengeId);
+      toast.success('🎯 Défi rejoint avec succès !');
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Erreur lors de la participation au défi');
     }
   };
 
   const handleCompleteChallenge = async (challengeId: string) => {
     try {
-      await markChallengeCompleted(challengeId);
-      toast.success('Défi validé pour aujourd\'hui !');
-      refetch();
+      await completeChallenge(challengeId);
+      toast.success('✅ Jour validé ! Continuez votre belle progression !');
     } catch (error) {
+      console.error('Erreur:', error);
       toast.error('Erreur lors de la validation');
     }
   };
 
-  const handleJoinSuggestedChallenge = async (suggestedChallenge: any) => {
-    try {
-      await createChallenge({
-        title: suggestedChallenge.title,
-        description: suggestedChallenge.description,
-        target_days: suggestedChallenge.target_days,
-        is_public: true
-      });
-      
-      // Envoyer notification communautaire
-      await sendCommunityNotification({
-        type: 'challenge',
-        title: suggestedChallenge.title,
-        content: suggestedChallenge.description,
-        authorName: 'Utilisateur'
-      });
-      
-      toast.success('Vous avez rejoint le défi !');
-      refetch();
-    } catch (error) {
-      toast.error('Erreur lors de l\'inscription au défi');
+  const handleShareChallenge = async (challenge: any) => {
+    const shareText = `🎯 Je relève le défi "${challenge.title}" sur Compagnon Spirituel ! Rejoignez-moi dans cette aventure spirituelle 🙏`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: challenge.title,
+          text: shareText,
+        });
+        toast.success('Défi partagé avec succès !');
+      } catch (error) {
+        console.log('Partage annulé');
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast.success('Lien copié dans le presse-papiers !');
+      } catch (error) {
+        toast.error('Erreur lors du partage');
+      }
     }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'facile': return 'bg-green-100 text-green-700 border-green-200';
-      case 'moyen': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'difficile': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
+  const getProgressPercentage = (challenge: any) => {
+    return challenge.target_days > 0 ? Math.round((challenge.completed_days / challenge.target_days) * 100) : 0;
   };
-
-  if (loading || monthlyLoading) {
-    return (
-      <div className="space-y-4 p-3 sm:p-4 max-w-4xl mx-auto">
-        <div className="animate-pulse bg-gray-200 h-32 rounded-lg"></div>
-        <div className="animate-pulse bg-gray-200 h-32 rounded-lg"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 max-w-4xl mx-auto">
+    <div className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* En-tête */}
-      <Card className="glass border-white/30">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
-                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800">Défis quotidiens</h1>
-                <p className="text-sm text-gray-600 hidden sm:block">Maintenez votre discipline spirituelle</p>
-              </div>
-            </div>
-            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Créer un défi
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-white border-gray-200">
-                <DialogHeader>
-                  <DialogTitle className="text-gray-800">Créer un nouveau défi</DialogTitle>
-                  <DialogDescription className="text-gray-600">
-                    Définissez un objectif spirituel personnel à atteindre
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="title" className="text-gray-800">Titre du défi</Label>
-                    <Input
-                      id="title"
-                      value={newChallenge.title}
-                      onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="ex: Prier chaque matin pendant 21 jours"
-                      className="bg-white border-gray-300 text-gray-800"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description" className="text-gray-800">Description (optionnel)</Label>
-                    <Textarea
-                      id="description"
-                      value={newChallenge.description}
-                      onChange={(e) => setNewChallenge(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Décrivez votre défi en détail..."
-                      className="bg-white border-gray-300 text-gray-800"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="target_days" className="text-gray-800">Durée (jours)</Label>
-                    <Input
-                      id="target_days"
-                      type="number"
-                      value={newChallenge.target_days}
-                      onChange={(e) => setNewChallenge(prev => ({ ...prev, target_days: parseInt(e.target.value) || 30 }))}
-                      min="1"
-                      max="365"
-                      className="bg-white border-gray-300 text-gray-800"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_public"
-                      checked={newChallenge.is_public}
-                      onCheckedChange={(checked) => setNewChallenge(prev => ({ ...prev, is_public: checked }))}
-                    />
-                    <Label htmlFor="is_public" className="flex items-center gap-2 text-gray-800">
-                      {newChallenge.is_public ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                      {newChallenge.is_public ? 'Partager avec la communauté' : 'Garder privé'}
-                    </Label>
-                  </div>
-                  <div className="flex gap-2 pt-4">
-                    <Button onClick={handleCreateChallenge} className="flex-1">
-                      Créer le défi
-                    </Button>
-                    <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardHeader>
-      </Card>
-
-      {/* Défis suggérés mensuels */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-500" />
-          <h2 className="text-lg font-semibold text-gray-800">Défis du mois</h2>
-          <Badge variant="outline" className="text-purple-600 border-purple-600">
-            Mis à jour mensuellement
-          </Badge>
-        </div>
-        <div className="grid gap-4">
-          {monthlyChallenges.map((challenge) => (
-            <Card key={challenge.id} className="glass border-purple-200/50">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Target className="h-4 w-4 text-purple-500" />
-                    {challenge.title}
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Badge variant="outline" className="text-purple-600 border-purple-600">
-                      {challenge.category}
-                    </Badge>
-                    <Badge className={getDifficultyColor(challenge.difficulty)}>
-                      {challenge.difficulty}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {challenge.description && (
-                  <p className="text-sm text-gray-600 mb-3">{challenge.description}</p>
-                )}
-                
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-600">
-                    Durée: {challenge.target_days} jours
-                  </div>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleJoinSuggestedChallenge(challenge)}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
-                    Rejoindre ce défi
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Défis personnels actifs */}
-      {challenges.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800">Mes défis</h2>
-          <div className="grid gap-4">
-            {challenges.slice(0, 3).map((challenge) => (
-              <ChallengeCard 
-                key={challenge.id} 
-                challenge={challenge} 
-                onMarkCompleted={handleCompleteChallenge}
-                showCommunityProgress={challenge.is_public}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Défis de la communauté */}
-      {publicChallenges.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800">Défis de la communauté</h2>
-          <div className="grid gap-4">
-            {publicChallenges.slice(0, 3).map((challenge) => (
-              <PublicChallengeCard 
-                key={challenge.id} 
-                challenge={challenge}
-                onJoin={() => handleJoinSuggestedChallenge({
-                  title: challenge.title,
-                  description: challenge.description,
-                  target_days: challenge.target_days
-                })}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Explication - maintenant en bas */}
-      <Card className="glass border-[var(--accent-primary)]/20">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-              <Info className="h-6 w-6 text-white" />
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{ background: 'var(--accent-primary)' }}
+            >
+              <Target className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-                Comment ça marche ?
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                Relevez des défis spirituels quotidiens pour maintenir votre croissance personnelle. 
-                Chaque mois, de nouveaux défis suggérés sont automatiquement proposés selon la période spirituelle. 
-                Choisissez parmi nos défis mensuels ou créez vos propres défis personnalisés. 
-                Validez vos actions chaque jour pour construire des séries et suivre votre progression. 
-                Partagez vos défis avec la communauté pour encourager d'autres personnes et recevoir des notifications de leurs progressions.
+              <h1 className="text-2xl font-bold text-[var(--text-primary)]">Défis spirituels</h1>
+              <p className="text-sm text-[var(--text-secondary)]">Grandissez dans votre foi jour après jour</p>
+            </div>
+          </div>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <ModernButton 
+                variant="primary" 
+                className="gap-2"
+                onClick={() => setNewChallenge({ title: '', description: '', targetDays: 30, isPublic: false })}
+              >
+                <Plus className="h-4 w-4" />
+                Créer un défi
+              </ModernButton>
+            </DialogTrigger>
+            
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Créer un nouveau défi</DialogTitle>
+              </DialogHeader>
+              
+              <form onSubmit={handleCreateChallenge} className="space-y-4">
+                <div>
+                  <Label>Titre du défi *</Label>
+                  <Input
+                    value={newChallenge.title}
+                    onChange={(e) => setNewChallenge({ ...newChallenge, title: e.target.value })}
+                    placeholder="Ex: Lire la Bible 15 minutes par jour"
+                  />
+                </div>
+                
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    value={newChallenge.description}
+                    onChange={(e) => setNewChallenge({ ...newChallenge, description: e.target.value })}
+                    placeholder="Décrivez votre défi..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div>
+                  <Label>Durée (jours)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={newChallenge.targetDays}
+                    onChange={(e) => setNewChallenge({ ...newChallenge, targetDays: parseInt(e.target.value) || 30 })}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
+                  <Switch
+                    id="share-challenge"
+                    checked={newChallenge.isPublic}
+                    onCheckedChange={(checked) => setNewChallenge({ ...newChallenge, isPublic: checked })}
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="share-challenge" className="text-sm font-medium cursor-pointer">
+                      Partager avec la communauté
+                    </Label>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Permettre aux autres de découvrir et rejoindre votre défi
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <ModernButton type="submit" variant="primary" className="flex-1" disabled={loading}>
+                    Créer le défi
+                  </ModernButton>
+                  <ModernButton 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="flex-1"
+                  >
+                    Annuler
+                  </ModernButton>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </ModernCard>
+
+      {/* Défis suggérés */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+            <Sparkles className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Défis suggérés ce mois-ci</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Défis adaptés à la période spirituelle actuelle</p>
+          </div>
+        </div>
+
+        {suggestedLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {suggestedChallenges.map((challenge, index) => (
+              <ModernCard key={index} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)] hover:shadow-md transition-all">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-[var(--text-primary)] mb-1">{challenge.title}</h3>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{challenge.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-2 border-t border-[var(--border-default)]">
+                    <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>{challenge.duration || 30} jours</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        <span>{challenge.participants || 0} participants</span>
+                      </div>
+                    </div>
+                    
+                    <ModernButton
+                      onClick={() => handleJoinSuggestedChallenge(challenge)}
+                      size="sm"
+                      variant="primary"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 shadow-sm"
+                    >
+                      Rejoindre
+                    </ModernButton>
+                  </div>
+                </div>
+              </ModernCard>
+            ))}
+          </div>
+        )}
+      </ModernCard>
+
+      {/* Mes défis */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
+            <Trophy className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Mes défis actifs</h2>
+            <p className="text-sm text-[var(--text-secondary)]">Suivez votre progression spirituelle</p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        ) : challenges.length === 0 ? (
+          <div className="text-center py-8">
+            <Target className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
+            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun défi actif</h4>
+            <p className="text-[var(--text-secondary)] mb-4">Commencez votre parcours spirituel en créant ou rejoignant un défi</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {challenges.map((challenge) => {
+              const progress = getProgressPercentage(challenge);
+              const isCompleted = progress >= 100;
+              
+              return (
+                <ModernCard key={challenge.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h3>
+                          {isCompleted && (
+                            <Badge className="bg-green-100 text-green-700 border-green-200">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Terminé
+                            </Badge>
+                          )}
+                        </div>
+                        {challenge.description && (
+                          <p className="text-sm text-[var(--text-secondary)] mb-2">{challenge.description}</p>
+                        )}
+                        
+                        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>{challenge.completed_days || 0}/{challenge.target_days} jours</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{progress}% terminé</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <ModernButton
+                          onClick={() => handleShareChallenge(challenge)}
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1"
+                        >
+                          <Share2 className="h-3 w-3" />
+                        </ModernButton>
+                        
+                        {!isCompleted && (
+                          <ModernButton
+                            onClick={() => handleCompleteChallenge(challenge.id)}
+                            size="sm"
+                            variant="primary"
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm"
+                          >
+                            Valider aujourd'hui
+                          </ModernButton>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Barre de progression */}
+                    <div className="space-y-1">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min(progress, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </ModernCard>
+              );
+            })}
+          </div>
+        )}
+      </ModernCard>
+
+      {/* Comment ça marche */}
+      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+            <Info className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+              Comment ça marche ?
+            </h3>
+            <div className="space-y-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+              <p>
+                <strong>Créez vos défis :</strong> Définissez vos objectifs spirituels personnels et partagez-les avec la communauté si vous le souhaitez.
+              </p>
+              <p>
+                <strong>Rejoignez les défis suggérés :</strong> Découvrez chaque mois de nouveaux défis adaptés à la période spirituelle actuelle.
+              </p>
+              <p>
+                <strong>Validez votre progression :</strong> Chaque jour, validez votre participation pour suivre votre croissance spirituelle.
+              </p>
+              <p>
+                <strong>Partagez vos réussites :</strong> Inspirez les autres en partageant vos défis et votre progression.
               </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </ModernCard>
     </div>
   );
 };
-
-function ChallengeCard({ challenge, onMarkCompleted, showCommunityProgress }: { 
-  challenge: any; 
-  onMarkCompleted: (id: string) => void;
-  showCommunityProgress: boolean;
-}) {
-  const { progress, getStats } = useSupabaseChallengeProgress(challenge.id);
-  const stats = getStats();
-  const progressPercentage = Math.round((stats.completedDays / challenge.target_days) * 100);
-  const today = new Date().toISOString().split('T')[0];
-  const completedToday = progress.some(p => p.completed_date === today);
-
-  // Simulation de la progression communautaire si c'est un défi public
-  const communityProgress = showCommunityProgress ? {
-    totalParticipants: Math.floor(Math.random() * 50) + 10,
-    averageProgress: Math.floor(Math.random() * 80) + 20
-  } : null;
-
-  return (
-    <Card className="glass border-white/30">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Target className="h-4 w-4 text-orange-500" />
-            {challenge.title}
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            {stats.currentStreak > 0 && (
-              <Badge variant="outline" className="text-orange-600 border-orange-600">
-                <Trophy className="h-3 w-3 mr-1" />
-                {stats.currentStreak}
-              </Badge>
-            )}
-            <Badge variant={completedToday ? "default" : "secondary"}>
-              {progressPercentage}%
-            </Badge>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {challenge.description && (
-          <p className="text-sm text-gray-600 mb-4">{challenge.description}</p>
-        )}
-        
-        <div className="space-y-3">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Progression: {stats.completedDays}/{challenge.target_days} jours</span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                Série: {stats.currentStreak} jours
-              </span>
-            </div>
-            <Progress value={progressPercentage} className="h-2" />
-          </div>
-          
-          {showCommunityProgress && communityProgress && (
-            <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
-              <span className="font-medium">Défi communautaire</span> - {communityProgress.totalParticipants} participants, 
-              progression moyenne: {communityProgress.averageProgress}%
-            </div>
-          )}
-          
-          <div className="flex justify-end">
-            <Button
-              size="sm"
-              onClick={() => onMarkCompleted(challenge.id)}
-              disabled={completedToday}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle className="h-4 w-4" />
-              {completedToday ? "Terminé aujourd'hui" : "Valider"}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PublicChallengeCard({ challenge, onJoin }: { challenge: any; onJoin: () => void }) {
-  // Simulation de statistiques communautaires
-  const communityStats = {
-    totalParticipants: Math.floor(Math.random() * 100) + 20,
-    averageProgress: Math.floor(Math.random() * 70) + 30,
-    completionRate: Math.floor(Math.random() * 40) + 60
-  };
-
-  return (
-    <Card className="glass border-blue-200/50">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Target className="h-4 w-4 text-blue-500" />
-            {challenge.title}
-          </CardTitle>
-          <Badge variant="outline" className="text-blue-600 border-blue-600">
-            Communauté
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {challenge.description && (
-          <p className="text-sm text-gray-600 mb-3">{challenge.description}</p>
-        )}
-        
-        <div className="space-y-3">
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <div className="text-xs text-blue-700 mb-1">
-              <span className="font-medium">Progression communautaire</span>
-            </div>
-            <div className="text-xs text-blue-600 space-y-1">
-              <div>👥 {communityStats.totalParticipants} participants</div>
-              <div>📊 Progression moyenne: {communityStats.averageProgress}%</div>
-              <div>✅ Taux de réussite: {communityStats.completionRate}%</div>
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              Durée: {challenge.target_days} jours
-            </div>
-            <Button 
-              size="sm" 
-              onClick={onJoin}
-            >
-              Rejoindre
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default DailyChallenges;

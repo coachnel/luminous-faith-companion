@@ -3,9 +3,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
-import { Compass, Heart, MessageCircle, Bookmark, Calendar, ThumbsUp, Info, Loader2 } from 'lucide-react';
+import { Compass, Heart, MessageCircle, Bookmark, Calendar, ThumbsUp, Info, Loader2, Target, PenTool } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNeonPrayerRequests, useNeonNotes } from '@/hooks/useNeonData';
+import { useCommunityContent } from '@/hooks/useCommunityContent';
 import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 10;
@@ -14,17 +15,18 @@ const Discover = () => {
   const { user } = useAuth();
   const { prayerRequests, loading: prayersLoading } = useNeonPrayerRequests();
   const { notes, loading: notesLoading } = useNeonNotes();
-  const [activeTab, setActiveTab] = useState<'all' | 'prayers' | 'notes'>('all');
+  const { content: communityContent, loading: communityLoading } = useCommunityContent();
+  const [activeTab, setActiveTab] = useState<'all' | 'prayers' | 'notes' | 'challenges'>('all');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Combiner et trier tout le contenu partageable avec optimisation
+  // Combiner tout le contenu partagé avec optimisation
   const allContent = useMemo(() => {
     const content: any[] = [];
     
-    // Ajouter les prières publiques (non anonymes) avec limitation
+    // Ajouter les prières publiques (non anonymes)
     prayerRequests
       .filter(prayer => !prayer.is_anonymous)
-      .slice(0, 50) // Limite pour optimiser les performances
+      .slice(0, 30)
       .forEach(prayer => {
         content.push({
           ...prayer,
@@ -35,27 +37,38 @@ const Discover = () => {
         });
       });
 
+    // Ajouter le contenu communautaire (notes, témoignages, etc.)
+    communityContent
+      .filter(item => item.is_public)
+      .slice(0, 50)
+      .forEach(item => {
+        content.push({
+          ...item,
+          type: item.type,
+          author: item.author_name,
+          likes: item.likes_count || 0,
+          createdAt: new Date(item.created_at)
+        });
+      });
+
     // Trier par date décroissante
     return content
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, 100); // Limite globale pour optimiser
-  }, [prayerRequests]);
-
-  const prayersContent = useMemo(() => 
-    allContent.filter(item => item.type === 'prayer'),
-    [allContent]
-  );
+      .slice(0, 100);
+  }, [prayerRequests, communityContent]);
 
   const getFilteredContent = useMemo(() => {
     switch (activeTab) {
       case 'prayers':
-        return prayersContent;
+        return allContent.filter(item => item.type === 'prayer');
       case 'notes':
-        return []; // Les notes restent privées pour l'instant
+        return allContent.filter(item => item.type === 'note');
+      case 'challenges':
+        return allContent.filter(item => item.type === 'challenge');
       default:
         return allContent;
     }
-  }, [activeTab, prayersContent, allContent]);
+  }, [activeTab, allContent]);
 
   // Pagination optimisée
   const paginatedContent = useMemo(() => {
@@ -82,78 +95,99 @@ const Discover = () => {
     toast.info('💬 Fonctionnalité de commentaires à venir');
   };
 
-  const renderContentCard = (item: any) => (
-    <ModernCard key={`${item.type}-${item.id}`} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="default" className="flex items-center gap-1 flex-shrink-0">
-                {item.type === 'prayer' ? <Heart className="h-3 w-3" /> : <MessageCircle className="h-3 w-3" />}
-                <span>{item.type === 'prayer' ? 'Prière' : 'Note'}</span>
-              </Badge>
-              <span className="text-xs text-[var(--text-secondary)] truncate">
-                par {item.author}
-              </span>
-            </div>
-            <h4 className="font-semibold text-[var(--text-primary)] break-words mb-2 line-clamp-2">
-              {item.title}
-            </h4>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words line-clamp-3">
-              {item.content}
-            </p>
-          </div>
-        </div>
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'prayer': return Heart;
+      case 'note': return PenTool;
+      case 'testimony': return MessageCircle;
+      case 'verse': return BookOpen;
+      case 'challenge': return Target;
+      default: return MessageCircle;
+    }
+  };
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[var(--border-default)]">
-          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4 flex-shrink-0" />
-              <span>{item.createdAt.toLocaleDateString('fr-FR')}</span>
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'prayer': return 'Prière';
+      case 'note': return 'Note';
+      case 'testimony': return 'Témoignage';
+      case 'verse': return 'Verset';
+      case 'challenge': return 'Défi';
+      default: return 'Contenu';
+    }
+  };
+
+  const renderContentCard = (item: any) => {
+    const IconComponent = getTypeIcon(item.type);
+    const typeLabel = getTypeLabel(item.type);
+
+    return (
+      <ModernCard key={`${item.type}-${item.id}`} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="default" className="flex items-center gap-1 flex-shrink-0">
+                  <IconComponent className="h-3 w-3" />
+                  <span>{typeLabel}</span>
+                </Badge>
+                <span className="text-xs text-[var(--text-secondary)] truncate">
+                  par {item.author}
+                </span>
+              </div>
+              <h4 className="font-semibold text-[var(--text-primary)] break-words mb-2 line-clamp-2">
+                {item.title}
+              </h4>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed break-words line-clamp-3">
+                {item.content}
+              </p>
             </div>
-            {item.type === 'prayer' && (
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[var(--border-default)]">
+            <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4 flex-shrink-0" />
+                <span>{item.createdAt.toLocaleDateString('fr-FR')}</span>
+              </div>
               <div className="flex items-center gap-1">
                 <Heart className="h-4 w-4 flex-shrink-0" />
-                <span>{item.likes} prières</span>
+                <span>{item.likes} {item.type === 'prayer' ? 'prières' : 'j\'aime'}</span>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <ModernButton
-              onClick={() => handleLike(item.id, item.type)}
-              size="sm"
-              variant="outline"
-              className="gap-2 text-xs"
-            >
-              <ThumbsUp className="h-4 w-4" />
-              <span className="hidden sm:inline">J'aime</span>
-            </ModernButton>
-            <ModernButton
-              onClick={() => handleBookmark(item.id, item.type)}
-              size="sm"
-              variant="ghost"
-              className="gap-2 text-xs"
-            >
-              <Bookmark className="h-4 w-4" />
-              <span className="hidden sm:inline">Sauver</span>
-            </ModernButton>
-            <ModernButton
-              onClick={() => handleComment(item.id, item.type)}
-              size="sm"
-              variant="ghost"
-              className="gap-2 text-xs"
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">Commenter</span>
-            </ModernButton>
+            <div className="flex items-center gap-2">
+              <ModernButton
+                onClick={() => handleLike(item.id, item.type)}
+                size="sm"
+                variant="outline"
+                className="gap-2 text-xs"
+              >
+                <ThumbsUp className="h-4 w-4" />
+                <span className="hidden sm:inline">J'aime</span>
+              </ModernButton>
+              <ModernButton
+                onClick={() => handleBookmark(item.id, item.type)}
+                size="sm"
+                variant="ghost"
+                className="gap-2 text-xs"
+              >
+                <Bookmark className="h-4 w-4" />
+                <span className="hidden sm:inline">Sauver</span>
+              </ModernButton>
+            </div>
           </div>
         </div>
-      </div>
-    </ModernCard>
-  );
+      </ModernCard>
+    );
+  };
 
-  const loading = prayersLoading || notesLoading;
+  const loading = prayersLoading || notesLoading || communityLoading;
+
+  // Compter les contenus par type
+  const prayersCount = allContent.filter(item => item.type === 'prayer').length;
+  const notesCount = allContent.filter(item => item.type === 'note').length;
+  const challengesCount = allContent.filter(item => item.type === 'challenge').length;
 
   return (
     <div 
@@ -179,18 +213,22 @@ const Discover = () => {
       </ModernCard>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <ModernCard className="p-4 text-center bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border-blue-200 dark:border-blue-800">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{allContent.length}</div>
-          <div className="text-sm text-blue-700 dark:text-blue-300">Contenus</div>
+          <div className="text-sm text-blue-700 dark:text-blue-300">Total</div>
         </ModernCard>
         <ModernCard className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-green-200 dark:border-green-800">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{prayersContent.length}</div>
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{prayersCount}</div>
           <div className="text-sm text-green-700 dark:text-green-300">Prières</div>
         </ModernCard>
         <ModernCard className="p-4 text-center bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950 border-purple-200 dark:border-purple-800">
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">0</div>
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{notesCount}</div>
           <div className="text-sm text-purple-700 dark:text-purple-300">Notes</div>
+        </ModernCard>
+        <ModernCard className="p-4 text-center bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 border-orange-200 dark:border-orange-800">
+          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{challengesCount}</div>
+          <div className="text-sm text-orange-700 dark:text-orange-300">Défis</div>
         </ModernCard>
       </div>
 
@@ -219,8 +257,17 @@ const Discover = () => {
             size="sm"
             className="gap-2"
           >
-            <MessageCircle className="h-4 w-4" />
+            <PenTool className="h-4 w-4" />
             Notes
+          </ModernButton>
+          <ModernButton
+            onClick={() => setActiveTab('challenges')}
+            variant={activeTab === 'challenges' ? 'primary' : 'outline'}
+            size="sm"
+            className="gap-2"
+          >
+            <Target className="h-4 w-4" />
+            Défis
           </ModernButton>
         </div>
 
@@ -237,13 +284,10 @@ const Discover = () => {
               <div className="text-center py-8">
                 <Compass className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
                 <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-                  {activeTab === 'notes' ? 'Aucune note partagée' : 'Aucun contenu à découvrir'}
+                  Aucun contenu à découvrir
                 </h4>
                 <p className="text-[var(--text-secondary)] mb-4">
-                  {activeTab === 'notes' 
-                    ? 'Les notes restent privées pour le moment'
-                    : 'Soyez le premier à partager du contenu avec la communauté'
-                  }
+                  Soyez le premier à partager du contenu avec la communauté
                 </p>
               </div>
             ) : (
@@ -293,10 +337,9 @@ const Discover = () => {
               Comment ça marche ?
             </h3>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Découvrez les contenus partagés publiquement par les autres membres de la communauté. 
-              Vous pouvez interagir avec les prières et notes en les aimant, les sauvegardant ou en laissant des commentaires. 
-              Seuls les contenus publics sont visibles ici. 
-              Les contenus sont automatiquement supprimés après 7 jours pour maintenir la fraîcheur du feed.
+              Découvrez tous les contenus partagés publiquement par les membres de la communauté : 
+              prières, notes spirituelles, témoignages et défis. Vous pouvez interagir avec ces contenus 
+              en les aimant ou en les sauvegardant. Seuls les contenus marqués comme publics sont visibles ici.
             </p>
           </div>
         </div>

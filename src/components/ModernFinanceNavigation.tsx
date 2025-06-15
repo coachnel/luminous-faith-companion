@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   BookOpen, 
   Users, 
@@ -12,30 +11,29 @@ import {
   Calendar
 } from 'lucide-react';
 
-const ModernFinanceNavigation = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+interface ModernFinanceNavigationProps {
+  currentSection: string;
+  onNavigate: (section: string) => void;
+}
 
+const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNavigationProps) => {
   const navigationItems = [
-    { path: '/', label: 'Tableau de bord', icon: Calendar, color: 'from-blue-500 to-blue-600' },
-    { path: '/bible', label: 'Bible', icon: BookOpen, color: 'from-green-500 to-green-600' },
-    { path: '/journal', label: 'Journal', icon: PenTool, color: 'from-purple-500 to-purple-600' },
-    { path: '/prayer', label: 'Prière', icon: Heart, color: 'from-rose-500 to-rose-600' },
-    { path: '/community', label: 'Communauté', icon: Users, color: 'from-indigo-500 to-indigo-600' },
-    { path: '/testimony', label: 'Témoignages', icon: Plus, color: 'from-orange-500 to-orange-600' },
-    { path: '/notifications', label: 'Notifications', icon: Bell, color: 'from-cyan-500 to-cyan-600' },
-    { path: '/settings', label: 'Paramètres', icon: Settings, color: 'from-gray-500 to-gray-600' }
+    { path: 'dashboard', label: 'Tableau de bord', icon: Calendar, color: 'from-blue-500 to-blue-600' },
+    { path: 'discover', label: 'Bible', icon: BookOpen, color: 'from-green-500 to-green-600' },
+    { path: 'notes', label: 'Journal', icon: PenTool, color: 'from-purple-500 to-purple-600' },
+    { path: 'prayer', label: 'Prière', icon: Heart, color: 'from-rose-500 to-rose-600' },
+    { path: 'community', label: 'Communauté', icon: Users, color: 'from-indigo-500 to-indigo-600' },
+    { path: 'testimony', label: 'Témoignages', icon: Plus, color: 'from-orange-500 to-orange-600' },
+    { path: 'challenges', label: 'Défis', icon: Bell, color: 'from-cyan-500 to-cyan-600' },
+    { path: 'settings', label: 'Paramètres', icon: Settings, color: 'from-gray-500 to-gray-600' }
   ];
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    onNavigate(path);
   };
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
+    return currentSection === path;
   };
 
   return (

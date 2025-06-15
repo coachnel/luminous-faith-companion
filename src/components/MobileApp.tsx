@@ -37,17 +37,21 @@ const MobileApp = () => {
       '/prayer-circles': 'prayer-circles',
       '/settings': 'settings',
       '/community': 'community',
-      '/testimony': 'testimony'
+      '/testimony': 'testimony',
+      'dashboard': 'dashboard',
+      'prayer': 'prayer',
+      'notes': 'notes',
+      'challenges': 'challenges',
+      'reading-plans': 'reading-plans',
+      'discover': 'discover',
+      'prayer-circles': 'prayer-circles',
+      'settings': 'settings',
+      'community': 'community',
+      'testimony': 'testimony'
     };
     
     const targetSection = sectionMap[section] || 'dashboard';
     setCurrentSection(targetSection);
-  }, []);
-
-  // Create a wrapper function for navigation that accepts string and converts to AppSection
-  const handleNavigationFromNav = useCallback((section: string) => {
-    const validSection = section as AppSection;
-    setCurrentSection(validSection);
   }, []);
 
   // Mémoiser le rendu des sections pour optimiser les performances
@@ -96,7 +100,10 @@ const MobileApp = () => {
       <div className="pb-16 xxs:pb-14 xs:pb-20 lg:pb-0">
         {renderSection}
       </div>
-      <ModernFinanceNavigation />
+      <ModernFinanceNavigation 
+        currentSection={currentSection} 
+        onNavigate={handleNavigation} 
+      />
     </div>
   );
 };

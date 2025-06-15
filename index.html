@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/heart.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>Compagnon Spirituel</title>
     <meta name="description" content="Votre compagnon spirituel pour la prière, la méditation et le partage de témoignages" />
     
@@ -21,6 +21,28 @@
     <!-- Additional PWA meta tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Compagnon Spirituel" />
+    
+    <!-- Ensure proper mobile display -->
+    <style>
+      * { box-sizing: border-box; }
+      html, body { 
+        margin: 0; 
+        padding: 0; 
+        width: 100%; 
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      #root { 
+        width: 100%; 
+        min-height: 100vh; 
+        overflow-x: hidden;
+      }
+      @media (max-width: 280px) {
+        html { font-size: 12px; }
+        body { font-size: 10px; }
+      }
+    </style>
     
     <!-- Service Worker Registration -->
     <script>

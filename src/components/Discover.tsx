@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Search, TrendingUp, Heart, Users, Star } from 'lucide-react';
+import { Sparkles, Search, TrendingUp, Heart, Users, Star, Target } from 'lucide-react';
 import { useCommunityContent } from '@/hooks/useCommunityContent';
 import CommunityContentCard from './CommunityContentCard';
 
@@ -12,12 +13,13 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { content, loading } = useCommunityContent();
 
-  // CORRECTION : Suppression de la catégorie "Versets" - Bible supprimée
+  // Fixed categories - removed "Verses" as requested
   const categories = [
     { id: 'all', label: 'Tout', icon: Sparkles },
     { id: 'prayer', label: 'Prières', icon: Heart },
-    { id: 'testimony', label: 'Témoignages', icon: Users },
-    { id: 'note', label: 'Réflexions', icon: Star }
+    { id: 'note', label: 'Notes', icon: Star },
+    { id: 'challenge', label: 'Défis', icon: Target },
+    { id: 'testimony', label: 'Témoignages', icon: Users }
   ];
 
   const filteredContent = content.filter(item => {
@@ -67,9 +69,10 @@ const Discover = () => {
             </div>
           </div>
         </div>
+
         {/* Search + Categories in cards */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
-          <div className="relative mb-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="text"
@@ -79,7 +82,9 @@ const Discover = () => {
               className="pl-10 text-sm w-full"
             />
           </div>
-          <div className="flex flex-wrap gap-2 p-1">
+          
+          {/* Improved filter layout with proper spacing */}
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
@@ -88,19 +93,20 @@ const Discover = () => {
                   onClick={() => setSelectedCategory(category.id)}
                   variant={selectedCategory === category.id ? "primary" : "outline"}
                   size="sm"
-                  className="text-xs"
+                  className="text-xs sm:text-sm flex-shrink-0"
                 >
-                  <Icon className="h-3 w-3 mr-1" />
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   {category.label}
                 </ModernButton>
               );
             })}
           </div>
         </div>
-        {/* Trending Topics (card) */}
+
+        {/* Trending Topics */}
         {trendingTopics.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="h-4 w-4 text-blue-600" />
               <h3 className="text-base font-semibold text-gray-900">Sujets tendance</h3>
             </div>
@@ -113,16 +119,18 @@ const Discover = () => {
             </div>
           </div>
         )}
+
         {/* Community Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
-          <div className="flex items-center justify-between mb-2">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-semibold text-gray-900">Contenu de la communauté</h3>
             <Badge variant="outline" className="text-xs">{filteredContent.length} publications</Badge>
           </div>
+          
           {loading ? (
-            <div>
+            <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse mb-2"></div>
+                <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse"></div>
               ))}
             </div>
           ) : (
@@ -132,9 +140,10 @@ const Discover = () => {
               ))}
             </div>
           )}
+          
           {filteredContent.length === 0 && !loading && (
-            <div className="text-center py-6">
-              <Sparkles className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+            <div className="text-center py-8">
+              <Sparkles className="h-10 w-10 text-gray-400 mx-auto mb-3" />
               <h4 className="text-base font-semibold text-gray-900 mb-2">Aucun contenu trouvé</h4>
               <p className="text-gray-600 text-sm px-4">
                 {content.length === 0 

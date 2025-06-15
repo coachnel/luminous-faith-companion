@@ -63,15 +63,16 @@ export const useUniversalNotifications = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (userPrefs?.notification_preferences) {
+      if (userPrefs?.notification_preferences && typeof userPrefs.notification_preferences === 'object') {
+        const notifPrefs = userPrefs.notification_preferences as Record<string, any>;
         setPreferences({
           pushEnabled: hasPermission,
           emailEnabled: true,
-          newContent: userPrefs.notification_preferences.dailyVerse || true,
-          challengeReminders: userPrefs.notification_preferences.prayerReminder || true,
-          communityUpdates: userPrefs.notification_preferences.readingReminder || true,
-          prayerReminders: userPrefs.notification_preferences.prayerReminder || true,
-          readingReminders: userPrefs.notification_preferences.readingReminder || true
+          newContent: notifPrefs.dailyVerse !== false,
+          challengeReminders: notifPrefs.prayerReminder !== false,
+          communityUpdates: notifPrefs.readingReminder !== false,
+          prayerReminders: notifPrefs.prayerReminder !== false,
+          readingReminders: notifPrefs.readingReminder !== false
         });
       }
     } catch (error) {

@@ -9,7 +9,7 @@ import { Clock, Plus, Trash2, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useEnhancedNotifications } from '@/hooks/useEnhancedNotifications';
+import { useUniversalNotifications } from '@/hooks/useUniversalNotifications';
 
 interface PrayerTime {
   id: string;
@@ -25,7 +25,7 @@ const PrayerTimeSettings = () => {
   const [newLabel, setNewLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const { scheduleNotification, hasPermission, requestPermission } = useEnhancedNotifications();
+  const { sendPrayerReminder, hasPermission, requestPermission } = useUniversalNotifications();
 
   // Temps de prière par défaut
   const defaultTimes: Omit<PrayerTime, 'id'>[] = [
@@ -49,7 +49,12 @@ const PrayerTimeSettings = () => {
         .eq('user_id', user.id)
         .single();
 
-      const savedTimes = preferences?.reminder_times?.prayer || [];
+      let savedTimes: string[] = [];
+      
+      if (preferences?.reminder_times && typeof preferences.reminder_times === 'object') {
+        const reminderTimes = preferences.reminder_times as Record<string, any>;
+        savedTimes = Array.isArray(reminderTimes.prayer) ? reminderTimes.prayer : [];
+      }
       
       // Combiner les temps par défaut avec les temps personnalisés
       const allTimes: PrayerTime[] = [
@@ -121,11 +126,9 @@ const PrayerTimeSettings = () => {
 
       const delay = prayerTime.getTime() - now.getTime();
       
-      scheduleNotification(
-        '🙏 Temps de prière',
-        'Il est temps de prendre un moment pour prier',
-        delay
-      );
+      setTimeout(() => {
+        sendPrayerReminder(time);
+      }, delay);
     });
   };
 

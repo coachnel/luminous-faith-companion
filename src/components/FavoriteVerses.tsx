@@ -1,121 +1,172 @@
 
 import React, { useState, useEffect } from 'react';
-import { Heart, Trash2, Book } from 'lucide-react';
-import { ModernButton } from '@/components/ui/modern-button';
-import { ModernCard } from '@/components/ui/modern-card';
-import { useNeonFavoriteVerses } from '@/hooks/useNeonData';
-import VerseCard from './VerseCard';
-import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Trash2, Share2 } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { toast } from 'sonner';
 
-const FavoriteVerses = () => {
-  const { favoriteVerses, loading, removeFavoriteVerse } = useNeonFavoriteVerses();
+interface FavoriteVerse {
+  id: string;
+  book: string;
+  chapter: number;
+  verse: number;
+  text: string;
+  reference: string;
+  addedAt: string;
+}
 
-  const handleRemoveFavorite = async (verseId: string) => {
-    try {
-      await removeFavoriteVerse(verseId);
-      toast({
-        description: "Verset supprimé des favoris",
-      });
-    } catch (error) {
-      toast({
-        description: "Erreur lors de la suppression",
-        variant: "destructive",
-      });
-    }
+const FavoriteVerses: React.FC = () => {
+  const [favorites, setFavorites] = useLocalStorage<FavoriteVerse[]>('favoriteVerses', []);
+  const [selectedVerses, setSelectedVerses] = useState<Set<string>>(new Set());
+
+  const handleRemoveFavorite = (id: string) => {
+    setFavorites(prev => prev.filter(verse => verse.id !== id));
+    setSelectedVerses(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(id);
+      return newSet;
+    });
+    toast.success('Verset retiré des favoris');
   };
 
-  const clearAllFavorites = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer tous vos favoris ?')) return;
-    
-    try {
-      for (const verse of favoriteVerses) {
-        await removeFavoriteVerse(verse.verse_id);
+  const handleSelectVerse = (id: string) => {
+    setSelectedVerses(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
       }
-      toast({
-        description: "Tous les favoris ont été supprimés",
+      return newSet;
+    });
+  };
+
+  const handleShareSelected = () => {
+    if (selectedVerses.size === 0) {
+      toast.error('Veuillez sélectionner au moins un verset');
+      return;
+    }
+
+    const selectedVersesData = favorites.filter(verse => selectedVerses.has(verse.id));
+    const shareText = selectedVersesData
+      .map(verse => `${verse.reference}: "${verse.text}"`)
+      .join('\n\n');
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Versets favoris',
+        text: shareText,
       });
-    } catch (error) {
-      toast({
-        description: "Erreur lors de la suppression",
-        variant: "destructive",
-      });
+    } else {
+      navigator.clipboard.writeText(shareText);
+      toast.success('Versets copiés dans le presse-papiers');
     }
   };
 
-  if (loading) {
+  const handleRemoveSelected = () => {
+    if (selectedVerses.size === 0) {
+      toast.error('Veuillez sélectionner au moins un verset');
+      return;
+    }
+
+    setFavorites(prev => prev.filter(verse => !selectedVerses.has(verse.id)));
+    setSelectedVerses(new Set());
+    toast.success(`${selectedVerses.size} verset(s) supprimé(s)`);
+  };
+
+  if (favorites.length === 0) {
     return (
-      <div className="p-4 space-y-4 max-w-4xl mx-auto">
-        <ModernCard>
-          <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-[var(--accent-primary)] border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-[var(--text-secondary)]">Chargement des favoris...</p>
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Heart className="h-5 w-5" />
+            Versets favoris
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Heart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">Aucun verset favori.</p>
+            <p className="text-sm text-gray-400 mt-2">
+              Ajoutez des versets à vos favoris depuis la lecture de la Bible.
+            </p>
           </div>
-        </ModernCard>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="p-4 space-y-4 max-w-4xl mx-auto">
-      <ModernCard variant="elevated">
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="text-[var(--accent-primary)]" size={24} />
-            <h1 className="text-xl font-semibold text-[var(--text-primary)]">Versets favoris</h1>
-            <span className="text-sm bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-2 py-1 rounded-full">
-              {favoriteVerses.length}
-            </span>
-          </div>
-          {favoriteVerses.length > 0 && (
-            <ModernButton
-              variant="outline"
-              size="sm"
-              onClick={clearAllFavorites}
-            >
-              <Trash2 size={16} className="mr-2" />
-              Tout supprimer
-            </ModernButton>
+          <CardTitle className="flex items-center gap-2">
+            <Heart className="h-5 w-5" />
+            Versets favoris ({favorites.length})
+          </CardTitle>
+          {selectedVerses.size > 0 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShareSelected}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Partager ({selectedVerses.size})
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleRemoveSelected}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer ({selectedVerses.size})
+              </Button>
+            </div>
           )}
         </div>
-      </ModernCard>
-
-      {favoriteVerses.length === 0 ? (
-        <ModernCard>
-          <div className="p-8 text-center">
-            <Heart className="mx-auto mb-4 text-[var(--text-secondary)]" size={48} />
-            <h3 className="text-lg font-semibold mb-2 text-[var(--text-primary)]">Aucun verset favori</h3>
-            <p className="text-[var(--text-secondary)]">
-              Explorez la Bible et ajoutez vos versets préférés en cliquant sur l'étoile ⭐
-            </p>
-          </div>
-        </ModernCard>
-      ) : (
+      </CardHeader>
+      <CardContent>
         <div className="space-y-4">
-          {favoriteVerses.map((favoriteVerse, index) => {
-            const verse = {
-              book: favoriteVerse.book,
-              chapter: favoriteVerse.chapter,
-              verse: favoriteVerse.verse,
-              text: favoriteVerse.text
-            };
-            
-            return (
-              <div key={`${favoriteVerse.id}-${index}`} className="relative">
-                <VerseCard verse={verse} />
-                <ModernButton
+          {favorites.map((verse) => (
+            <div
+              key={verse.id}
+              className={`p-4 border rounded-lg transition-colors cursor-pointer ${
+                selectedVerses.has(verse.id)
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => handleSelectVerse(verse.id)}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline">{verse.reference}</Badge>
+                    <span className="text-xs text-gray-500">
+                      Ajouté le {new Date(verse.addedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-gray-800 leading-relaxed">{verse.text}</p>
+                </div>
+                <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleRemoveFavorite(favoriteVerse.verse_id)}
-                  className="absolute top-2 right-2 text-[var(--accent-primary)] hover:bg-[var(--bg-secondary)]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveFavorite(verse.id);
+                  }}
+                  className="flex-shrink-0 text-red-500 hover:text-red-700"
                 >
-                  <Trash2 size={16} />
-                </ModernButton>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

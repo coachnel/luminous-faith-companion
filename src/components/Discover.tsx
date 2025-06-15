@@ -13,7 +13,7 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { content, loading } = useCommunityContent();
 
-  // Categories without "Verses" filter
+  // Categories without "Verses" filter - only the 5 specified categories
   const categories = [
     { id: 'all', label: 'Tout', icon: Sparkles },
     { id: 'prayer', label: 'Prières', icon: Heart },
@@ -70,7 +70,7 @@ const Discover = () => {
           </div>
         </div>
 
-        {/* Search + Categories with consistent blue styling */}
+        {/* Search + Categories with blue styling - single row layout */}
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="relative mb-4 sm:mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -83,21 +83,21 @@ const Discover = () => {
             />
           </div>
           
-          {/* Filter grid with consistent blue styling - single row layout */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-start">
+          {/* Filter buttons - horizontal alignment with consistent blue styling */}
+          <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 ${
                     selectedCategory === category.id 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'shadow-lg shadow-blue-600/25 scale-105' 
+                      : ''
                   }`}
                 >
-                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <Icon className="h-4 w-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">{category.label}</span>
                 </button>
               );

@@ -84,7 +84,7 @@ const AuthPage = () => {
         } else {
           toast({
             title: "Connexion réussie ! ✨",
-            description: "Bienvenue dans votre compagnon spirituel",
+            description: "Bienvenue dans votre application compagnon",
           });
         }
       }
@@ -100,18 +100,18 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-spiritual-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-heavenly-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md glass border-white/30 shadow-2xl">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full spiritual-gradient flex items-center justify-center">
+          <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             <span className="text-2xl">✝️</span>
           </div>
-          <CardTitle className="text-2xl glow-text">
+          <CardTitle className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
             {isLogin ? 'Connexion' : 'Inscription'}
           </CardTitle>
           <p className="text-gray-600">
             {isLogin 
-              ? 'Connectez-vous à votre compagnon spirituel' 
+              ? 'Connectez-vous à l\'application' 
               : 'Créez votre compte pour commencer votre parcours'
             }
           </p>
@@ -167,7 +167,7 @@ const AuthPage = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full spiritual-gradient hover:opacity-90 transition-opacity"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90 transition-opacity"
             >
               {loading ? 'Chargement...' : (isLogin ? 'Se connecter' : "S'inscrire")}
             </Button>
@@ -176,7 +176,7 @@ const AuthPage = () => {
           <div className="text-center">
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-spiritual-600 hover:text-spiritual-700 text-sm"
+              className="text-blue-600 hover:text-blue-700 text-sm"
               disabled={loading}
             >
               {isLogin 

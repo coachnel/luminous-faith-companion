@@ -69,17 +69,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Configuration de l'écouteur d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
         console.log('Événement auth:', event, session?.user?.email);
         
+        // Mise à jour immédiate de l'état
         setSession(session);
         setUser(session?.user ?? null);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log('Utilisateur connecté:', session.user.email);
+          console.log('Utilisateur connecté avec succès:', session.user.email);
           
           // Si l'utilisateur vient de confirmer son email, le rediriger vers l'app
           const urlParams = new URLSearchParams(window.location.search);
@@ -90,14 +92,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         if (event === 'SIGNED_OUT') {
+          console.log('Utilisateur déconnecté');
           cleanupAuthState();
+        }
+        
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token rafraîchi automatiquement');
         }
         
         setLoading(false);
       }
     );
 
-    // Vérifier la session initiale et gérer la confirmation
+    // Vérifier la session initiale avec persistance activée
     const initializeAuth = async () => {
       if (!mounted) return;
       
@@ -108,13 +115,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Ensuite, vérifier la session seulement si pas de confirmation en cours
         const urlParams = new URLSearchParams(window.location.search);
         if (!urlParams.get('token_hash')) {
-          const { data: { session } } = await supabase.auth.getSession();
-          console.log('Session initiale:', session?.user?.email);
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('Erreur lors de la récupération de la session:', error);
+          } else {
+            console.log('Session initiale récupérée:', session?.user?.email || 'aucune session');
+          }
+          
           setSession(session);
           setUser(session?.user ?? null);
         }
       } catch (error) {
-        console.error('Erreur lors de l\'initialisation:', error);
+        console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -144,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
       
-      console.log('Connexion réussie:', data.user?.email);
+      console.log('Connexion réussie pour:', data.user?.email);
       return { error: null };
       
     } catch (error) {
@@ -157,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Tentative d\'inscription pour:', email);
       
-      // URL de redirection après confirmation d'email - directement vers l'app
+      // URL de redirection après confirmation d'email
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -176,7 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
-      console.log('Inscription réussie:', data.user?.email);
+      console.log('Inscription réussie pour:', data.user?.email);
       console.log('Email de confirmation envoyé');
       return { error: null };
       
@@ -196,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       
-      console.log('Déconnexion terminée');
+      console.log('Déconnexion terminée avec succès');
       
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);

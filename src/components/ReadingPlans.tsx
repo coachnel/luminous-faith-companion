@@ -5,7 +5,7 @@ import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Calendar, CheckCircle, Clock, Users, Trophy, Play, Settings } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle, Clock, Users, Trophy, Play, Settings, Plus } from 'lucide-react';
 import { useReadingPlanProgress, READING_PLANS } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
 import CustomReadingPlan from './CustomReadingPlan';
@@ -96,13 +96,12 @@ const ReadingPlans = () => {
         <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <ModernButton
+              <button
                 onClick={() => setShowCustomPlans(false)}
-                variant="outline"
-                size="sm"
+                className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200"
               >
                 ← Retour aux plans
-              </ModernButton>
+              </button>
             </div>
           </div>
         </ModernCard>
@@ -128,15 +127,13 @@ const ReadingPlans = () => {
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Structurez votre étude biblique quotidienne</p>
             </div>
           </div>
-          <ModernButton
+          <button
             onClick={() => setShowCustomPlans(true)}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
+            className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2"
           >
-            <Settings className="h-4 w-4" />
-            Plans personnalisés
-          </ModernButton>
+            <Plus className="h-4 w-4" />
+            Créer un plan personnalisé
+          </button>
         </div>
       </ModernCard>
 
@@ -166,13 +163,12 @@ const ReadingPlans = () => {
               />
             </div>
             
-            <ModernButton 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+            <button 
+              className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2 w-full sm:w-auto"
             >
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4" />
               Continuer la lecture
-            </ModernButton>
+            </button>
           </div>
         </ModernCard>
       )}
@@ -185,16 +181,18 @@ const ReadingPlans = () => {
             {categories.map((category) => {
               const Icon = category.icon;
               return (
-                <ModernButton
+                <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  variant={selectedCategory === category.id ? "primary" : "outline"}
-                  size="sm"
-                  className="text-xs sm:text-sm"
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    selectedCategory === category.id 
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25 scale-105' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="break-words">{category.label}</span>
-                </ModernButton>
+                </button>
               );
             })}
           </div>
@@ -237,24 +235,23 @@ const ReadingPlans = () => {
                   </div>
                 </div>
                 
-                <ModernButton
+                <button
                   onClick={() => handleJoinPlan(plan.id)}
-                  size="sm"
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm w-full sm:w-auto text-xs"
                   disabled={currentPlan?.plan_id === plan.id}
+                  className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-2 w-full sm:w-auto"
                 >
                   {currentPlan?.plan_id === plan.id ? (
                     <>
-                      <CheckCircle className="h-3 w-3 mr-1" />
+                      <CheckCircle className="h-3 w-3" />
                       Actuel
                     </>
                   ) : (
                     <>
-                      <Play className="h-3 w-3 mr-1" />
+                      <Play className="h-3 w-3" />
                       Commencer
                     </>
                   )}
-                </ModernButton>
+                </button>
               </div>
             </div>
           </ModernCard>

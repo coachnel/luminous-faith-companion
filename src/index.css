@@ -37,23 +37,116 @@ body {
   overflow-x: hidden;
 }
 
-/* Amélioration du responsive et de la lisibilité */
-.modern-card {
-  backdrop-filter: blur(10px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modern-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-}
-
-/* Optimisation du texte pour mobile */
-@media (max-width: 640px) {
+/* Responsive ultra-optimisé pour tous les écrans */
+@media (max-width: 280px) { /* Ultra-small <4" */
+  html {
+    font-size: 12px;
+  }
+  
   body {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  
+  h1 {
+    font-size: 1rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  
+  h2 {
+    font-size: 0.875rem;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+  }
+  
+  h3 {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+  }
+  
+  p {
+    font-size: 0.625rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+  
+  button {
+    min-height: 32px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+  }
+  
+  .space-y-1 > * + * { margin-top: 0.125rem; }
+  .space-y-2 > * + * { margin-top: 0.25rem; }
+  .space-y-3 > * + * { margin-top: 0.375rem; }
+  .space-y-4 > * + * { margin-top: 0.5rem; }
+}
+
+@media (min-width: 281px) and (max-width: 374px) { /* Mobile small 4-5.5" */
+  html {
+    font-size: 13px;
+  }
+  
+  body {
+    font-size: 11px;
+  }
+  
+  h1 {
+    font-size: 1.125rem;
+    line-height: 1.25;
+  }
+  
+  h2 {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+  
+  h3 {
+    font-size: 0.875rem;
+    line-height: 1.25;
+  }
+  
+  button {
+    min-height: 36px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 639px) { /* Mobile standard */
+  html {
     font-size: 14px;
   }
   
+  body {
+    font-size: 12px;
+  }
+  
+  h1 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+  
+  h2 {
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  
+  button {
+    min-height: 40px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 767px) { /* Phablet */
   h1 {
     font-size: 1.5rem;
     line-height: 1.3;
@@ -64,69 +157,55 @@ body {
     line-height: 1.3;
   }
   
-  h3 {
-    font-size: 1.125rem;
-    line-height: 1.3;
-  }
-  
-  p {
-    line-height: 1.5;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-  }
-  
-  /* Amélioration des boutons sur mobile */
   button {
-    min-height: 44px; /* Taille minimale recommandée pour le touch */
+    min-height: 44px;
     padding: 0.75rem 1rem;
-  }
-  
-  /* Espacement optimisé pour mobile */
-  .space-y-4 > * + * {
-    margin-top: 1rem;
-  }
-  
-  .space-y-6 > * + * {
-    margin-top: 1.5rem;
   }
 }
 
-/* Optimisation pour les tablettes */
-@media (min-width: 641px) and (max-width: 1024px) {
+@media (min-width: 768px) { /* Tablette et plus */
   .grid-cols-2 {
     gap: 1.5rem;
   }
 }
 
-/* Animations fluides */
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Protection contre le débordement sur tous les écrans */
+* {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.5s ease-out;
+/* Amélioration des cards avec glassmorphism */
+.modern-card {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Amélioration du contraste pour l'accessibilité */
-.text-primary {
-  color: var(--text-primary);
-}
-
-.text-secondary {
-  color: var(--text-secondary);
+.modern-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 /* Optimisation des inputs et textareas */
 input, textarea {
-  font-size: 16px; /* Évite le zoom sur iOS */
+  font-size: max(16px, 1rem); /* Évite le zoom sur iOS */
   line-height: 1.4;
+}
+
+@media (max-width: 280px) {
+  input, textarea {
+    font-size: 12px;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (min-width: 281px) and (max-width: 374px) {
+  input, textarea {
+    font-size: 13px;
+    padding: 0.375rem 0.625rem;
+  }
 }
 
 /* Amélioration des focus states pour l'accessibilité */
@@ -148,28 +227,29 @@ textarea:focus-visible {
   }
 }
 
-/* Amélioration des cards avec glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dark .glass {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Optimisation des grilles responsive */
+/* Grilles ultra-responsives */
 .grid-responsive {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 0.5rem;
 }
 
-/* Amélioration des transitions */
-.transition-all {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+@media (min-width: 375px) {
+  .grid-responsive {
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive {
+    gap: 1.5rem;
+  }
 }
 
 /* Optimisation du scroll */
@@ -184,15 +264,26 @@ p, span, div {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Protection contre le débordement */
-* {
-  max-width: 100%;
-  overflow-wrap: break-word;
-}
-
 /* Amélioration des ombres en mode sombre */
 .dark .shadow-lg {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Classes utilitaires pour le responsive */
+.text-responsive {
+  font-size: clamp(0.625rem, 2.5vw, 1rem);
+}
+
+.heading-responsive {
+  font-size: clamp(0.875rem, 4vw, 1.5rem);
+}
+
+.padding-responsive {
+  padding: clamp(0.25rem, 2vw, 1rem);
+}
+
+.gap-responsive {
+  gap: clamp(0.25rem, 1.5vw, 0.75rem);
 }
 
 /* Optimisation pour les écrans haute densité */
@@ -200,33 +291,4 @@ p, span, div {
   .modern-card {
     border-width: 0.5px;
   }
-}
-
-/* Amélioration des inputs */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="time"],
-textarea {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-default);
-  color: var(--text-primary);
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  font-size: 14px;
-  line-height: 1.4;
-  transition: all 0.2s ease;
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
-}
-
-/* Amélioration des placeholder */
-::placeholder {
-  color: var(--text-secondary);
-  opacity: 0.7;
 }

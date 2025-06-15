@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import ModernFinanceNavigation from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
@@ -91,9 +90,9 @@ const MobileApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] lg:pl-64">
+    <div className="min-h-screen bg-[var(--bg-primary)] lg:pl-64 xl:pl-72">
       <PWAUpdatePrompt />
-      <div className="pb-20 lg:pb-0">
+      <div className="pb-16 xxs:pb-14 xs:pb-20 lg:pb-0">
         {renderSection}
       </div>
       <ModernFinanceNavigation 

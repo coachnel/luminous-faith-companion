@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -63,7 +62,6 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Couleurs spirituelles personnalisées
         spiritual: {
           50: "#faf8ff",
           100: "#f4f1ff", 
@@ -108,15 +106,33 @@ const config: Config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      // Optimisations mobile
+      // Breakpoints ultra-responsifs
       screens: {
-        'xs': '475px',
+        'xxs': '280px',    // ultra-small (<4")
+        'xs': '375px',     // mobile small (4-5.5")
+        'sm': '640px',     // mobile large/phablet (5.5-7")
+        'md': '768px',     // tablette portrait
+        'lg': '1024px',    // tablette paysage
+        'xl': '1280px',    // desktop
+        '2xl': '1536px',   // large desktop
       },
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',
         'safe-bottom': 'env(safe-area-inset-bottom)',
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
+        // Espacements adaptatifs
+        'xxs': '0.125rem',   // 2px pour ultra-small
+        'xs-half': '0.375rem', // 6px
+      },
+      fontSize: {
+        'xxs': ['0.625rem', { lineHeight: '0.75rem' }],  // 10px pour ultra-small
+        'xs': ['0.75rem', { lineHeight: '1rem' }],       // 12px
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],   // 14px
+      },
+      minHeight: {
+        'touch': '44px',     // Taille minimale pour touch
+        'touch-sm': '36px',  // Pour ultra-small
       },
     },
   },

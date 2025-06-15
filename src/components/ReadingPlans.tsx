@@ -1,342 +1,266 @@
 
 import React, { useState } from 'react';
-import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
+import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Play, CheckCircle, Clock, Target, Plus, Book, Info, X } from 'lucide-react';
-import { useReadingPlanProgress, READING_PLANS } from '@/hooks/useReadingProgress';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { BookOpen, Calendar, CheckCircle, Clock, Star, Users, Trophy, Play } from 'lucide-react';
+import { useReadingProgress } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
 
-// Données bibliques pour les plans
-const BIBLE_READINGS = {
-  'bible-1-year': [
-    { day: 1, passages: ['Genèse 1-3', 'Matthieu 1'] },
-    { day: 2, passages: ['Genèse 4-7', 'Matthieu 2'] },
-    { day: 3, passages: ['Genèse 8-11', 'Matthieu 3'] },
-    // ... plus de données
-  ],
-  'new-testament-90': [
-    { day: 1, passages: ['Matthieu 1-2'] },
-    { day: 2, passages: ['Matthieu 3-4'] },
-    { day: 3, passages: ['Matthieu 5-7'] },
-    // ... plus de données
-  ],
-  'psalms-month': [
-    { day: 1, passages: ['Psaume 1-5'] },
-    { day: 2, passages: ['Psaume 6-10'] },
-    { day: 3, passages: ['Psaume 11-15'] },
-    // ... plus de données
-  ]
-};
+interface ReadingPlan {
+  id: string;
+  title: string;
+  description: string;
+  duration: number; // en jours
+  difficulty: 'facile' | 'moyen' | 'difficile';
+  category: 'bible-complete' | 'nouveau-testament' | 'ancien-testament' | 'thematique';
+  popular: boolean;
+}
 
 const ReadingPlans = () => {
-  const { plans, startPlan, cancelPlan, markDayCompleted, getPlanStats, loading } = useReadingPlanProgress();
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [showCustomForm, setShowCustomForm] = useState(false);
-  const [customPlan, setCustomPlan] = useState({
-    name: '',
-    duration: 30,
-    description: ''
-  });
+  const { progress, markChapterRead, getCurrentPlan, joinPlan } = useReadingProgress();
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const handleStartPlan = async (planId: string) => {
-    const plan = READING_PLANS.find(p => p.id === planId);
-    if (!plan) return;
-
-    try {
-      await startPlan(planId, plan.name);
-      toast.success(`Plan "${plan.name}" démarré !`);
-    } catch (error) {
-      toast.error('Erreur lors du démarrage du plan');
+  const readingPlans: ReadingPlan[] = [
+    {
+      id: 'bible-year',
+      title: 'Bible en 1 an',
+      description: 'Lisez toute la Bible en une année avec un plan structuré',
+      duration: 365,
+      difficulty: 'moyen',
+      category: 'bible-complete',
+      popular: true
+    },
+    {
+      id: 'new-testament-90',
+      title: 'Nouveau Testament en 90 jours',
+      description: 'Parcourez le Nouveau Testament en 3 mois',
+      duration: 90,
+      difficulty: 'facile',
+      category: 'nouveau-testament',
+      popular: true
+    },
+    {
+      id: 'psalms-proverbs',
+      title: 'Psaumes et Proverbes',
+      description: 'Sagesse quotidienne avec les Psaumes et Proverbes',
+      duration: 60,
+      difficulty: 'facile',
+      category: 'thematique',
+      popular: false
+    },
+    {
+      id: 'gospels-30',
+      title: 'Les 4 Évangiles en 30 jours',
+      description: 'Découvrez la vie de Jésus à travers les quatre Évangiles',
+      duration: 30,
+      difficulty: 'facile',
+      category: 'nouveau-testament',
+      popular: true
+    },
+    {
+      id: 'genesis-revelation',
+      title: 'De la Genèse à l\'Apocalypse',
+      description: 'Un parcours chronologique de toute la Bible',
+      duration: 200,
+      difficulty: 'difficile',
+      category: 'bible-complete',
+      popular: false
     }
+  ];
+
+  const categories = [
+    { id: 'all', label: 'Tous', icon: BookOpen },
+    { id: 'bible-complete', label: 'Bible complète', icon: BookOpen },
+    { id: 'nouveau-testament', label: 'Nouveau Testament', icon: Star },
+    { id: 'ancien-testament', label: 'Ancien Testament', icon: Calendar },
+    { id: 'thematique', label: 'Thématiques', icon: Users }
+  ];
+
+  const filteredPlans = selectedCategory === 'all' 
+    ? readingPlans 
+    : readingPlans.filter(plan => plan.category === selectedCategory);
+
+  const currentPlan = getCurrentPlan();
+
+  const handleJoinPlan = (planId: string) => {
+    joinPlan(planId);
+    toast.success('🎉 Plan de lecture rejoint avec succès !');
   };
 
-  const handleCancelPlan = async (planId: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir annuler ce plan de lecture ?')) {
-      try {
-        await cancelPlan(planId);
-        toast.success('Plan de lecture annulé');
-      } catch (error) {
-        toast.error('Erreur lors de l\'annulation du plan');
-      }
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'facile': return 'bg-green-100 text-green-800 border-green-200';
+      case 'moyen': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'difficile': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  const handleMarkDay = async (planId: string, day: number) => {
-    try {
-      await markDayCompleted(planId, day);
-      toast.success(`Jour ${day + 1} marqué comme terminé !`);
-    } catch (error) {
-      toast.error('Erreur lors de la mise à jour');
-    }
-  };
-
-  const createCustomPlan = () => {
-    if (!customPlan.name.trim()) {
-      toast.error('Veuillez donner un nom à votre plan');
-      return;
-    }
-
-    // Pour l'instant, on simule la création d'un plan personnalisé
-    toast.success('Plan personnalisé créé ! (Fonctionnalité en développement)');
-    setShowCustomForm(false);
-    setCustomPlan({ name: '', duration: 30, description: '' });
-  };
-
-  const getReadingForDay = (planId: string, day: number) => {
-    const readings = BIBLE_READINGS[planId as keyof typeof BIBLE_READINGS];
-    if (!readings || !readings[day - 1]) {
-      return [`Lecture du jour ${day}`];
-    }
-    return readings[day - 1].passages;
-  };
-
-  if (loading) {
-    return (
-      <div className="p-4 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p>Chargement des plans...</p>
-      </div>
-    );
-  }
 
   return (
-    <div 
-      className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen"
-      style={{ background: 'var(--bg-primary)' }}
-    >
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* En-tête */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex items-center gap-3">
-          <div 
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center"
-            style={{ background: 'var(--accent-primary)' }}
-          >
-            <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Plans de lecture</h1>
-            <p className="text-sm text-[var(--text-secondary)] break-words">
-              Suivez votre progression dans la lecture
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div 
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--accent-primary)' }}
+            >
+              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] break-words">Plans de lecture</h1>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Structurez votre étude biblique quotidienne</p>
+            </div>
           </div>
         </div>
       </ModernCard>
 
-      {/* Plans actifs */}
-      {plans.filter(p => p.is_active).length > 0 && (
-        <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Plans actifs</h3>
-            <p className="text-sm text-[var(--text-secondary)]">
-              {plans.filter(p => p.is_active).length} plan(s) en cours
-            </p>
-          </div>
-
+      {/* Plan actuel */}
+      {currentPlan && (
+        <ModernCard variant="elevated" className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <div className="space-y-4">
-            {plans.filter(p => p.is_active).map((plan) => {
-              const stats = getPlanStats(plan);
-              return (
-                <ModernCard key={plan.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-                  <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div>
-                        <h4 className="font-semibold text-[var(--text-primary)]">{plan.plan_name}</h4>
-                        <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)] mt-1">
-                          <span>Jour {plan.current_day}/{stats.totalDays}</span>
-                          <span>{stats.percentage}% terminé</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="default" className="flex items-center gap-1 flex-shrink-0">
-                          <Target className="h-3 w-3" />
-                          En cours
-                        </Badge>
-                        <ModernButton
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCancelPlan(plan.id)}
-                          className="gap-1 text-red-600 hover:text-red-700"
-                        >
-                          <X className="h-3 w-3" />
-                          Annuler
-                        </ModernButton>
-                      </div>
-                    </div>
-
-                    {/* Barre de progression */}
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-[var(--accent-primary)] h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${stats.percentage}%` }}
-                      />
-                    </div>
-
-                    {/* Lecture du jour */}
-                    <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-default)]">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Book className="h-4 w-4 text-[var(--accent-primary)]" />
-                        <span className="font-medium text-[var(--text-primary)]">Lecture du jour {plan.current_day}</span>
-                      </div>
-                      <div className="space-y-1">
-                        {getReadingForDay(plan.plan_id, plan.current_day).map((passage, index) => (
-                          <div key={index} className="text-sm text-[var(--text-secondary)]">
-                            📖 {passage}
-                          </div>
-                        ))}
-                      </div>
-                      <ModernButton
-                        onClick={() => handleMarkDay(plan.id, plan.current_day - 1)}
-                        disabled={plan.completed_days.includes(plan.current_day - 1)}
-                        size="sm"
-                        className="mt-3 gap-2"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        {plan.completed_days.includes(plan.current_day - 1) ? 'Terminé' : 'Marquer comme lu'}
-                      </ModernButton>
-                    </div>
-                  </div>
-                </ModernCard>
-              );
-            })}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-blue-900 break-words">Plan actuel</h3>
+                <p className="text-sm text-blue-700 break-words">{currentPlan.title}</p>
+              </div>
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200 self-start sm:self-auto">
+                <Trophy className="h-3 w-3 mr-1" />
+                <span className="text-xs">En cours</span>
+              </Badge>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+                <span className="text-blue-700">Progression</span>
+                <span className="text-blue-900 font-medium">{progress.completedDays}/{currentPlan.duration} jours</span>
+              </div>
+              <Progress 
+                value={(progress.completedDays / currentPlan.duration) * 100} 
+                className="h-2"
+              />
+            </div>
+            
+            <ModernButton 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Continuer la lecture
+            </ModernButton>
           </div>
         </ModernCard>
       )}
 
-      {/* Plans disponibles */}
+      {/* Filtres par catégorie */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)]">Plans disponibles</h3>
-            <p className="text-sm text-[var(--text-secondary)]">
-              Choisissez un plan de lecture pour commencer
-            </p>
-          </div>
-          <ModernButton 
-            onClick={() => setShowCustomForm(!showCustomForm)} 
-            variant="outline" 
-            className="gap-2 flex-shrink-0"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="whitespace-nowrap">Plan personnalisé</span>
-          </ModernButton>
-        </div>
-
-        {/* Formulaire plan personnalisé */}
-        {showCustomForm && (
-          <ModernCard className="mb-6 p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-            <div className="space-y-4">
-              <h4 className="font-semibold text-[var(--text-primary)]">Créer un plan personnalisé</h4>
-              
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  Nom du plan
-                </label>
-                <input
-                  type="text"
-                  value={customPlan.name}
-                  onChange={(e) => setCustomPlan({...customPlan, name: e.target.value})}
-                  placeholder="Ex: Mon plan personnel..."
-                  className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  Durée (jours)
-                </label>
-                <input
-                  type="number"
-                  value={customPlan.duration}
-                  onChange={(e) => setCustomPlan({...customPlan, duration: parseInt(e.target.value) || 30})}
-                  min="7"
-                  max="365"
-                  className="w-full p-3 border border-[var(--border-default)] rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)]"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <ModernButton 
-                  onClick={createCustomPlan}
-                  disabled={!customPlan.name.trim()}
-                  className="flex-1"
+        <div className="space-y-3">
+          <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Catégories</h3>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <ModernButton
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  variant={selectedCategory === category.id ? "primary" : "outline"}
+                  size="sm"
+                  className="text-xs sm:text-sm"
                 >
-                  Créer le plan
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="break-words">{category.label}</span>
                 </ModernButton>
-                <ModernButton 
-                  onClick={() => setShowCustomForm(false)}
-                  variant="outline"
-                  className="flex-1"
+              );
+            })}
+          </div>
+        </div>
+      </ModernCard>
+
+      {/* Liste des plans */}
+      <div className="space-y-4">
+        {filteredPlans.map((plan) => (
+          <ModernCard 
+            key={plan.id} 
+            className="bg-[var(--bg-card)] border-[var(--border-default)] hover:shadow-md transition-all"
+          >
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base break-words">{plan.title}</h3>
+                    {plan.popular && (
+                      <Badge className="bg-orange-100 text-orange-700 border-orange-200 self-start sm:self-auto">
+                        <Star className="h-3 w-3 mr-1" />
+                        <span className="text-xs">Populaire</span>
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-3 break-words leading-relaxed">{plan.description}</p>
+                  
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs ${getDifficultyColor(plan.difficulty)}`}
+                    >
+                      {plan.difficulty}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {plan.duration} jours
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-[var(--border-default)]">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs text-[var(--text-secondary)]">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3 flex-shrink-0" />
+                    <span>~15 min/jour</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3 flex-shrink-0" />
+                    <span>Communauté</span>
+                  </div>
+                </div>
+                
+                <ModernButton
+                  onClick={() => handleJoinPlan(plan.id)}
+                  size="sm"
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm w-full sm:w-auto text-xs"
+                  disabled={currentPlan?.id === plan.id}
                 >
-                  Annuler
+                  {currentPlan?.id === plan.id ? (
+                    <>
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Actuel
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-3 w-3 mr-1" />
+                      Commencer
+                    </>
+                  )}
                 </ModernButton>
               </div>
             </div>
           </ModernCard>
-        )}
+        ))}
+      </div>
 
-        {/* Liste des plans prédéfinis */}
-        <div className="grid gap-4">
-          {READING_PLANS.map((plan) => {
-            const isActive = plans.some(p => p.plan_id === plan.id && p.is_active);
-            
-            return (
-              <ModernCard key={plan.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-semibold text-[var(--text-primary)]">{plan.name}</h4>
-                      {isActive && (
-                        <Badge variant="default" className="flex items-center gap-1">
-                          <Play className="h-3 w-3" />
-                          Actif
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-[var(--text-secondary)] mb-2">{plan.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{plan.duration} jours</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <ModernButton
-                    onClick={() => handleStartPlan(plan.id)}
-                    disabled={isActive}
-                    className="gap-2 flex-shrink-0"
-                  >
-                    <Play className="h-4 w-4" />
-                    <span className="whitespace-nowrap">{isActive ? 'Déjà actif' : 'Démarrer'}</span>
-                  </ModernButton>
-                </div>
-              </ModernCard>
-            );
-          })}
-        </div>
-      </ModernCard>
-
-      {/* Comment ça marche */}
-      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-            <Info className="h-6 w-6 text-white" />
+      {filteredPlans.length === 0 && (
+        <ModernCard className="bg-[var(--bg-card)] border-[var(--border-default)]">
+          <div className="text-center py-6 sm:py-8">
+            <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--text-secondary)] mx-auto mb-4" />
+            <h4 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun plan trouvé</h4>
+            <p className="text-[var(--text-secondary)] text-sm px-4">Essayez une autre catégorie pour découvrir d'autres plans de lecture</p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Comment ça marche ?
-            </h3>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Choisissez un plan de lecture prédéfini ou créez le vôtre. 
-              Chaque jour, vous recevrez des passages à lire selon votre plan. 
-              Marquez vos lectures comme terminées pour suivre votre progression. 
-              Les textes bibliques sont intégrés directement dans les plans, vous n'avez pas besoin d'accéder à une autre section. 
-              Votre progression est sauvegardée automatiquement. Vous pouvez annuler un plan actif à tout moment.
-            </p>
-          </div>
-        </div>
-      </ModernCard>
+        </ModernCard>
+      )}
     </div>
   );
 };

@@ -3,9 +3,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { getDataSource } from '@/lib/dataRouter';
+import type { Database } from '@/integrations/supabase/types';
+
+type TableNames = keyof Database['public']['Tables'];
 
 interface UnifiedDataOptions {
-  table: string;
+  table: TableNames;
   enableRealtime?: boolean;
   fallbackToLocal?: boolean;
 }

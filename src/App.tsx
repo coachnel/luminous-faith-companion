@@ -11,21 +11,7 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <div 
-      id="app-root" 
-      style={{
-        width: '100vw',
-        height: '100vh',
-        minHeight: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: '#f9fafb',
-        overflow: 'hidden'
-      }}
-    >
+    <div className="min-h-screen bg-gray-50">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider>

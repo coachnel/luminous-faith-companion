@@ -17,80 +17,13 @@
     <link rel="apple-touch-icon" href="/icon-192x192.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Compagnon Spirituel" />
-    
-    <!-- CSS critique pour forcer l'affichage mobile -->
-    <style>
-      html, body {
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow-x: hidden !important;
-        background: #f9fafb !important;
-        font-family: 'Inter', system-ui, sans-serif !important;
-        -webkit-text-size-adjust: 100% !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-      }
-      
-      #root {
-        width: 100% !important;
-        height: 100% !important;
-        min-height: 100vh !important;
-        display: block !important;
-        visibility: visible !important;
-        position: relative !important;
-        overflow: visible !important;
-        opacity: 1 !important;
-        background: #f9fafb !important;
-      }
-      
-      /* Debug mobile - force l'affichage */
-      * {
-        box-sizing: border-box !important;
-      }
-      
-      body {
-        font-size: 14px !important;
-      }
-      
-      /* Force l'affichage même si JS fail */
-      .loading-fallback {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        font-size: 16px;
-        color: #6b7280;
-      }
-    </style>
-    
-    <!-- Debug logs pour mobile -->
-    <script>
-      console.log('🔧 DEBUG: HTML chargé');
-      console.log('📱 Viewport:', window.innerWidth, 'x', window.innerHeight);
-      console.log('🌐 User Agent:', navigator.userAgent);
-      
-      // Force l'affichage si JS plante
-      window.addEventListener('error', function(e) {
-        console.error('❌ Erreur JS:', e.error);
-        document.body.innerHTML = '<div class="loading-fallback">Erreur de chargement<br>Veuillez actualiser</div>';
-      });
-      
-      // Timeout de sécurité
-      setTimeout(function() {
-        if (!document.querySelector('#app-root')) {
-          console.warn('⚠️ App non chargée après 10s');
-          document.body.innerHTML = '<div class="loading-fallback">Chargement...<br>Veuillez patienter</div>';
-        }
-      }, 10000);
-    </script>
   </head>
   <body>
     <div id="root">
-      <div class="loading-fallback">Chargement initial...</div>
+      <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-family: Inter, sans-serif; color: #6b7280;">
+        <div style="width: 32px; height: 32px; border: 4px solid #3b82f6; border-top: 4px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+        <div>Chargement initial...</div>
+      </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

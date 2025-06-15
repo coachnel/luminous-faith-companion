@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,12 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Target, CheckCircle, Calendar, Trophy, Info, Plus, Users, Lock } from 'lucide-react';
+import { Target, CheckCircle, Calendar, Trophy, Info, Plus, Users, Lock, TrendingUp, Sparkles } from 'lucide-react';
 import { useSupabaseChallenges, useSupabaseChallengeProgress } from '@/hooks/useSupabaseChallenges';
+import { useMonthlyChallenges } from '@/hooks/useMonthlyChallenges';
+import { useEnhancedNotifications } from '@/hooks/useEnhancedNotifications';
 import { toast } from 'sonner';
 
 const DailyChallenges = () => {
   const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted, refetch } = useSupabaseChallenges();
+  const { monthlyChallenges, loading: monthlyLoading } = useMonthlyChallenges();
+  const { sendCommunityNotification } = useEnhancedNotifications();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newChallenge, setNewChallenge] = useState({
     title: '',
@@ -22,34 +25,6 @@ const DailyChallenges = () => {
     is_public: false,
     target_days: 30
   });
-
-  // Défis automatiques proposés par défaut
-  const suggestedChallenges = [
-    {
-      id: 'auto-1',
-      title: 'Prier chaque matin pendant 21 jours',
-      description: 'Commencez votre journée par une prière de 10 minutes',
-      target_days: 21,
-      is_public: true,
-      category: 'Prière'
-    },
-    {
-      id: 'auto-2',
-      title: 'Lire un chapitre de la Bible quotidiennement',
-      description: 'Découvrez la Parole de Dieu chaque jour pendant un mois',
-      target_days: 30,
-      is_public: true,
-      category: 'Lecture'
-    },
-    {
-      id: 'auto-3',
-      title: 'Méditer 15 minutes par jour',
-      description: 'Prenez du temps pour la méditation spirituelle',
-      target_days: 14,
-      is_public: true,
-      category: 'Méditation'
-    }
-  ];
 
   const handleCreateChallenge = async () => {
     try {
@@ -59,6 +34,17 @@ const DailyChallenges = () => {
       }
 
       await createChallenge(newChallenge);
+      
+      // Envoyer notification si c'est un défi public
+      if (newChallenge.is_public) {
+        await sendCommunityNotification({
+          type: 'challenge',
+          title: newChallenge.title,
+          content: newChallenge.description || 'Nouveau défi spirituel',
+          authorName: 'Utilisateur' // À remplacer par le vrai nom
+        });
+      }
+      
       setIsCreateOpen(false);
       setNewChallenge({ title: '', description: '', is_public: false, target_days: 30 });
       toast.success('Défi créé avec succès !');
@@ -86,6 +72,15 @@ const DailyChallenges = () => {
         target_days: suggestedChallenge.target_days,
         is_public: true
       });
+      
+      // Envoyer notification communautaire
+      await sendCommunityNotification({
+        type: 'challenge',
+        title: suggestedChallenge.title,
+        content: suggestedChallenge.description,
+        authorName: 'Utilisateur'
+      });
+      
       toast.success('Vous avez rejoint le défi !');
       refetch();
     } catch (error) {
@@ -93,7 +88,16 @@ const DailyChallenges = () => {
     }
   };
 
-  if (loading) {
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'facile': return 'bg-green-100 text-green-700 border-green-200';
+      case 'moyen': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'difficile': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  if (loading || monthlyLoading) {
     return (
       <div className="space-y-4 p-3 sm:p-4 max-w-4xl mx-auto">
         <div className="animate-pulse bg-gray-200 h-32 rounded-lg"></div>
@@ -190,21 +194,32 @@ const DailyChallenges = () => {
         </CardHeader>
       </Card>
 
-      {/* Défis suggérés automatiquement */}
+      {/* Défis suggérés mensuels */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">Défis suggérés</h2>
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-purple-500" />
+          <h2 className="text-lg font-semibold text-gray-800">Défis du mois</h2>
+          <Badge variant="outline" className="text-purple-600 border-purple-600">
+            Mis à jour mensuellement
+          </Badge>
+        </div>
         <div className="grid gap-4">
-          {suggestedChallenges.map((challenge) => (
-            <Card key={challenge.id} className="glass border-blue-200/50">
+          {monthlyChallenges.map((challenge) => (
+            <Card key={challenge.id} className="glass border-purple-200/50">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Target className="h-4 w-4 text-blue-500" />
+                    <Target className="h-4 w-4 text-purple-500" />
                     {challenge.title}
                   </CardTitle>
-                  <Badge variant="outline" className="text-blue-600 border-blue-600">
-                    {challenge.category}
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-purple-600 border-purple-600">
+                      {challenge.category}
+                    </Badge>
+                    <Badge className={getDifficultyColor(challenge.difficulty)}>
+                      {challenge.difficulty}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -219,6 +234,7 @@ const DailyChallenges = () => {
                   <Button 
                     size="sm" 
                     onClick={() => handleJoinSuggestedChallenge(challenge)}
+                    className="bg-purple-600 hover:bg-purple-700"
                   >
                     Rejoindre ce défi
                   </Button>
@@ -279,9 +295,10 @@ const DailyChallenges = () => {
               </h3>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                 Relevez des défis spirituels quotidiens pour maintenir votre croissance personnelle. 
-                Choisissez parmi nos défis suggérés ou créez vos propres défis personnalisés. 
+                Chaque mois, de nouveaux défis suggérés sont automatiquement proposés selon la période spirituelle. 
+                Choisissez parmi nos défis mensuels ou créez vos propres défis personnalisés. 
                 Validez vos actions chaque jour pour construire des séries et suivre votre progression. 
-                Partagez vos défis avec la communauté pour encourager d'autres personnes dans leur cheminement spirituel et voir la progression globale.
+                Partagez vos défis avec la communauté pour encourager d'autres personnes et recevoir des notifications de leurs progressions.
               </p>
             </div>
           </div>

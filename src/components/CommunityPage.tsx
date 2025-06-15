@@ -17,7 +17,7 @@ const CommunityPage = () => {
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
             <Users className="h-8 w-8 text-blue-600" />
-            Communauté Spirituelle
+            Communauté Compagnon
           </h1>
           <p className="text-gray-600">
             Partagez, découvrez et priez ensemble

@@ -282,7 +282,7 @@ const NotesJournal = () => {
                 <PenTool className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="text-lg sm:text-xl break-words">Journal spirituel</CardTitle>
+                <CardTitle className="text-lg sm:text-xl break-words">Journal compagnon</CardTitle>
                 <p className="text-xs sm:text-sm text-gray-600 break-words">Organisez vos pensées et réflexions</p>
               </div>
             </div>
@@ -460,7 +460,7 @@ const NotesJournal = () => {
                       </Label>
                       <p className="text-xs text-gray-600 mt-1 break-words">
                         {formData.isPublic 
-                          ? "Cette note sera visible par tous les membres de la communauté"
+                          ? "Cette note sera visible par tous les membres de la communauté compagnon"
                           : "Cette note restera privée et ne sera visible que par vous"
                         }
                       </p>

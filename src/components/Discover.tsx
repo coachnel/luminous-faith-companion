@@ -67,7 +67,7 @@ const Discover = () => {
             </div>
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] break-words">Découvrir</h1>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Explorez le contenu de la communauté spirituelle</p>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Explorez le contenu de la communauté compagnon</p>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ const Discover = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
           <Input
             type="text"
-            placeholder="Rechercher du contenu spirituel..."
+            placeholder="Rechercher du contenu compagnon..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 text-sm"

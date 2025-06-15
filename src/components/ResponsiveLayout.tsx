@@ -8,24 +8,19 @@ const ResponsiveLayout: React.FC = () => {
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('dashboard');
   const isMobile = useIsMobile();
 
-  const handleNavigate = (path: string) => {
-    const cleanPath = path.replace('/', '');
-    const route = cleanPath === '' ? 'dashboard' : cleanPath as AppRoute;
-    setCurrentRoute(route);
-  };
-
   const handleMobileNavigate = (route: AppRoute) => {
     setCurrentRoute(route);
+    console.log('Navigation vers:', route);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Contenu principal */}
+      {/* Contenu principal avec padding bottom pour mobile */}
       <div className={`${isMobile ? 'pb-20' : ''} min-h-screen`}>
         <AppRouter initialRoute={currentRoute} />
       </div>
 
-      {/* Navigation mobile */}
+      {/* Navigation mobile - toujours visible sur mobile */}
       {isMobile && (
         <MobileNavigation 
           currentRoute={currentRoute} 

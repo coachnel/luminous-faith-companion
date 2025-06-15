@@ -86,9 +86,21 @@ textarea:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-/* Safe area for mobile navigation */
+/* Safe area for mobile navigation - CRITICAL FIX */
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+}
+
+/* Navigation mobile - Force l'affichage */
+nav[class*="fixed bottom-0"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Responsive breakpoints */
@@ -100,6 +112,16 @@ textarea:focus-visible {
   .xxs\:px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
   .xxs\:px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
   .xxs\:min-w-\[1\.25rem\] { min-width: 1.25rem; }
+  
+  /* Navigation ultra-petits écrans */
+  nav[class*="fixed bottom-0"] .flex span {
+    font-size: 8px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] .flex svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
 }
 
 /* Very small screen optimizations */
@@ -119,6 +141,16 @@ textarea:focus-visible {
   
   .gap-4 {
     gap: 0.75rem;
+  }
+  
+  /* Navigation ajustements */
+  nav[class*="fixed bottom-0"] {
+    padding: 4px 2px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] button {
+    min-width: 36px !important;
+    padding: 6px 2px !important;
   }
 }
 
@@ -143,6 +175,22 @@ textarea:focus-visible {
   .text-2xl {
     font-size: 1.25rem;
   }
+  
+  /* Navigation Tecno Spark 20 */
+  nav[class*="fixed bottom-0"] {
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] button {
+    min-width: 32px !important;
+    padding: 4px 1px !important;
+  }
+  
+  nav[class*="fixed bottom-0"] span {
+    font-size: 7px !important;
+    line-height: 1 !important;
+  }
 }
 
 /* Prevent horizontal scroll on small screens */
@@ -154,6 +202,14 @@ textarea:focus-visible {
   .container {
     max-width: 100%;
     overflow-x: hidden;
+  }
+  
+  /* Force navigation visible on all mobile screens */
+  nav[class*="fixed bottom-0"] {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    position: fixed !important;
   }
 }
 
@@ -196,4 +252,30 @@ textarea:focus-visible {
 
 .btn-secondary:hover {
   background: var(--border-default);
+}
+
+/* PWA specific fixes */
+@media (display-mode: standalone) {
+  body {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Assurer que la navigation reste visible en mode PWA */
+  nav[class*="fixed bottom-0"] {
+    padding-bottom: env(safe-area-inset-bottom, 8px) !important;
+  }
+}
+
+/* Force reload indicator */
+.update-available {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10000;
+  background: #4CAF50;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
 }

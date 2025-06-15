@@ -22,8 +22,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ currentRoute, onNav
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-bottom">
-      <div className="flex justify-around items-center py-1 px-1 overflow-x-auto">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-50 safe-area-bottom shadow-lg">
+      <div className="flex justify-around items-center py-1.5 px-1 overflow-x-auto max-w-screen">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentRoute === item.route;
@@ -31,16 +31,20 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ currentRoute, onNav
           return (
             <button
               key={item.route}
-              onClick={() => onNavigate(item.route)}
-              className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all duration-200 min-w-0 flex-1 ${
+              onClick={() => {
+                console.log('Navigation mobile vers:', item.route);
+                onNavigate(item.route);
+              }}
+              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 min-w-0 flex-1 hover:scale-105 ${
                 isActive 
-                  ? 'text-blue-600 bg-blue-50' 
+                  ? 'text-blue-600 bg-blue-50 shadow-sm' 
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
+              style={{ minWidth: '44px' }}
             >
-              <Icon className={`h-4 w-4 mb-0.5 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
-              <span className={`text-[10px] truncate w-full text-center leading-tight ${
-                isActive ? 'text-blue-600 font-medium' : 'text-gray-500'
+              <Icon className={`h-5 w-5 mb-1 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
+              <span className={`text-[9px] truncate w-full text-center leading-tight font-medium ${
+                isActive ? 'text-blue-600' : 'text-gray-500'
               }`}>
                 {item.label}
               </span>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -272,25 +271,35 @@ const NotesJournal = () => {
   const allTags = Array.from(new Set(notes.flatMap(note => note.tags)));
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 max-w-4xl mx-auto">
-      {/* En-tête */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center flex-shrink-0">
-                <PenTool className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+    <div 
+      className="min-h-screen p-2 xs:p-3 sm:p-4 space-y-3 sm:space-y-4 max-w-7xl mx-auto pb-20"
+      style={{ background: 'var(--bg-primary)' }}
+    >
+      {/* En-tête moderne unifié */}
+      <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <CardHeader className="p-3 sm:p-4 lg:p-6">
+          <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div 
+                className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--accent-primary)' }}
+              >
+                <PenTool className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="min-w-0">
-                <CardTitle className="text-lg sm:text-xl break-words">Journal compagnon</CardTitle>
-                <p className="text-xs sm:text-sm text-gray-600 break-words">Organisez vos pensées et réflexions</p>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-[var(--text-primary)] break-words">
+                  Journal
+                </CardTitle>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">
+                  Organisez vos pensées et réflexions
+                </p>
               </div>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  className="w-full sm:w-auto flex-shrink-0"
+                  className="w-full xs:w-auto flex-shrink-0 text-xs sm:text-sm"
                   onClick={() => {
                     setEditingNote(null);
                     setFormData({ title: '', content: '', tags: '', isPublic: false });
@@ -300,44 +309,44 @@ const NotesJournal = () => {
                     setAudioPreview('');
                   }}
                 >
-                  <Plus size={16} className="mr-2" />
+                  <Plus size={14} className="mr-1 sm:mr-2" />
                   <span className="whitespace-nowrap">Ajouter une note</span>
                 </Button>
               </DialogTrigger>
               
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-3 sm:mx-auto">
+              <DialogContent className="max-w-[95vw] xs:max-w-2xl max-h-[95vh] overflow-y-auto mx-2 xs:mx-auto">
                 <DialogHeader>
-                  <DialogTitle>
+                  <DialogTitle className="text-sm sm:text-base">
                     {editingNote ? 'Modifier la note' : 'Créer une nouvelle note'}
                   </DialogTitle>
                 </DialogHeader>
                 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                   <div>
-                    <Label>Titre *</Label>
+                    <Label className="text-xs sm:text-sm">Titre *</Label>
                     <Input
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Titre de votre note"
-                      className="text-sm"
+                      className="text-xs sm:text-sm mt-1"
                     />
                   </div>
                   
                   <div>
-                    <Label>Contenu</Label>
+                    <Label className="text-xs sm:text-sm">Contenu</Label>
                     <Textarea
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       placeholder="Écrivez vos pensées..."
-                      className="min-h-[120px] text-sm"
-                      rows={6}
+                      className="min-h-[100px] sm:min-h-[120px] text-xs sm:text-sm mt-1"
+                      rows={4}
                     />
                   </div>
 
-                  {/* Upload d'image */}
+                  {/* Upload d'image - Responsive */}
                   <div>
-                    <Label>Image (optionnel)</Label>
-                    <div className="space-y-3">
+                    <Label className="text-xs sm:text-sm">Image (optionnel)</Label>
+                    <div className="space-y-2 sm:space-y-3 mt-1">
                       <div className="flex items-center gap-2">
                         <Input
                           type="file"
@@ -346,10 +355,10 @@ const NotesJournal = () => {
                           className="hidden"
                           id="image-upload"
                         />
-                        <Label htmlFor="image-upload" className="cursor-pointer">
-                          <Button type="button" variant="outline" className="gap-2 w-full sm:w-auto" asChild>
+                        <Label htmlFor="image-upload" className="cursor-pointer w-full">
+                          <Button type="button" variant="outline" className="gap-2 w-full text-xs sm:text-sm h-8 sm:h-10" asChild>
                             <span>
-                              <Image className="h-4 w-4" />
+                              <Image className="h-3 w-3 sm:h-4 sm:w-4" />
                               <span className="whitespace-nowrap">Ajouter une image</span>
                             </span>
                           </Button>
@@ -361,26 +370,26 @@ const NotesJournal = () => {
                           <img 
                             src={imagePreview} 
                             alt="Aperçu" 
-                            className="w-full max-w-sm h-32 object-cover rounded-lg border"
+                            className="w-full max-w-xs h-24 sm:h-32 object-cover rounded-lg border"
                           />
                           <Button
                             type="button"
                             variant="destructive"
                             size="sm"
                             onClick={removeImage}
-                            className="absolute top-2 right-2"
+                            className="absolute top-1 right-1 h-6 w-6 sm:h-8 sm:w-8 p-0"
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Upload d'audio */}
+                  {/* Upload d'audio - Responsive */}
                   <div>
-                    <Label>Audio (optionnel)</Label>
-                    <div className="space-y-3">
+                    <Label className="text-xs sm:text-sm">Audio (optionnel)</Label>
+                    <div className="space-y-2 sm:space-y-3 mt-1">
                       <div className="flex items-center gap-2">
                         <Input
                           type="file"
@@ -389,10 +398,10 @@ const NotesJournal = () => {
                           className="hidden"
                           id="audio-upload"
                         />
-                        <Label htmlFor="audio-upload" className="cursor-pointer">
-                          <Button type="button" variant="outline" className="gap-2 w-full sm:w-auto" asChild>
+                        <Label htmlFor="audio-upload" className="cursor-pointer w-full">
+                          <Button type="button" variant="outline" className="gap-2 w-full text-xs sm:text-sm h-8 sm:h-10" asChild>
                             <span>
-                              <Mic className="h-4 w-4" />
+                              <Mic className="h-3 w-3 sm:h-4 sm:w-4" />
                               <span className="whitespace-nowrap">Ajouter un audio</span>
                             </span>
                           </Button>
@@ -400,16 +409,17 @@ const NotesJournal = () => {
                       </div>
                       
                       {audioPreview && (
-                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2 p-2 sm:p-3 bg-gray-50 rounded-lg">
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={toggleAudioPlayback}
+                            className="h-6 w-6 sm:h-8 sm:w-8 p-0"
                           >
-                            {isPlayingAudio ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            {isPlayingAudio ? <Pause className="h-3 w-3 sm:h-4 sm:w-4" /> : <Play className="h-3 w-3 sm:h-4 sm:w-4" />}
                           </Button>
-                          <span className="text-sm text-gray-600 flex-1 min-w-0 break-words">
+                          <span className="text-xs sm:text-sm text-gray-600 flex-1 min-w-0 break-words">
                             {selectedAudio?.name || 'Fichier audio'}
                           </span>
                           <Button
@@ -417,9 +427,9 @@ const NotesJournal = () => {
                             variant="destructive"
                             size="sm"
                             onClick={removeAudio}
-                            className="ml-auto flex-shrink-0"
+                            className="ml-auto flex-shrink-0 h-6 w-6 sm:h-8 sm:w-8 p-0"
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </div>
                       )}
@@ -427,55 +437,56 @@ const NotesJournal = () => {
                   </div>
                   
                   <div>
-                    <Label>Tags</Label>
+                    <Label className="text-xs sm:text-sm">Tags</Label>
                     <Input
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                       placeholder="prière, réflexion, gratitude..."
-                      className="text-sm"
+                      className="text-xs sm:text-sm mt-1"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Séparez les tags par des virgules</p>
+                    <p className="text-[10px] xs:text-xs text-gray-500 mt-1">Séparez les tags par des virgules</p>
                   </div>
 
-                  {/* Switch de partage communautaire */}
-                  <div className="flex items-center space-x-2 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  {/* Switch de partage communautaire - Responsive */}
+                  <div className="flex items-start space-x-2 p-2 sm:p-3 lg:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
                     <Switch
                       id="share-note"
                       checked={formData.isPublic}
                       onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })}
+                      className="mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
-                      <Label htmlFor="share-note" className="text-sm font-medium cursor-pointer flex items-center gap-2 break-words">
+                      <Label htmlFor="share-note" className="text-xs sm:text-sm font-medium cursor-pointer flex items-center gap-2 break-words">
                         {formData.isPublic ? (
                           <>
-                            <Globe className="h-4 w-4 text-green-600 flex-shrink-0" />
+                            <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
                             <span className="text-green-700">Partager avec la communauté</span>
                           </>
                         ) : (
                           <>
-                            <Lock className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <Lock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500 flex-shrink-0" />
                             <span className="text-gray-700">Garder privé</span>
                           </>
                         )}
                       </Label>
-                      <p className="text-xs text-gray-600 mt-1 break-words">
+                      <p className="text-[10px] xs:text-xs text-gray-600 mt-1 break-words">
                         {formData.isPublic 
-                          ? "Cette note sera visible par tous les membres de la communauté compagnon"
+                          ? "Cette note sera visible par tous les membres de la communauté"
                           : "Cette note restera privée et ne sera visible que par vous"
                         }
                       </p>
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button type="submit" className="flex-1">
+                  <div className="flex flex-col xs:flex-row gap-2">
+                    <Button type="submit" className="flex-1 text-xs sm:text-sm h-8 sm:h-10">
                       {editingNote ? 'Modifier' : 'Créer'}
                     </Button>
                     <Button 
                       type="button" 
                       variant="outline" 
                       onClick={() => setIsDialogOpen(false)}
-                      className="flex-1"
+                      className="flex-1 text-xs sm:text-sm h-8 sm:h-10"
                     >
                       Annuler
                     </Button>
@@ -487,27 +498,27 @@ const NotesJournal = () => {
         </CardHeader>
       </Card>
 
-      {/* Barre de recherche et filtres */}
-      <Card>
-        <CardContent className="p-3 sm:p-4">
-          <div className="space-y-3">
+      {/* Barre de recherche et filtres - Responsive */}
+      <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
+        <CardContent className="p-2 xs:p-3 sm:p-4">
+          <div className="space-y-2 sm:space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3 sm:h-4 sm:w-4" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher dans vos notes..."
-                className="pl-10 text-sm"
+                className="pl-8 sm:pl-10 text-xs sm:text-sm h-8 sm:h-10"
               />
             </div>
             
             {allTags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
                 <Button
                   variant={selectedTag === '' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedTag('')}
-                  className="text-xs h-7"
+                  className="text-[10px] xs:text-xs h-6 sm:h-7 px-2 sm:px-3"
                 >
                   Tous
                 </Button>
@@ -517,10 +528,10 @@ const NotesJournal = () => {
                     variant={selectedTag === tag ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedTag(selectedTag === tag ? '' : tag)}
-                    className="text-xs h-7"
+                    className="text-[10px] xs:text-xs h-6 sm:h-7 px-2 sm:px-3"
                   >
-                    <Tag className="h-3 w-3 mr-1" />
-                    <span className="break-words">{tag}</span>
+                    <Tag className="h-2 w-2 xs:h-3 xs:w-3 mr-1" />
+                    <span className="break-words max-w-16 xs:max-w-20 sm:max-w-none truncate">{tag}</span>
                   </Button>
                 ))}
               </div>
@@ -529,74 +540,74 @@ const NotesJournal = () => {
         </CardContent>
       </Card>
 
-      {/* Liste des notes */}
-      <div className="space-y-4">
+      {/* Liste des notes - Responsive */}
+      <div className="space-y-3 sm:space-y-4">
         {filteredNotes.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 sm:p-8 text-center">
-              <PenTool className="mx-auto mb-4 text-gray-400" size={48} />
-              <p className="text-gray-600 mb-2">
+          <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
+            <CardContent className="p-4 sm:p-6 lg:p-8 text-center">
+              <PenTool className="mx-auto mb-3 sm:mb-4 text-gray-400" size={32} />
+              <p className="text-gray-600 mb-2 text-sm sm:text-base">
                 {searchQuery || selectedTag ? 'Aucune note trouvée' : 'Aucune note pour le moment'}
               </p>
-              <p className="text-sm text-gray-500 px-4">
+              <p className="text-xs sm:text-sm text-gray-500 px-2 sm:px-4">
                 {searchQuery || selectedTag ? 'Essayez avec d\'autres critères de recherche' : 'Commencez à écrire vos premières réflexions'}
               </p>
             </CardContent>
           </Card>
         ) : (
           filteredNotes.map((note) => (
-            <Card key={note.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-3 sm:p-4">
-                <div className="space-y-3">
-                  {/* En-tête de la note */}
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <Card key={note.id} className="hover:shadow-md transition-shadow bg-[var(--bg-card)] border-[var(--border-default)]">
+              <CardContent className="p-2 xs:p-3 sm:p-4">
+                <div className="space-y-2 sm:space-y-3">
+                  {/* En-tête de la note - Responsive */}
+                  <div className="flex flex-col xs:flex-row xs:items-start justify-between gap-2 sm:gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-800 break-words text-sm sm:text-base">
+                      <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2 mb-1">
+                        <h3 className="font-semibold text-[var(--text-primary)] break-words text-sm sm:text-base">
                           {note.title}
                         </h3>
                         <div className="flex items-center gap-2">
                           {note.isPublic ? (
-                            <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                            <Globe className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 flex-shrink-0" />
                           ) : (
-                            <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <Lock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs text-gray-500">
+                      <div className="flex flex-col xs:flex-row xs:items-center gap-1 text-[10px] xs:text-xs text-gray-500">
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 flex-shrink-0" />
+                          <Calendar className="h-2 w-2 xs:h-3 xs:w-3 flex-shrink-0" />
                           <span>{new Date(note.createdAt).toLocaleDateString('fr-FR')}</span>
                         </div>
                         {note.updatedAt !== note.createdAt && (
-                          <span className="text-gray-400">• Modifié</span>
+                          <span className="text-gray-400 hidden xs:inline">• Modifié</span>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex gap-1 flex-shrink-0">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(note)} className="p-2">
-                        <Edit size={14} />
+                    <div className="flex gap-1 flex-shrink-0 self-start xs:self-center">
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(note)} className="p-1 h-6 w-6 sm:h-8 sm:w-8">
+                        <Edit size={12} />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handleDelete(note.id)}
-                        className="text-red-600 hover:text-red-700 p-2"
+                        className="text-red-600 hover:text-red-700 p-1 h-6 w-6 sm:h-8 sm:w-8"
                       >
-                        <Trash size={14} />
+                        <Trash size={12} />
                       </Button>
                     </div>
                   </div>
                   
                   {/* Contenu de la note */}
                   {note.content && (
-                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed line-clamp-3 break-words">
+                    <p className="text-[10px] xs:text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3 break-words">
                       {note.content}
                     </p>
                   )}
 
-                  {/* Aperçu des médias */}
+                  {/* Aperçu des médias - Responsive */}
                   {(note.imageUrl || note.audioUrl) && (
                     <div className="space-y-2">
                       {note.imageUrl && (
@@ -604,27 +615,27 @@ const NotesJournal = () => {
                           <img 
                             src={note.imageUrl} 
                             alt="Image de la note" 
-                            className="w-full max-w-xs h-20 sm:h-24 object-cover rounded border"
+                            className="w-full max-w-xs h-16 xs:h-20 sm:h-24 object-cover rounded border"
                           />
                         </div>
                       )}
                       {note.audioUrl && (
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <Mic className="h-4 w-4 flex-shrink-0" />
+                        <div className="flex items-center gap-2 text-[10px] xs:text-xs sm:text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                          <Mic className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                           <span>Fichier audio joint</span>
                         </div>
                       )}
                     </div>
                   )}
                   
-                  {/* Tags */}
+                  {/* Tags - Responsive */}
                   {note.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {note.tags.map(tag => (
                         <Badge 
                           key={tag} 
                           variant="secondary" 
-                          className="text-xs px-2 py-1 cursor-pointer hover:bg-gray-200"
+                          className="text-[9px] xs:text-[10px] sm:text-xs px-1.5 xs:px-2 py-0.5 xs:py-1 cursor-pointer hover:bg-gray-200"
                           onClick={() => setSelectedTag(tag)}
                         >
                           {tag}

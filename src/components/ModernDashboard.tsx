@@ -19,38 +19,38 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Hooks de données avec gestion d'erreur
-  let prayerRequests = [];
-  let notes = [];
-  let plans = null;
-  let challenges = null;
-  let prayersLoading = false;
-  let notesLoading = false;
-  let plansLoading = false;
-  let challengesLoading = false;
+  // Hooks de données, appelés inconditionnellement pour respecter les règles de React
+  const prayerData = useNeonPrayerRequests();
+  const notesData = useNeonNotes();
+  const plansData = useReadingPlanProgress();
+  const challengesData = useSupabaseChallenges();
+  useDataCleanup();
 
-  try {
-    const prayerData = useNeonPrayerRequests();
-    prayerRequests = prayerData.prayerRequests || [];
-    prayersLoading = prayerData.loading || false;
+  // Extraction sécurisée des données et des états de chargement
+  const prayerRequests = prayerData.prayerRequests || [];
+  const prayersLoading = prayerData.loading || false;
+  const prayersError = prayerData.error;
 
-    const notesData = useNeonNotes();
-    notes = notesData.notes || [];
-    notesLoading = notesData.loading || false;
+  const notes = notesData.notes || [];
+  const notesLoading = notesData.loading || false;
+  const notesError = notesData.error;
 
-    const plansData = useReadingPlanProgress();
-    plans = plansData.plans || null;
-    plansLoading = plansData.loading || false;
+  const plans = plansData.plans || null;
+  const plansLoading = plansData.loading || false;
+  const plansError = plansData.error;
 
-    const challengesData = useSupabaseChallenges();
-    challenges = challengesData.challenges || null;
-    challengesLoading = challengesData.loading || false;
+  const challenges = challengesData.challenges || null;
+  const challengesLoading = challengesData.loading || false;
+  const challengesError = challengesData.error;
 
-    useDataCleanup();
-  } catch (err) {
-    console.error('Erreur dans les hooks de données:', err);
-    setError('Erreur de chargement des données');
-  }
+  useEffect(() => {
+    const anyError = prayersError || notesError || plansError || challengesError;
+    if (anyError) {
+      console.error('Erreur lors du chargement des données du tableau de bord:', anyError);
+      setError('Une erreur est survenue lors du chargement des données.');
+    }
+  }, [prayersError, notesError, plansError, challengesError]);
+
 
   // Vérification de l'état de l'utilisateur
   useEffect(() => {

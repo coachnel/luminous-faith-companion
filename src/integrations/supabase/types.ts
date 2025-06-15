@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      challenge_leaderboard: {
+        Row: {
+          created_at: string | null
+          current_streak: number | null
+          id: string
+          last_activity: string | null
+          longest_streak: number | null
+          total_challenges_completed: number | null
+          total_days_completed: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_activity?: string | null
+          longest_streak?: number | null
+          total_challenges_completed?: number | null
+          total_days_completed?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_activity?: string | null
+          longest_streak?: number | null
+          total_challenges_completed?: number | null
+          total_days_completed?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           created_at: string
@@ -210,6 +246,39 @@ export type Database = {
           },
         ]
       }
+      community_stats: {
+        Row: {
+          active_users: number | null
+          created_at: string | null
+          id: string
+          month_year: string
+          total_challenges: number | null
+          total_notes: number | null
+          total_plans_completed: number | null
+          total_prayers: number | null
+        }
+        Insert: {
+          active_users?: number | null
+          created_at?: string | null
+          id?: string
+          month_year: string
+          total_challenges?: number | null
+          total_notes?: number | null
+          total_plans_completed?: number | null
+          total_prayers?: number | null
+        }
+        Update: {
+          active_users?: number | null
+          created_at?: string | null
+          id?: string
+          month_year?: string
+          total_challenges?: number | null
+          total_notes?: number | null
+          total_plans_completed?: number | null
+          total_prayers?: number | null
+        }
+        Relationships: []
+      }
       favorite_verses: {
         Row: {
           book: string
@@ -351,6 +420,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_plan_progress: {
+        Row: {
+          completed_days: number | null
+          completion_percentage: number | null
+          created_at: string | null
+          id: string
+          plan_name: string
+          total_days: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_days?: number | null
+          completion_percentage?: number | null
+          created_at?: string | null
+          id?: string
+          plan_name: string
+          total_days: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_days?: number | null
+          completion_percentage?: number | null
+          created_at?: string | null
+          id?: string
+          plan_name?: string
+          total_days?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       reminders: {
         Row: {
           created_at: string
@@ -389,6 +491,60 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          description: string | null
+          earned_at: string | null
+          id: string
+          is_visible: boolean | null
+          user_id: string
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          description?: string | null
+          earned_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          user_id: string
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          description?: string | null
+          earned_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_last_visits: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_visit_discover: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_visit_discover?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_visit_discover?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

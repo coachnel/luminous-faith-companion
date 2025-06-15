@@ -193,7 +193,7 @@ const PrayerSharing = () => {
 
   return (
     <div className="p-4 space-y-4 max-w-4xl mx-auto">
-      <Card className="glass border-white/30">
+      <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Heart className="text-red-500" size={24} />
@@ -207,7 +207,7 @@ const PrayerSharing = () => {
 
       {/* Formulaire de nouvelle demande */}
       {user && (
-        <Card className="glass border-white/30">
+        <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
           <CardHeader>
             <CardTitle className="text-lg">Partager une demande de prière</CardTitle>
           </CardHeader>
@@ -216,14 +216,14 @@ const PrayerSharing = () => {
               placeholder="Titre de votre demande..."
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              className="glass border-white/30"
+              className="bg-[var(--bg-card)] border-[var(--border-default)]"
             />
             
             <Textarea
               placeholder="Décrivez votre demande de prière..."
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
-              className="glass border-white/30 min-h-[100px]"
+              className="bg-[var(--bg-card)] border-[var(--border-default)] min-h-[100px]"
             />
             
             <div className="flex items-center justify-between">
@@ -233,14 +233,14 @@ const PrayerSharing = () => {
                   checked={isAnonymous}
                   onCheckedChange={setIsAnonymous}
                 />
-                <label htmlFor="anonymous" className="text-sm">
+                <label htmlFor="anonymous" className="text-sm text-[var(--text-primary)]">
                   Publier en anonyme
                 </label>
               </div>
               
               <Button
                 onClick={submitPrayerRequest}
-                className="spiritual-gradient"
+                className="bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:opacity-90 rounded-xl"
               >
                 <Send size={16} className="mr-2" />
                 Partager
@@ -253,14 +253,14 @@ const PrayerSharing = () => {
       {/* Liste des demandes de prière */}
       <div className="space-y-4">
         {loading ? (
-          <Card className="glass border-white/30">
+          <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
             <CardContent className="p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-spiritual-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
               <p>Chargement des demandes...</p>
             </CardContent>
           </Card>
         ) : prayerRequests.length === 0 ? (
-          <Card className="glass border-white/30">
+          <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
             <CardContent className="p-8 text-center">
               <Heart className="mx-auto mb-4 text-gray-400" size={48} />
               <h3 className="text-lg font-semibold mb-2">Aucune demande de prière</h3>
@@ -271,42 +271,49 @@ const PrayerSharing = () => {
           </Card>
         ) : (
           prayerRequests.map((request) => (
-            <Card key={request.id} className="glass border-white/30 hover:shadow-lg transition-all">
+            <Card key={request.id} className="bg-[var(--bg-card)] border-[var(--border-default)] hover:shadow-lg transition-all">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-spiritual-100 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                       {request.is_anonymous ? (
-                        <User className="text-spiritual-600" size={16} />
+                        <User className="text-blue-600" size={16} />
                       ) : (
-                        <span className="text-spiritual-600 font-medium">
+                        <span className="text-blue-600 font-medium">
                           {request.author_name.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-spiritual-700">
+                      <h4 className="font-semibold text-[var(--text-primary)]">
                         {request.title}
                       </h4>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-[var(--text-secondary)]">
                         Par {request.author_name} • {new Date(request.created_at).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
                   </div>
-                  {/* Icône suppression visible uniquement pour l'auteur */}
+                  {/* Bouton suppression amélioré pour l'auteur */}
                   {user && user.id === request.user_id && (
-                    <Button variant="ghost" size="icon" onClick={() => deletePrayerRequest(request.id)} title="Supprimer" className="text-red-500 hover:bg-red-100">
-                      <Trash2 size={18} />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => deletePrayerRequest(request.id)} 
+                      className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl border border-red-200 hover:border-red-300 transition-all"
+                      title="Supprimer cette demande"
+                    >
+                      <Trash2 size={16} />
+                      <span className="ml-1 hidden sm:inline">Supprimer</span>
                     </Button>
                   )}
                 </div>
                 
-                <p className="text-gray-700 mb-4 leading-relaxed">
+                <p className="text-[var(--text-primary)] mb-4 leading-relaxed">
                   {request.content}
                 </p>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                     <MessageCircle size={16} />
                     <span>{request.prayer_count} prière(s)</span>
                   </div>
@@ -314,9 +321,12 @@ const PrayerSharing = () => {
                   <Button
                     onClick={() => prayForRequest(request.id)}
                     disabled={prayedFor.has(request.id)}
-                    variant={prayedFor.has(request.id) ? "outline" : "default"}
                     size="sm"
-                    className={prayedFor.has(request.id) ? "text-green-600" : "spiritual-gradient"}
+                    className={`rounded-xl transition-all ${
+                      prayedFor.has(request.id) 
+                        ? "bg-green-100 text-green-700 border border-green-200 hover:bg-green-150" 
+                        : "bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:opacity-90 shadow-sm"
+                    }`}
                   >
                     <Heart size={16} className="mr-2" fill={prayedFor.has(request.id) ? 'currentColor' : 'none'} />
                     {prayedFor.has(request.id) ? 'Prié' : 'Prier'}

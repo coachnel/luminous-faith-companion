@@ -75,7 +75,7 @@ const MobileApp = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 p-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto">
             <img 
               src="/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png" 
@@ -95,9 +95,9 @@ const MobileApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] lg:pl-64 xl:pl-72">
+    <div className="min-h-screen w-full bg-[var(--bg-primary)]">
       <PWAUpdatePrompt />
-      <div className="pb-16 xxs:pb-14 xs:pb-20 lg:pb-0">
+      <div className="pb-16 sm:pb-20 w-full overflow-x-hidden">
         {renderSection}
       </div>
       <ModernFinanceNavigation 

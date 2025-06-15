@@ -49,11 +49,11 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
       const width = window.innerWidth;
       
       if (width < 320) {
-        setVisibleItemsCount(3);
+        setVisibleItemsCount(4); // Augmenté pour très petits écrans
       } else if (width < 375) {
-        setVisibleItemsCount(4);
+        setVisibleItemsCount(5); // Augmenté
       } else if (width < 640) {
-        setVisibleItemsCount(5);
+        setVisibleItemsCount(6); // Augmenté
       } else {
         setVisibleItemsCount(7);
       }
@@ -88,7 +88,7 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
         onClick={() => handleNavigation(item.path)}
         className={`
           flex ${isInDrawer ? 'flex-row items-center justify-start w-full p-4 text-left' : 'flex-col items-center justify-center'} 
-          ${isInDrawer ? 'hover:bg-gray-50 rounded-lg' : 'p-2 rounded-xl'} transition-all duration-300
+          ${isInDrawer ? 'hover:bg-gray-50 rounded-xl' : 'p-2 rounded-xl'} transition-all duration-300
           ${!isInDrawer ? 'min-w-0 flex-1 max-w-[4.5rem]' : ''}
           ${active && !isInDrawer
             ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white transform scale-105 shadow-lg' 
@@ -100,13 +100,13 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
       >
         <Icon 
           className={`
-            ${isInDrawer ? 'mr-3 w-5 h-5' : 'mb-1 flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6'}
+            ${isInDrawer ? 'mr-3 w-5 h-5' : 'mb-1 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5'}
             ${active ? 'text-white' : ''}
           `}
         />
         <span 
           className={`
-            ${isInDrawer ? 'text-base font-medium' : 'text-[10px] sm:text-xs font-medium leading-tight truncate w-full text-center'}
+            ${isInDrawer ? 'text-base font-medium' : 'text-[9px] sm:text-[10px] font-medium leading-tight truncate w-full text-center'}
             ${active ? 'text-white font-semibold' : ''}
           `}
           title={item.label}
@@ -118,8 +118,8 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200/50 shadow-lg">
-      <div className="max-w-md mx-auto px-3 py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200/50 shadow-lg safe-area-inset-bottom">
+      <div className="max-w-md mx-auto px-2 py-2">
         <div className="flex justify-around items-center space-x-1">
           {/* Éléments visibles */}
           {visibleItems.map((item) => renderNavigationItem(item))}
@@ -129,8 +129,8 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
               <DrawerTrigger asChild>
                 <button className="flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-300 min-w-0 flex-1 max-w-[4.5rem] text-gray-600 hover:text-gray-800 hover:bg-gray-50">
-                  <MoreHorizontal className="mb-1 flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6" />
-                  <span className="text-[10px] sm:text-xs font-medium leading-tight truncate w-full text-center">
+                  <MoreHorizontal className="mb-1 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-[9px] sm:text-[10px] font-medium leading-tight truncate w-full text-center">
                     Plus
                   </span>
                 </button>

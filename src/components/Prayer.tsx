@@ -43,16 +43,16 @@ const Prayer = () => {
         </CardHeader>
       </Card>
 
-      {/* Onglets modernes - Responsive avec meilleure accessibilité */}
+      {/* Onglets modernes avec style cohérent du menu principal */}
       <Card className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-secondary)] border-[var(--border-default)] m-2 sm:m-3 h-auto rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-card)] border-[var(--border-default)] m-2 sm:m-3 h-auto rounded-xl p-1">
             <TabsTrigger 
               value="prayer" 
-              className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 font-medium cursor-pointer ${
+              className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'prayer' 
                   ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                  : 'hover:bg-white/50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm'
+                  : 'hover:bg-gray-50 text-[var(--text-primary)]'
               }`}
             >
               <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -60,10 +60,10 @@ const Prayer = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="sharing" 
-              className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 font-medium cursor-pointer ${
+              className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'sharing' 
                   ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                  : 'hover:bg-white/50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm'
+                  : 'hover:bg-gray-50 text-[var(--text-primary)]'
               }`}
             >
               <Users className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -71,10 +71,10 @@ const Prayer = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 font-medium cursor-pointer ${
+              className={`gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
                 activeTab === 'settings' 
                   ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                  : 'hover:bg-white/50 data-[state=active]:bg-[var(--bg-card)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm'
+                  : 'hover:bg-gray-50 text-[var(--text-primary)]'
               }`}
             >
               <SettingsIcon className="h-3 w-3 sm:h-4 sm:w-4" />

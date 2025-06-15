@@ -33,15 +33,15 @@ const CommunityPage = () => {
         </div>
       </div>
 
-      {/* Onglets modernes avec amélioration visuelle */}
+      {/* Onglets modernes avec style cohérent du menu principal */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-card)] border-[var(--border-default)] p-1 rounded-lg">
+        <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-card)] border-[var(--border-default)] p-1 rounded-xl">
           <TabsTrigger 
             value="feed" 
-            className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 font-medium cursor-pointer ${
+            className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
               activeTab === 'feed' 
                 ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'hover:bg-gray-50'
+                : 'hover:bg-gray-50 text-[var(--text-primary)]'
             }`}
           >
             <Users className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -49,10 +49,10 @@ const CommunityPage = () => {
           </TabsTrigger>
           <TabsTrigger 
             value="publish" 
-            className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 font-medium cursor-pointer ${
+            className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer ${
               activeTab === 'publish' 
                 ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'hover:bg-gray-50'
+                : 'hover:bg-gray-50 text-[var(--text-primary)]'
             }`}
           >
             <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -60,10 +60,10 @@ const CommunityPage = () => {
           </TabsTrigger>
           <TabsTrigger 
             value="notifications" 
-            className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-md transition-all duration-200 font-medium cursor-pointer relative ${
+            className={`gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3 rounded-xl transition-all duration-200 font-medium cursor-pointer relative ${
               activeTab === 'notifications' 
                 ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg' 
-                : 'hover:bg-gray-50'
+                : 'hover:bg-gray-50 text-[var(--text-primary)]'
             }`}
           >
             <Bell className="h-3 w-3 sm:h-4 sm:w-4" />

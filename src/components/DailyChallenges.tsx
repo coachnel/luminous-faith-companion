@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -15,12 +14,13 @@ import { useMonthlyChallenges } from '@/hooks/useMonthlyChallenges';
 import { useChallenges } from '@/hooks/useChallenges';
 import { useCommunityContent } from '@/hooks/useCommunityContent';
 import { useAuth } from '@/hooks/useAuth';
+import { useSupabaseChallengeProgress } from '@/hooks/useSupabaseChallenges';
 import { toast } from 'sonner';
 
 const DailyChallenges = () => {
   const { user } = useAuth();
-  const { suggestedChallenges, loading: suggestedLoading } = useMonthlyChallenges();
-  const { challenges, createChallenge, joinChallenge, completeChallenge, loading } = useChallenges();
+  const { monthlyChallenges, loading: suggestedLoading } = useMonthlyChallenges();
+  const { challenges, createChallenge, markChallengeCompleted, loading } = useChallenges();
   const { publishContent } = useCommunityContent();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -76,7 +76,7 @@ const DailyChallenges = () => {
       const challengeData = {
         title: challenge.title,
         description: challenge.description,
-        target_days: challenge.duration || 30,
+        target_days: challenge.target_days || 30,
         is_public: false
       };
 
@@ -88,19 +88,9 @@ const DailyChallenges = () => {
     }
   };
 
-  const handleJoinChallenge = async (challengeId: string) => {
-    try {
-      await joinChallenge(challengeId);
-      toast.success('🎯 Défi rejoint avec succès !');
-    } catch (error) {
-      console.error('Erreur:', error);
-      toast.error('Erreur lors de la participation au défi');
-    }
-  };
-
   const handleCompleteChallenge = async (challengeId: string) => {
     try {
-      await completeChallenge(challengeId);
+      await markChallengeCompleted(challengeId);
       toast.success('✅ Jour validé ! Continuez votre belle progression !');
     } catch (error) {
       console.error('Erreur:', error);
@@ -131,8 +121,78 @@ const DailyChallenges = () => {
     }
   };
 
-  const getProgressPercentage = (challenge: any) => {
-    return challenge.target_days > 0 ? Math.round((challenge.completed_days / challenge.target_days) * 100) : 0;
+  // Composant pour afficher un défi avec sa progression
+  const ChallengeWithProgress = ({ challenge }: { challenge: any }) => {
+    const { progress, getStats } = useSupabaseChallengeProgress(challenge.id);
+    const stats = getStats();
+    const progressPercentage = Math.round((stats.completedDays / challenge.target_days) * 100);
+    const isCompleted = progressPercentage >= 100;
+
+    return (
+      <ModernCard key={challenge.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h3>
+                {isCompleted && (
+                  <Badge className="bg-green-100 text-green-700 border-green-200">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Terminé
+                  </Badge>
+                )}
+              </div>
+              {challenge.description && (
+                <p className="text-sm text-[var(--text-secondary)] mb-2">{challenge.description}</p>
+              )}
+              
+              <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  <span>{stats.completedDays || 0}/{challenge.target_days} jours</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>{progressPercentage}% terminé</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <ModernButton
+                onClick={() => handleShareChallenge(challenge)}
+                size="sm"
+                variant="ghost"
+                className="gap-1"
+              >
+                <Share2 className="h-3 w-3" />
+              </ModernButton>
+              
+              {!isCompleted && (
+                <ModernButton
+                  onClick={() => handleCompleteChallenge(challenge.id)}
+                  size="sm"
+                  variant="primary"
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm"
+                >
+                  Valider aujourd'hui
+                </ModernButton>
+              )}
+            </div>
+          </div>
+          
+          {/* Barre de progression */}
+          <div className="space-y-1">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      </ModernCard>
+    );
   };
 
   return (
@@ -256,7 +316,7 @@ const DailyChallenges = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {suggestedChallenges.map((challenge, index) => (
+            {monthlyChallenges.map((challenge, index) => (
               <ModernCard key={index} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)] hover:shadow-md transition-all">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
@@ -270,19 +330,18 @@ const DailyChallenges = () => {
                     <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        <span>{challenge.duration || 30} jours</span>
+                        <span>{challenge.target_days} jours</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        <span>{challenge.participants || 0} participants</span>
+                        <span>Communauté</span>
                       </div>
                     </div>
                     
                     <ModernButton
                       onClick={() => handleJoinSuggestedChallenge(challenge)}
                       size="sm"
-                      variant="primary"
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 shadow-sm"
+                      className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 shadow-sm transition-all duration-200"
                     >
                       Rejoindre
                     </ModernButton>
@@ -320,76 +379,9 @@ const DailyChallenges = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {challenges.map((challenge) => {
-              const progress = getProgressPercentage(challenge);
-              const isCompleted = progress >= 100;
-              
-              return (
-                <ModernCard key={challenge.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h3>
-                          {isCompleted && (
-                            <Badge className="bg-green-100 text-green-700 border-green-200">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Terminé
-                            </Badge>
-                          )}
-                        </div>
-                        {challenge.description && (
-                          <p className="text-sm text-[var(--text-secondary)] mb-2">{challenge.description}</p>
-                        )}
-                        
-                        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>{challenge.completed_days || 0}/{challenge.target_days} jours</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{progress}% terminé</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <ModernButton
-                          onClick={() => handleShareChallenge(challenge)}
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1"
-                        >
-                          <Share2 className="h-3 w-3" />
-                        </ModernButton>
-                        
-                        {!isCompleted && (
-                          <ModernButton
-                            onClick={() => handleCompleteChallenge(challenge.id)}
-                            size="sm"
-                            variant="primary"
-                            className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm"
-                          >
-                            Valider aujourd'hui
-                          </ModernButton>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Barre de progression */}
-                    <div className="space-y-1">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${Math.min(progress, 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </ModernCard>
-              );
-            })}
+            {challenges.map((challenge) => (
+              <ChallengeWithProgress key={challenge.id} challenge={challenge} />
+            ))}
           </div>
         )}
       </ModernCard>

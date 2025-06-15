@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
-import { Compass, Heart, MessageCircle, Bookmark, Calendar, ThumbsUp, Info, Loader2, Target, PenTool } from 'lucide-react';
+import { Compass, Heart, MessageCircle, Bookmark, Calendar, ThumbsUp, Info, Loader2, Target, PenTool, BookOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNeonPrayerRequests, useNeonNotes } from '@/hooks/useNeonData';
 import { useCommunityContent } from '@/hooks/useCommunityContent';

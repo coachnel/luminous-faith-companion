@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/heart.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     <title>Compagnon Spirituel</title>
     <meta name="description" content="Votre compagnon spirituel pour la prière, la méditation et le partage de témoignages" />
     
@@ -18,39 +18,44 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Compagnon Spirituel" />
     
-    <!-- Force mobile display -->
+    <!-- Force mobile display and prevent zoom issues -->
     <style>
-      * { 
-        box-sizing: border-box; 
-        margin: 0; 
-        padding: 0; 
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        background: #f9fafb !important;
+        font-family: 'Inter', system-ui, sans-serif !important;
+        -webkit-text-size-adjust: 100% !important;
       }
-      html, body { 
-        width: 100%; 
-        height: 100%;
-        overflow-x: hidden;
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-        background: #f9fafb;
-      }
-      #root { 
-        width: 100%; 
-        height: 100%;
-        min-height: 100vh; 
-        overflow-x: hidden;
+      
+      #root {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100vh !important;
         display: block !important;
         visibility: visible !important;
+        position: relative !important;
+        overflow: visible !important;
       }
-      body {
-        font-family: 'Inter', system-ui, sans-serif;
-        line-height: 1.5;
-        color: #111827;
+      
+      /* Disable service worker temporarily for debugging */
+      @media screen and (max-width: 768px) {
+        * {
+          max-width: 100% !important;
+        }
+        body {
+          font-size: 14px !important;
+        }
       }
     </style>
     
-    <!-- Service Worker Registration -->
+    <!-- Temporarily disable service worker for mobile debugging -->
     <script>
-      if ('serviceWorker' in navigator) {
+      // Disable service worker temporarily
+      if ('serviceWorker' in navigator && false) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
             .then((registration) => {
@@ -61,6 +66,11 @@
             });
         });
       }
+      
+      // Force mobile display
+      console.log('Mobile app loading...');
+      console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
+      console.log('User Agent:', navigator.userAgent);
     </script>
   </head>
   <body>

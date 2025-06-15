@@ -72,17 +72,45 @@ const MobileApp = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mx-auto">
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        background: '#ffffff', 
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div style={{ 
+            width: '64px', 
+            height: '64px', 
+            borderRadius: '50%', 
+            background: '#3b82f6', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            margin: '0 auto 16px' 
+          }}>
             <img 
               src="/lovable-uploads/ee59e58d-a594-4372-b796-33f8edb80c6c.png" 
               alt="Luminous Faith" 
-              className="w-8 h-8 object-contain"
+              style={{ width: '32px', height: '32px', objectFit: 'contain' }}
             />
           </div>
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div className="text-base text-gray-600 font-medium">Chargement...</div>
+          <div style={{ 
+            width: '32px', 
+            height: '32px', 
+            border: '4px solid #3b82f6', 
+            borderTop: '4px solid transparent', 
+            borderRadius: '50%', 
+            animation: 'spin 1s linear infinite', 
+            margin: '0 auto 16px' 
+          }}></div>
+          <div style={{ fontSize: '16px', color: '#6b7280', fontWeight: 500 }}>Chargement...</div>
         </div>
       </div>
     );
@@ -93,9 +121,26 @@ const MobileApp = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-50 flex flex-col">
+    <div style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0, 
+      background: '#f9fafb', 
+      display: 'flex', 
+      flexDirection: 'column',
+      minHeight: '100vh',
+      width: '100vw'
+    }}>
       <PWAUpdatePrompt />
-      <div className="flex-1 overflow-auto pb-20">
+      <div style={{ 
+        flex: 1, 
+        overflow: 'auto', 
+        paddingBottom: '80px',
+        width: '100%',
+        height: '100%'
+      }}>
         {renderSection}
       </div>
       <ModernFinanceNavigation 

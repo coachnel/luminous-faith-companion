@@ -18,7 +18,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Compagnon Spirituel" />
     
-    <!-- Force mobile display and prevent zoom issues -->
+    <!-- CSS critique pour forcer l'affichage mobile -->
     <style>
       html, body {
         width: 100% !important;
@@ -29,6 +29,9 @@
         background: #f9fafb !important;
         font-family: 'Inter', system-ui, sans-serif !important;
         -webkit-text-size-adjust: 100% !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
       
       #root {
@@ -39,42 +42,56 @@
         visibility: visible !important;
         position: relative !important;
         overflow: visible !important;
+        opacity: 1 !important;
+        background: #f9fafb !important;
       }
       
-      /* Disable service worker temporarily for debugging */
-      @media screen and (max-width: 768px) {
-        * {
-          max-width: 100% !important;
-        }
-        body {
-          font-size: 14px !important;
-        }
+      /* Debug mobile - force l'affichage */
+      * {
+        box-sizing: border-box !important;
+      }
+      
+      body {
+        font-size: 14px !important;
+      }
+      
+      /* Force l'affichage même si JS fail */
+      .loading-fallback {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 16px;
+        color: #6b7280;
       }
     </style>
     
-    <!-- Temporarily disable service worker for mobile debugging -->
+    <!-- Debug logs pour mobile -->
     <script>
-      // Disable service worker temporarily
-      if ('serviceWorker' in navigator && false) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
+      console.log('🔧 DEBUG: HTML chargé');
+      console.log('📱 Viewport:', window.innerWidth, 'x', window.innerHeight);
+      console.log('🌐 User Agent:', navigator.userAgent);
       
-      // Force mobile display
-      console.log('Mobile app loading...');
-      console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
-      console.log('User Agent:', navigator.userAgent);
+      // Force l'affichage si JS plante
+      window.addEventListener('error', function(e) {
+        console.error('❌ Erreur JS:', e.error);
+        document.body.innerHTML = '<div class="loading-fallback">Erreur de chargement<br>Veuillez actualiser</div>';
+      });
+      
+      // Timeout de sécurité
+      setTimeout(function() {
+        if (!document.querySelector('#app-root')) {
+          console.warn('⚠️ App non chargée après 10s');
+          document.body.innerHTML = '<div class="loading-fallback">Chargement...<br>Veuillez patienter</div>';
+        }
+      }, 10000);
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="loading-fallback">Chargement initial...</div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

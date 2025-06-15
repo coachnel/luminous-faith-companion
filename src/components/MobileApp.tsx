@@ -82,7 +82,9 @@ const MobileApp = () => {
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        width: '100vw',
+        height: '100vh'
       }}>
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <div style={{ 
@@ -117,7 +119,21 @@ const MobileApp = () => {
   }
 
   if (!user) {
-    return <AuthPage />;
+    return (
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        background: '#f9fafb', 
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto'
+      }}>
+        <AuthPage />
+      </div>
+    );
   }
 
   return (
@@ -130,8 +146,9 @@ const MobileApp = () => {
       background: '#f9fafb', 
       display: 'flex', 
       flexDirection: 'column',
-      minHeight: '100vh',
-      width: '100vw'
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden'
     }}>
       <PWAUpdatePrompt />
       <div style={{ 
@@ -139,7 +156,8 @@ const MobileApp = () => {
         overflow: 'auto', 
         paddingBottom: '80px',
         width: '100%',
-        height: '100%'
+        height: '100%',
+        position: 'relative'
       }}>
         {renderSection}
       </div>

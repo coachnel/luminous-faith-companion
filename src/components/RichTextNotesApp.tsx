@@ -207,7 +207,7 @@ const RichTextNotesApp = () => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Mes Notes Spirituelles</h1>
-          <Button onClick={handleCreateNote} className="spiritual-gradient text-white">
+          <Button onClick={handleCreateNote} className="bg-blue-600 text-white hover:bg-blue-700">
             <Plus size={16} className="mr-2" />
             Nouvelle note
           </Button>

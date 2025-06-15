@@ -64,7 +64,7 @@ const SettingsApp = () => {
             {/* Profil utilisateur */}
             <ModernCard variant="elevated">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
                   <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -114,7 +114,7 @@ const SettingsApp = () => {
             {/* Thème */}
             <ModernCard variant="elevated">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
                   <Palette className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -137,7 +137,7 @@ const SettingsApp = () => {
             {/* Actions */}
             <ModernCard variant="elevated">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -167,7 +167,7 @@ const SettingsApp = () => {
       {/* En-tête */}
       <ModernCard variant="elevated">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
             <Settings className="h-6 w-6 text-white" />
           </div>
           <div>

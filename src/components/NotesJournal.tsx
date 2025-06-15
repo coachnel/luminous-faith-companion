@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -307,9 +306,9 @@ const NotesJournal = () => {
                           {note.title}
                         </h3>
                         {note.isPublic ? (
-                          <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" title="Public" />
+                          <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" />
                         ) : (
-                          <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" title="Privé" />
+                          <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500">

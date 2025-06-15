@@ -1,4 +1,3 @@
-
 import React, { memo, useMemo } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -21,15 +20,23 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   const { plans, loading: plansLoading } = useReadingPlanProgress();
   const { challenges, loading: challengesLoading } = useSupabaseChallenges();
 
-  // Utiliser le hook de nettoyage automatique
   useDataCleanup();
 
-  // Mémoiser les statistiques pour optimiser les performances
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-lg font-semibold text-purple-700 mb-2">Chargement du profil...</p>
+        <p className="text-gray-600 text-sm">Nous vérifions les informations de votre compte.<br/>Si rien ne s'affiche d'ici quelques secondes, <b>essayez de rafraîchir la page</b>.</p>
+      </div>
+    );
+  }
+
   const stats = useMemo(() => ({
     prayers: prayerRequests.length,
     notes: notes.length,
-    activePlans: plans.filter(plan => plan.is_active).length,
-    activeChallenges: challenges.filter(challenge => challenge.is_active).length,
+    activePlans: plans ? plans.filter(plan => plan.is_active).length : 0,
+    activeChallenges: challenges ? challenges.filter(challenge => challenge.is_active).length : 0,
     publicContent: prayerRequests.filter(prayer => !prayer.is_anonymous).length
   }), [prayerRequests, notes, plans, challenges]);
 
@@ -139,7 +146,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-              Bonjour {user?.email?.split('@')[0] || 'Ami'}
+              Bonjour {user?.email ? user.email.split('@')[0] : 'Ami'}
             </h1>
             <p className="text-[var(--text-secondary)]">
               Bienvenue dans votre espace spirituel personnel

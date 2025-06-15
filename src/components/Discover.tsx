@@ -13,7 +13,7 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { content, loading } = useCommunityContent();
 
-  // Fixed categories - "Verses" removed as requested
+  // Categories without "Verses" - only the 5 core categories
   const categories = [
     { id: 'all', label: 'Tout', icon: Sparkles },
     { id: 'prayer', label: 'Prières', icon: Heart },
@@ -83,8 +83,8 @@ const Discover = () => {
             />
           </div>
           
-          {/* Fixed filter layout with proper spacing and contrast */}
-          <div className="flex flex-wrap gap-2 sm:gap-3">
+          {/* Fixed filter layout with proper spacing and strong contrast */}
+          <div className="flex flex-wrap gap-3 justify-start items-center">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
@@ -93,10 +93,10 @@ const Discover = () => {
                   onClick={() => setSelectedCategory(category.id)}
                   variant={selectedCategory === category.id ? "primary" : "outline"}
                   size="sm"
-                  className="text-xs sm:text-sm flex-shrink-0 min-w-0"
+                  className="flex items-center gap-2 px-4 py-2 min-w-fit"
                 >
-                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-                  <span className="truncate">{category.label}</span>
+                  <Icon className="h-4 w-4" />
+                  <span>{category.label}</span>
                 </ModernButton>
               );
             })}

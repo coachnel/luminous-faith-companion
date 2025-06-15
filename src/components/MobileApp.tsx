@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
 
@@ -32,7 +32,7 @@ const MobileApp = () => {
             ✅ Connexion réussie !
           </h1>
           <p className="text-gray-600 mb-4">
-            Utilisateur : {user.email}
+            Utilisateur : {user?.email || 'Email non disponible'}
           </p>
           <p className="text-sm text-green-600">
             L'application fonctionne correctement sur mobile.

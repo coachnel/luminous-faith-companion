@@ -13,7 +13,7 @@ interface UnifiedDataOptions {
   fallbackToLocal?: boolean;
 }
 
-export function useUnifiedData<T>({ table, enableRealtime = false, fallbackToLocal = true }: UnifiedDataOptions) {
+export function useUnifiedData<T = any>({ table, enableRealtime = false, fallbackToLocal = true }: UnifiedDataOptions) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function useUnifiedData<T>({ table, enableRealtime = false, fallbackToLoc
     
     try {
       const { data: result, error } = await supabase
-        .from(table)
+        .from(table as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -128,7 +128,7 @@ export function useUnifiedData<T>({ table, enableRealtime = false, fallbackToLoc
           {
             event: '*',
             schema: 'public',
-            table: table,
+            table: table as string,
             filter: `user_id=eq.${user.id}`
           },
           () => {

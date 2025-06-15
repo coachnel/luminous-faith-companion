@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
@@ -13,7 +12,7 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { content, loading } = useCommunityContent();
 
-  // Categories without "Verses" filter - only the 5 specified categories
+  // Only 5 categories - NO "Verses" filter
   const categories = [
     { id: 'all', label: 'Tout', icon: Sparkles },
     { id: 'prayer', label: 'Prières', icon: Heart },
@@ -30,6 +29,7 @@ const Discover = () => {
     return matchesCategory && matchesSearch;
   });
 
+  // ... keep existing code (getTrendingTopics function)
   const getTrendingTopics = () => {
     if (content.length === 0) return [];
     
@@ -70,7 +70,7 @@ const Discover = () => {
           </div>
         </div>
 
-        {/* Search + Categories with blue styling - single row layout */}
+        {/* Search + Filter Buttons - Single Row Layout */}
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="relative mb-4 sm:mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -83,22 +83,22 @@ const Discover = () => {
             />
           </div>
           
-          {/* Filter buttons - horizontal alignment with consistent blue styling */}
-          <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+          {/* Filter Buttons - Horizontal Single Line with Blue Styling */}
+          <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start overflow-x-auto">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 ${
+                  className={`flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                     selectedCategory === category.id 
                       ? 'shadow-lg shadow-blue-600/25 scale-105' 
                       : ''
                   }`}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">{category.label}</span>
+                  <span>{category.label}</span>
                 </button>
               );
             })}

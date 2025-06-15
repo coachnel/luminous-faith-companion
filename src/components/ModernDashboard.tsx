@@ -18,14 +18,30 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   const { user } = useAuth();
   const [isReady, setIsReady] = useState(false);
 
-  // Appeler tous les hooks de manière inconditionnelle (règle de React)
+  // Tous les hooks doivent être appelés de manière inconditionnelle
   const prayerData = useNeonPrayerRequests();
   const notesData = useNeonNotes();
   const plansData = useReadingPlanProgress();
   const challengesData = useSupabaseChallenges();
   useDataCleanup();
 
-  // Vérification de l'état de l'utilisateur
+  // Calcul des statistiques avec useMemo - doit être appelé de manière inconditionnelle
+  const stats = useMemo(() => {
+    const prayerRequests = prayerData?.prayerRequests || [];
+    const notes = notesData?.notes || [];
+    const plans = plansData?.plans || [];
+    const challenges = challengesData?.challenges || [];
+
+    return {
+      prayers: prayerRequests.length,
+      notes: notes.length,
+      activePlans: plans.filter(plan => plan?.is_active).length,
+      activeChallenges: challenges.filter(challenge => challenge?.is_active).length,
+      publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
+    };
+  }, [prayerData?.prayerRequests, notesData?.notes, plansData?.plans, challengesData?.challenges]);
+
+  // Effect pour la préparation
   useEffect(() => {
     if (user) {
       const timer = setTimeout(() => {
@@ -64,23 +80,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       </div>
     );
   }
-
-  // Extraction sécurisée des données
-  const prayerRequests = prayerData?.prayerRequests || [];
-  const notes = notesData?.notes || [];
-  const plans = plansData?.plans || [];
-  const challenges = challengesData?.challenges || [];
-
-  // Calcul des statistiques
-  const stats = useMemo(() => {
-    return {
-      prayers: prayerRequests.length,
-      notes: notes.length,
-      activePlans: plans.filter(plan => plan?.is_active).length,
-      activeChallenges: challenges.filter(challenge => challenge?.is_active).length,
-      publicContent: prayerRequests.filter(prayer => prayer && !prayer.is_anonymous).length
-    };
-  }, [prayerRequests, notes, plans, challenges]);
 
   const loading = prayerData?.loading || notesData?.loading || plansData?.loading || challengesData?.loading;
 

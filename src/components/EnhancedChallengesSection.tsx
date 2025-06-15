@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Target, Users, Lock, CheckCircle, Flame, Info, Calendar, Trophy } from 'lucide-react';
+import { Plus, Target, Users, Lock, CheckCircle, Flame, Info, Calendar, Trophy, TrendingUp } from 'lucide-react';
 import { useSupabaseChallenges, useSupabaseChallengeProgress } from '@/hooks/useSupabaseChallenges';
 import { toast } from 'sonner';
 
 export function EnhancedChallengesSection() {
-  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted } = useSupabaseChallenges();
+  const { challenges, publicChallenges, loading, createChallenge, markChallengeCompleted, refetch } = useSupabaseChallenges();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newChallenge, setNewChallenge] = useState({
     title: '',
@@ -35,6 +35,7 @@ export function EnhancedChallengesSection() {
       setIsCreateOpen(false);
       setNewChallenge({ title: '', description: '', is_public: false, target_days: 30 });
       toast.success('Défi créé avec succès !');
+      refetch();
     } catch (error) {
       toast.error('Erreur lors de la création du défi');
     }
@@ -44,6 +45,7 @@ export function EnhancedChallengesSection() {
     try {
       await markChallengeCompleted(challengeId);
       toast.success('Défi validé pour aujourd\'hui !');
+      refetch();
     } catch (error) {
       toast.error('Erreur lors de la validation');
     }
@@ -60,25 +62,6 @@ export function EnhancedChallengesSection() {
 
   return (
     <div className="space-y-6 p-4">
-      {/* Explication */}
-      <ModernCard className="border-[var(--accent-primary)]/20">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-            <Info className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Comment ça marche ?
-            </h3>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-              Créez des défis spirituels personnels (exemple : "Prier chaque matin pendant 30 jours"). 
-              Choisissez de les garder privés ou de les partager avec la communauté. 
-              Validez chaque jour votre progression pour maintenir votre motivation et voir votre croissance spirituelle.
-            </p>
-          </div>
-        </div>
-      </ModernCard>
-
       {/* En-tête avec bouton de création */}
       <div className="flex items-center justify-between">
         <div>
@@ -110,7 +93,7 @@ export function EnhancedChallengesSection() {
                   id="title"
                   value={newChallenge.title}
                   onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="ex: Prier chaque matin"
+                  placeholder="ex: Prier chaque matin pendant 21 jours"
                   className="bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-primary)]"
                 />
               </div>
@@ -191,26 +174,31 @@ export function EnhancedChallengesSection() {
           </h3>
           <div className="grid gap-4">
             {publicChallenges.slice(0, 6).map((challenge) => (
-              <ModernCard key={challenge.id} className="border-[var(--accent-primary)]/20">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h4>
-                  <Badge variant="secondary" className="bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
-                    <Users className="h-3 w-3 mr-1" />
-                    Public
-                  </Badge>
-                </div>
-                {challenge.description && (
-                  <p className="text-sm text-[var(--text-secondary)] mb-3">{challenge.description}</p>
-                )}
-                <div className="text-sm text-[var(--text-secondary)] flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  Durée: {challenge.target_days} jours
-                </div>
-              </ModernCard>
+              <CommunityChallenge key={challenge.id} challenge={challenge} />
             ))}
           </div>
         </div>
       )}
+
+      {/* Explication */}
+      <ModernCard className="border-[var(--accent-primary)]/20">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+            <Info className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+              Comment ça marche ?
+            </h3>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              Créez des défis spirituels personnels (exemple : "Prier chaque matin pendant 30 jours"). 
+              Choisissez de les garder privés ou de les partager avec la communauté pour encourager d'autres personnes. 
+              Validez chaque jour votre progression pour maintenir votre motivation et voir votre croissance spirituelle.
+              Suivez la progression globale des défis communautaires pour vous inspirer mutuellement.
+            </p>
+          </div>
+        </div>
+      </ModernCard>
     </div>
   );
 }
@@ -222,6 +210,8 @@ function ChallengeCard({ challenge, onMarkCompleted }: {
   const { progress, getStats } = useSupabaseChallengeProgress(challenge.id);
   const stats = getStats();
   const progressPercentage = Math.round((stats.completedDays / challenge.target_days) * 100);
+  const today = new Date().toISOString().split('T')[0];
+  const completedToday = progress.some(p => p.completed_date === today);
 
   return (
     <ModernCard>
@@ -254,6 +244,18 @@ function ChallengeCard({ challenge, onMarkCompleted }: {
           <Progress value={progressPercentage} className="h-2" />
         </div>
         
+        {challenge.is_public && (
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-blue-700 mb-1">
+              <TrendingUp className="h-4 w-4" />
+              <span className="font-medium">Progression communautaire</span>
+            </div>
+            <p className="text-xs text-blue-600">
+              D'autres personnes suivent ce défi ! Votre progression inspire la communauté.
+            </p>
+          </div>
+        )}
+        
         <div className="flex justify-between items-center">
           <div className="text-sm text-[var(--text-secondary)] flex items-center gap-1">
             <Trophy className="h-3 w-3" />
@@ -262,15 +264,38 @@ function ChallengeCard({ challenge, onMarkCompleted }: {
           <ModernButton
             size="sm"
             onClick={() => onMarkCompleted(challenge.id)}
-            disabled={progress.some(p => p.completed_date === new Date().toISOString().split('T')[0])}
+            disabled={completedToday}
           >
             <CheckCircle className="h-4 w-4 mr-2" />
-            {progress.some(p => p.completed_date === new Date().toISOString().split('T')[0])
-              ? 'Terminé aujourd\'hui' 
-              : 'Valider aujourd\'hui'
-            }
+            {completedToday ? 'Terminé aujourd\'hui' : 'Valider aujourd\'hui'}
           </ModernButton>
         </div>
+      </div>
+    </ModernCard>
+  );
+}
+
+function CommunityChallenge({ challenge }: { challenge: any }) {
+  return (
+    <ModernCard className="border-[var(--accent-primary)]/20">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h4>
+        <Badge variant="secondary" className="bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
+          <Users className="h-3 w-3 mr-1" />
+          Public
+        </Badge>
+      </div>
+      {challenge.description && (
+        <p className="text-sm text-[var(--text-secondary)] mb-3">{challenge.description}</p>
+      )}
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-[var(--text-secondary)] flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          Durée: {challenge.target_days} jours
+        </div>
+        <ModernButton size="sm" variant="outline">
+          Rejoindre ce défi
+        </ModernButton>
       </div>
     </ModernCard>
   );

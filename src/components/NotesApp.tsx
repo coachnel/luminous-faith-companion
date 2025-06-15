@@ -151,7 +151,7 @@ const NotesApp = () => {
             <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Journal Spirituel</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Journal Personnel</h1>
             <p className="text-sm text-[var(--text-secondary)] break-words">
               Écrivez vos réflexions et partagez vos témoignages
             </p>
@@ -197,7 +197,7 @@ const NotesApp = () => {
                   <Textarea
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Partagez vos pensées spirituelles..."
+                    placeholder="Partagez vos pensées et réflexions..."
                     className="border-[var(--border-default)] bg-[var(--bg-secondary)]"
                     rows={6}
                   />
@@ -303,7 +303,7 @@ const NotesApp = () => {
             <p className="text-sm text-[var(--text-secondary)]">
               {searchTerm || selectedTag 
                 ? 'Essayez de modifier vos critères de recherche'
-                : 'Commencez à écrire vos premières réflexions spirituelles'
+                : 'Commencez à écrire vos premières réflexions personnelles'
               }
             </p>
           </div>
@@ -375,14 +375,14 @@ const NotesApp = () => {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Comment utiliser votre journal spirituel ?
+              Comment utiliser votre journal personnel ?
             </h3>
             <div className="space-y-3 text-sm text-[var(--text-secondary)] leading-relaxed">
               <div className="flex items-start gap-2">
                 <FileText className="h-4 w-4 mt-0.5 text-blue-500 flex-shrink-0" />
                 <div>
                   <p className="font-medium">Écrivez vos réflexions</p>
-                  <p>Notez vos pensées spirituelles, prières exaucées, moments de gratitude et leçons apprises.</p>
+                  <p>Notez vos pensées personnelles, prières exaucées, moments de gratitude et leçons apprises.</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">

@@ -34,7 +34,7 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
 
   const navigationItems = [
     { path: 'dashboard', label: 'Tableau de bord', icon: Calendar, color: 'from-blue-500 to-blue-600' },
-    { path: 'discover', label: 'Bible', icon: BookOpen, color: 'from-green-500 to-green-600' },
+    { path: 'discover', label: 'Découvrir', icon: BookOpen, color: 'from-green-500 to-green-600' },
     { path: 'notes', label: 'Journal', icon: PenTool, color: 'from-purple-500 to-purple-600' },
     { path: 'prayer', label: 'Prière', icon: Heart, color: 'from-rose-500 to-rose-600' },
     { path: 'challenges', label: 'Défis', icon: Bell, color: 'from-cyan-500 to-cyan-600' },
@@ -49,13 +49,13 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
       const width = window.innerWidth;
       
       if (width < 320) {
-        setVisibleItemsCount(3); // Ultra-small screens - plus d'espace
+        setVisibleItemsCount(3);
       } else if (width < 375) {
-        setVisibleItemsCount(4); // Small mobile - plus d'espace
+        setVisibleItemsCount(4);
       } else if (width < 640) {
-        setVisibleItemsCount(5); // Standard mobile - plus d'espace
+        setVisibleItemsCount(5);
       } else {
-        setVisibleItemsCount(7); // Larger screens show more but keep some hidden
+        setVisibleItemsCount(7);
       }
     };
 
@@ -91,26 +91,23 @@ const ModernFinanceNavigation = ({ currentSection, onNavigate }: ModernFinanceNa
           ${isInDrawer ? 'hover:bg-gray-50 rounded-lg' : 'p-2 rounded-xl'} transition-all duration-300
           ${!isInDrawer ? 'min-w-0 flex-1 max-w-[4.5rem]' : ''}
           ${active && !isInDrawer
-            ? 'text-white transform scale-105 shadow-lg' 
+            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white transform scale-105 shadow-lg' 
             : active && isInDrawer
             ? 'bg-blue-50 text-blue-600'
             : 'text-gray-600 hover:text-gray-800'
           }
         `}
-        style={active && !isInDrawer ? {
-          background: `linear-gradient(135deg, ${item.color.split(' ')[0].replace('from-', '')}, ${item.color.split(' ')[1].replace('to-', '')})`
-        } : {}}
       >
         <Icon 
           className={`
             ${isInDrawer ? 'mr-3 w-5 h-5' : 'mb-1 flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6'}
-            ${active && !isInDrawer ? 'text-white' : ''}
+            ${active ? 'text-white' : ''}
           `}
         />
         <span 
           className={`
             ${isInDrawer ? 'text-base font-medium' : 'text-[10px] sm:text-xs font-medium leading-tight truncate w-full text-center'}
-            ${active && !isInDrawer ? 'text-white' : ''}
+            ${active ? 'text-white font-semibold' : ''}
           `}
           title={item.label}
         >

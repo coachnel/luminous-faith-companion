@@ -1,7 +1,5 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Router } from 'react-router-dom';
-import { createBrowserHistory } from 'history';
 import ModernFinanceNavigation from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
 import Prayer from './Prayer';
@@ -17,8 +15,6 @@ import PWAUpdatePrompt from './PWAUpdatePrompt';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
 import { useDataCleanup } from '@/hooks/useDataCleanup';
-
-const history = createBrowserHistory();
 
 type AppSection = 'dashboard' | 'prayer' | 'notes' | 'challenges' | 'reading-plans' | 'discover' | 'prayer-circles' | 'settings' | 'community' | 'testimony';
 
@@ -95,18 +91,16 @@ const MobileApp = () => {
   }
 
   return (
-    <Router history={history}>
-      <div className="min-h-screen bg-[var(--bg-primary)] lg:pl-64">
-        <PWAUpdatePrompt />
-        <div className="pb-20 lg:pb-0">
-          {renderSection}
-        </div>
-        <ModernFinanceNavigation 
-          activeSection={currentSection} 
-          setActiveSection={handleNavigationFromNav}
-        />
+    <div className="min-h-screen bg-[var(--bg-primary)] lg:pl-64">
+      <PWAUpdatePrompt />
+      <div className="pb-20 lg:pb-0">
+        {renderSection}
       </div>
-    </Router>
+      <ModernFinanceNavigation 
+        activeSection={currentSection} 
+        setActiveSection={handleNavigationFromNav}
+      />
+    </div>
   );
 };
 

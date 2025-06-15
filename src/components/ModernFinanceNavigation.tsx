@@ -23,19 +23,26 @@ interface ModernFinanceNavigationProps {
   setActiveSection: (section: AppSection) => void;
 }
 
+interface NavItem {
+  id: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  badge?: number | null;
+}
+
 const ModernFinanceNavigation: React.FC<ModernFinanceNavigationProps> = ({ activeSection, setActiveSection }) => {
   const { signOut } = useAuth();
   const { unreadCount } = useCommunityNotifications();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const mainNavItems = [
+  const mainNavItems: NavItem[] = [
     { id: 'dashboard', icon: Home, label: 'Accueil' },
     { id: 'prayer', icon: Heart, label: 'Prière' },
     { id: 'notes', icon: FileText, label: 'Notes' },
     { id: 'community', icon: Users, label: 'Communauté' },
   ];
 
-  const secondaryNavItems = [
+  const secondaryNavItems: NavItem[] = [
     { id: 'discover', icon: Sparkles, label: 'Découvrir', badge: unreadCount > 0 ? unreadCount : null },
     { id: 'testimony', icon: Heart, label: 'Témoignages' },
     { id: 'challenges', icon: Circle, label: 'Défis' },

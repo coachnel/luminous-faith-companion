@@ -1,5 +1,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { Router } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import ModernFinanceNavigation from './ModernFinanceNavigation';
 import ModernDashboard from './ModernDashboard';
 import Prayer from './Prayer';
@@ -9,12 +11,16 @@ import ReadingPlans from './ReadingPlans';
 import Discover from './Discover';
 import PrayerCircles from './PrayerCircles';
 import SettingsApp from './SettingsApp';
+import CommunityPage from './CommunityPage';
+import TestimonyPage from './TestimonyPage';
 import PWAUpdatePrompt from './PWAUpdatePrompt';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
 import { useDataCleanup } from '@/hooks/useDataCleanup';
 
-type AppSection = 'dashboard' | 'prayer' | 'notes' | 'challenges' | 'reading-plans' | 'discover' | 'prayer-circles' | 'settings';
+const history = createBrowserHistory();
+
+type AppSection = 'dashboard' | 'prayer' | 'notes' | 'challenges' | 'reading-plans' | 'discover' | 'prayer-circles' | 'settings' | 'community' | 'testimony';
 
 const MobileApp = () => {
   const { user, loading } = useAuth();
@@ -33,7 +39,9 @@ const MobileApp = () => {
       '/reading-plans': 'reading-plans',
       '/discover': 'discover',
       '/prayer-circles': 'prayer-circles',
-      '/settings': 'settings'
+      '/settings': 'settings',
+      '/community': 'community',
+      '/testimony': 'testimony'
     };
     
     const targetSection = sectionMap[section] || 'dashboard';
@@ -56,7 +64,9 @@ const MobileApp = () => {
       'reading-plans': <ReadingPlans />,
       discover: <Discover />,
       'prayer-circles': <PrayerCircles />,
-      settings: <SettingsApp />
+      settings: <SettingsApp />,
+      community: <CommunityPage />,
+      testimony: <TestimonyPage />
     };
 
     return sections[currentSection] || sections.dashboard;
@@ -85,16 +95,18 @@ const MobileApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
-      <PWAUpdatePrompt />
-      <div className="pb-20 lg:pb-0">
-        {renderSection}
+    <Router history={history}>
+      <div className="min-h-screen bg-[var(--bg-primary)] lg:pl-64">
+        <PWAUpdatePrompt />
+        <div className="pb-20 lg:pb-0">
+          {renderSection}
+        </div>
+        <ModernFinanceNavigation 
+          activeSection={currentSection} 
+          setActiveSection={handleNavigationFromNav}
+        />
       </div>
-      <ModernFinanceNavigation 
-        activeSection={currentSection} 
-        setActiveSection={handleNavigationFromNav}
-      />
-    </div>
+    </Router>
   );
 };
 

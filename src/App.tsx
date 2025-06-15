@@ -6,7 +6,6 @@ import { Toaster as SonnerToaster } from 'sonner';
 import { AuthProvider } from './hooks/useAuth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './contexts/ThemeContext';
-import Navigation from './components/Navigation';
 import Index from './pages/Index';
 import AuthPage from './components/AuthPage';
 import NotesApp from './components/NotesApp';
@@ -15,6 +14,7 @@ import CommunityPage from './components/CommunityPage';
 import TestimonyPage from './components/TestimonyPage';
 import Discover from './components/Discover';
 import NotesJournal from './components/NotesJournal';
+import MobileApp from './components/MobileApp';
 import { useAuth } from './hooks/useAuth';
 
 const queryClient = new QueryClient();
@@ -40,61 +40,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function AppContent() {
   const { user } = useAuth();
 
+  // Si l'utilisateur est connecté, utilise MobileApp qui contient déjà la navigation
+  if (user) {
+    return <MobileApp />;
+  }
+
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-        {user && <Navigation />}
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/" element={user ? <Index /> : <Navigate to="/auth" replace />} />
-          <Route 
-            path="/journal" 
-            element={
-              <ProtectedRoute>
-                <NotesApp />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/rich-notes" 
-            element={
-              <ProtectedRoute>
-                <RichTextNotesApp />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/notes-journal" 
-            element={
-              <ProtectedRoute>
-                <NotesJournal />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/community" 
-            element={
-              <ProtectedRoute>
-                <CommunityPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/testimony" 
-            element={
-              <ProtectedRoute>
-                <TestimonyPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/discover" 
-            element={
-              <ProtectedRoute>
-                <Discover />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/" element={<Navigate to="/auth" replace />} />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>
       </div>
       <Toaster />

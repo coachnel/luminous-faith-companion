@@ -1,84 +1,209 @@
 
-import React from 'react';
-import { Home, Calendar, Users, Target, MessageSquare, Edit3, Compass } from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
+import React, { useState } from 'react';
+import { Home, FileText, Users, Heart, Plus, Settings, Sparkles, Circle } from 'lucide-react';
+import { ModernButton } from './ui/modern-button';
+import { useAuth } from '@/hooks/useAuth';
+import { useCommunityNotifications } from '@/hooks/useCommunityContent';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Badge } from '@/components/ui/badge';
+
+type AppSection = 'dashboard' | 'prayer' | 'notes' | 'challenges' | 'reading-plans' | 'discover' | 'prayer-circles' | 'settings' | 'community' | 'testimony';
 
 interface ModernFinanceNavigationProps {
-  activeSection: string;
-  setActiveSection: (section: string) => void;
+  activeSection: AppSection;
+  setActiveSection: (section: AppSection) => void;
 }
 
-const ModernFinanceNavigation = ({ activeSection, setActiveSection }: ModernFinanceNavigationProps) => {
-  const { theme } = useTheme();
-  
-  const navItems = [
+const ModernFinanceNavigation: React.FC<ModernFinanceNavigationProps> = ({ activeSection, setActiveSection }) => {
+  const { signOut } = useAuth();
+  const { unreadCount } = useCommunityNotifications();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const mainNavItems = [
     { id: 'dashboard', icon: Home, label: 'Accueil' },
-    { id: 'discover', icon: Compass, label: 'Découvrir' },
-    { id: 'reading-plans', icon: Calendar, label: 'Plans' },
-    { id: 'challenges', icon: Target, label: 'Défis' },
-    { id: 'prayer-circles', icon: Users, label: 'Prières' },
-    { id: 'notes', icon: Edit3, label: 'Journal' },
+    { id: 'prayer', icon: Heart, label: 'Prière' },
+    { id: 'notes', icon: FileText, label: 'Notes' },
+    { id: 'community', icon: Users, label: 'Communauté' },
   ];
 
+  const secondaryNavItems = [
+    { id: 'discover', icon: Sparkles, label: 'Découvrir', badge: unreadCount > 0 ? unreadCount : null },
+    { id: 'testimony', icon: Heart, label: 'Témoignages' },
+    { id: 'challenges', icon: Circle, label: 'Défis' },
+    { id: 'prayer-circles', icon: Circle, label: 'Cercle de prière' },
+    { id: 'reading-plans', icon: Circle, label: 'Plans de lecture' },
+    { id: 'settings', icon: Settings, label: 'Paramètres' },
+  ];
+
+  const handleNavigation = (sectionId: string) => {
+    setActiveSection(sectionId as AppSection);
+    setIsDrawerOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   return (
-    <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 px-2 sm:px-4 pb-safe"
-      style={{
-        background: theme === 'dark' 
-          ? 'rgba(30, 30, 42, 0.95)' 
-          : 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        borderTop: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
-      }}
-    >
-      <div className="flex items-center justify-around py-2 max-w-screen-lg mx-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeSection === item.id;
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`flex flex-col items-center gap-1 py-2 px-1 sm:px-2 rounded-2xl transition-all duration-300 min-w-0 flex-1 max-w-[80px] ${
-                isActive 
-                  ? 'transform scale-110' 
-                  : 'transform scale-100 hover:scale-105'
-              }`}
-              style={{
-                background: isActive 
-                  ? 'linear-gradient(135deg, #0066FF, #0052CC)'
-                  : 'transparent',
-                color: isActive 
-                  ? '#FFFFFF'
-                  : theme === 'dark' 
-                    ? 'rgba(209, 209, 224, 0.8)' 
-                    : 'rgba(60, 60, 67, 0.6)',
-                boxShadow: isActive 
-                  ? '0 8px 20px rgba(0, 102, 255, 0.3)'
-                  : 'none'
-              }}
-            >
-              <Icon size={16} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0" />
-              <span className={`text-xs font-medium leading-none truncate w-full text-center ${
-                isActive ? 'font-semibold' : ''
-              }`}>
-                {item.label}
+    <>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 lg:hidden">
+        <div className="flex items-center justify-around h-16 px-4">
+          {mainNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavigation(item.id)}
+                className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-[var(--accent-primary)] text-white shadow-lg' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-xs mt-1 font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+
+          {/* Bouton "+" avec Drawer */}
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <DrawerTrigger asChild>
+              <button className="flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 bg-[var(--accent-primary)] text-white shadow-lg hover:opacity-90">
+                <Plus className="h-5 w-5" />
+                <span className="text-xs mt-1 font-medium">Plus</span>
+              </button>
+            </DrawerTrigger>
+            
+            <DrawerContent className="bg-white">
+              <DrawerHeader>
+                <DrawerTitle className="text-xl font-bold text-[var(--text-primary)]">
+                  Sections supplémentaires
+                </DrawerTitle>
+                <DrawerDescription className="text-[var(--text-secondary)]">
+                  Accédez à toutes les fonctionnalités de l'application
+                </DrawerDescription>
+              </DrawerHeader>
+              
+              <div className="px-4 py-2 space-y-2 max-h-96 overflow-y-auto">
+                {secondaryNavItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeSection === item.id;
+                  
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNavigation(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                        isActive 
+                          ? 'bg-[var(--accent-primary)] text-white' 
+                          : 'hover:bg-gray-100 text-[var(--text-primary)]'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="flex-1 font-medium">{item.label}</span>
+                      {item.badge && (
+                        <Badge variant="outline" className="bg-red-500 text-white text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </button>
+                  );
+                })}
+                
+                {/* Séparateur */}
+                <div className="border-t border-gray-200 my-4" />
+                
+                {/* Bouton de déconnexion */}
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 hover:bg-red-50 text-red-600"
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="font-medium">Déconnexion</span>
+                </button>
+              </div>
+              
+              <DrawerFooter>
+                <DrawerClose asChild>
+                  <ModernButton variant="outline" className="w-full">
+                    Fermer
+                  </ModernButton>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        </div>
+      </nav>
+
+      {/* Navigation desktop - barre latérale simplifiée */}
+      <div className="hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:bg-white lg:border-r lg:border-gray-200 lg:flex-col">
+        <div className="flex flex-col flex-1 overflow-y-auto">
+          <div className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <Heart className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Compagnon Spirituel
               </span>
+            </div>
+          </div>
+          
+          <nav className="flex-1 px-4 space-y-2">
+            {[...mainNavItems, ...secondaryNavItems].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigation(item.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-[var(--accent-primary)] text-white shadow-sm' 
+                      : 'hover:bg-gray-100 text-[var(--text-primary)]'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                  {item.badge && (
+                    <Badge variant="outline" className="bg-red-500 text-white text-xs ml-auto">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+          
+          <div className="p-4 border-t border-gray-200">
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 hover:bg-red-50 text-red-600"
+            >
+              <Settings className="h-5 w-5" />
+              <span className="font-medium">Déconnexion</span>
             </button>
-          );
-        })}
+          </div>
+        </div>
       </div>
-      
-      {/* Indicateur moderne */}
-      <div 
-        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 sm:w-32 h-1 rounded-full transition-all duration-300"
-        style={{
-          background: 'linear-gradient(90deg, transparent, #0066FF, transparent)',
-          opacity: 0.6
-        }}
-      />
-    </nav>
+    </>
   );
 };
 

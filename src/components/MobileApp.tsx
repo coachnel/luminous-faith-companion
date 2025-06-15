@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
+import ModernDashboard from './ModernDashboard';
 
 const MobileApp = () => {
   const { user, loading } = useAuth();
@@ -23,24 +24,12 @@ const MobileApp = () => {
     return <AuthPage />;
   }
 
-  // Version ultra-simplifiée pour tester
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <h1 className="text-xl font-bold text-gray-800 mb-4">
-            ✅ Connexion réussie !
-          </h1>
-          <p className="text-gray-600 mb-4">
-            Utilisateur : {user?.email || 'Email non disponible'}
-          </p>
-          <p className="text-sm text-green-600">
-            L'application fonctionne correctement sur mobile.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  // Rétablir l'affichage du tableau de bord principal après la connexion
+  const handleNavigate = (path: string) => {
+    console.warn(`Navigation demandée vers : ${path}. Le routage doit être configuré.`);
+  };
+
+  return <ModernDashboard onNavigate={handleNavigate} />;
 };
 
 export default MobileApp;

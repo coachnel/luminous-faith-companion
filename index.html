@@ -4,31 +4,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/heart.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Test fallback minimaliste</title>
-    <meta name="description" content="Test minimal Mobile OK" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compagnon Spirituel</title>
+    <meta name="description" content="Votre compagnon spirituel personnel" />
   </head>
   <body>
-    <div id="root">
-      <h1 style="font-family:sans-serif;text-align:center;margin-top:45vh;color:#5445ac;">
-        Test Mobile OK
-      </h1>
-    </div>
-    <script>
-      // Aucune importation d'app, CSS ou service worker.
-      console.log('OK');
-      // Désactivation éventuelle du service worker de façon forcée
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for(let registration of registrations) {
-            registration.unregister();
-          }
-        });
-        caches && caches.keys().then(function(names) {
-          for(let name of names)
-            caches.delete(name);
-        });
-      }
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

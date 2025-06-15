@@ -83,22 +83,22 @@ const Discover = () => {
             />
           </div>
           
-          {/* Filter grid with consistent blue pill styling */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
+          {/* Filter grid with consistent blue styling - single row layout */}
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-start">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 rounded-full min-w-0 text-xs sm:text-sm font-medium transition-all ${
+                  className={`flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
                     selectedCategory === category.id 
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="truncate">{category.label}</span>
+                  <span className="whitespace-nowrap">{category.label}</span>
                 </button>
               );
             })}

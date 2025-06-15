@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -129,43 +130,44 @@ const DailyChallenges = () => {
     const isCompleted = progressPercentage >= 100;
 
     return (
-      <ModernCard key={challenge.id} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
+      <ModernCard key={challenge.id} className="p-3 sm:p-4 bg-[var(--bg-secondary)] border-[var(--border-default)]">
         <div className="space-y-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-[var(--text-primary)]">{challenge.title}</h3>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base break-words">{challenge.title}</h3>
                 {isCompleted && (
-                  <Badge className="bg-green-100 text-green-700 border-green-200">
+                  <Badge className="bg-green-100 text-green-700 border-green-200 self-start sm:self-auto">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    Terminé
+                    <span className="text-xs">Terminé</span>
                   </Badge>
                 )}
               </div>
               {challenge.description && (
-                <p className="text-sm text-[var(--text-secondary)] mb-2">{challenge.description}</p>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-2 break-words">{challenge.description}</p>
               )}
               
-              <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-[var(--text-secondary)]">
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
+                  <Calendar className="h-3 w-3 flex-shrink-0" />
                   <span>{stats.completedDays || 0}/{challenge.target_days} jours</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                  <Clock className="h-3 w-3 flex-shrink-0" />
                   <span>{progressPercentage}% terminé</span>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <ModernButton
                 onClick={() => handleShareChallenge(challenge)}
                 size="sm"
                 variant="ghost"
-                className="gap-1"
+                className="gap-1 p-2"
               >
                 <Share2 className="h-3 w-3" />
+                <span className="hidden sm:inline text-xs">Partager</span>
               </ModernButton>
               
               {!isCompleted && (
@@ -173,9 +175,9 @@ const DailyChallenges = () => {
                   onClick={() => handleCompleteChallenge(challenge.id)}
                   size="sm"
                   variant="primary"
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm"
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm text-xs px-2 py-1 sm:px-3 sm:py-2"
                 >
-                  Valider aujourd'hui
+                  <span className="whitespace-nowrap">Valider</span>
                 </ModernButton>
               )}
             </div>
@@ -196,20 +198,20 @@ const DailyChallenges = () => {
   };
 
   return (
-    <div className="p-4 space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+    <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* En-tête */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: 'var(--accent-primary)' }}
             >
-              <Target className="h-6 w-6 text-white" />
+              <Target className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--text-primary)]">Défis spirituels</h1>
-              <p className="text-sm text-[var(--text-secondary)]">Grandissez dans votre foi jour après jour</p>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] break-words">Défis spirituels</h1>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Grandissez dans votre foi jour après jour</p>
             </div>
           </div>
           
@@ -217,15 +219,15 @@ const DailyChallenges = () => {
             <DialogTrigger asChild>
               <ModernButton 
                 variant="primary" 
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto flex-shrink-0"
                 onClick={() => setNewChallenge({ title: '', description: '', targetDays: 30, isPublic: false })}
               >
                 <Plus className="h-4 w-4" />
-                Créer un défi
+                <span className="whitespace-nowrap">Créer un défi</span>
               </ModernButton>
             </DialogTrigger>
             
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md mx-3 sm:mx-auto">
               <DialogHeader>
                 <DialogTitle>Créer un nouveau défi</DialogTitle>
               </DialogHeader>
@@ -237,6 +239,7 @@ const DailyChallenges = () => {
                     value={newChallenge.title}
                     onChange={(e) => setNewChallenge({ ...newChallenge, title: e.target.value })}
                     placeholder="Ex: Lire la Bible 15 minutes par jour"
+                    className="text-sm"
                   />
                 </div>
                 
@@ -247,6 +250,7 @@ const DailyChallenges = () => {
                     onChange={(e) => setNewChallenge({ ...newChallenge, description: e.target.value })}
                     placeholder="Décrivez votre défi..."
                     rows={3}
+                    className="text-sm"
                   />
                 </div>
                 
@@ -258,6 +262,7 @@ const DailyChallenges = () => {
                     max="365"
                     value={newChallenge.targetDays}
                     onChange={(e) => setNewChallenge({ ...newChallenge, targetDays: parseInt(e.target.value) || 30 })}
+                    className="text-sm"
                   />
                 </div>
 
@@ -267,17 +272,17 @@ const DailyChallenges = () => {
                     checked={newChallenge.isPublic}
                     onCheckedChange={(checked) => setNewChallenge({ ...newChallenge, isPublic: checked })}
                   />
-                  <div className="flex-1">
-                    <Label htmlFor="share-challenge" className="text-sm font-medium cursor-pointer">
+                  <div className="flex-1 min-w-0">
+                    <Label htmlFor="share-challenge" className="text-sm font-medium cursor-pointer break-words">
                       Partager avec la communauté
                     </Label>
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs text-gray-600 mt-1 break-words">
                       Permettre aux autres de découvrir et rejoindre votre défi
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <ModernButton type="submit" variant="primary" className="flex-1" disabled={loading}>
                     Créer le défi
                   </ModernButton>
@@ -299,41 +304,41 @@ const DailyChallenges = () => {
       {/* Défis suggérés */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Défis suggérés ce mois-ci</h2>
-            <p className="text-sm text-[var(--text-secondary)]">Défis adaptés à la période spirituelle actuelle</p>
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] break-words">Défis suggérés ce mois-ci</h2>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Défis adaptés à la période spirituelle actuelle</p>
           </div>
         </div>
 
         {suggestedLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div key={i} className="h-24 sm:h-32 bg-gray-200 rounded-lg animate-pulse"></div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {monthlyChallenges.map((challenge, index) => (
-              <ModernCard key={index} className="p-4 bg-[var(--bg-secondary)] border-[var(--border-default)] hover:shadow-md transition-all">
+              <ModernCard key={index} className="p-3 sm:p-4 bg-[var(--bg-secondary)] border-[var(--border-default)] hover:shadow-md transition-all">
                 <div className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-[var(--text-primary)] mb-1">{challenge.title}</h3>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{challenge.description}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-[var(--text-primary)] mb-1 text-sm sm:text-base break-words">{challenge.title}</h3>
+                      <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed break-words">{challenge.description}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-2 border-t border-[var(--border-default)]">
-                    <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[var(--border-default)]">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-[var(--text-secondary)]">
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="h-3 w-3 flex-shrink-0" />
                         <span>{challenge.target_days} jours</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
+                        <Users className="h-3 w-3 flex-shrink-0" />
                         <span>Communauté</span>
                       </div>
                     </div>
@@ -341,7 +346,7 @@ const DailyChallenges = () => {
                     <ModernButton
                       onClick={() => handleJoinSuggestedChallenge(challenge)}
                       size="sm"
-                      className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 shadow-sm transition-all duration-200"
+                      className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0 shadow-sm transition-all duration-200 w-full sm:w-auto text-xs px-3 py-1"
                     >
                       Rejoindre
                     </ModernButton>
@@ -356,26 +361,26 @@ const DailyChallenges = () => {
       {/* Mes défis */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
-            <Trophy className="h-5 w-5 text-white" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+            <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Mes défis actifs</h2>
-            <p className="text-sm text-[var(--text-secondary)]">Suivez votre progression spirituelle</p>
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] break-words">Mes défis actifs</h2>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">Suivez votre progression spirituelle</p>
           </div>
         </div>
 
         {loading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div key={i} className="h-20 sm:h-24 bg-gray-200 rounded-lg animate-pulse"></div>
             ))}
           </div>
         ) : challenges.length === 0 ? (
-          <div className="text-center py-8">
-            <Target className="h-12 w-12 text-[var(--text-secondary)] mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun défi actif</h4>
-            <p className="text-[var(--text-secondary)] mb-4">Commencez votre parcours spirituel en créant ou rejoignant un défi</p>
+          <div className="text-center py-6 sm:py-8">
+            <Target className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--text-secondary)] mx-auto mb-4" />
+            <h4 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun défi actif</h4>
+            <p className="text-[var(--text-secondary)] mb-4 text-sm px-4">Commencez votre parcours spirituel en créant ou rejoignant un défi</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -388,25 +393,25 @@ const DailyChallenges = () => {
 
       {/* Comment ça marche */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
-            <Info className="h-6 w-6 text-white" />
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[var(--accent-primary)] flex items-center justify-center flex-shrink-0">
+            <Info className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+          <div className="min-w-0">
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">
               Comment ça marche ?
             </h3>
-            <div className="space-y-2 text-sm text-[var(--text-secondary)] leading-relaxed">
-              <p>
+            <div className="space-y-2 text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+              <p className="break-words">
                 <strong>Créez vos défis :</strong> Définissez vos objectifs spirituels personnels et partagez-les avec la communauté si vous le souhaitez.
               </p>
-              <p>
+              <p className="break-words">
                 <strong>Rejoignez les défis suggérés :</strong> Découvrez chaque mois de nouveaux défis adaptés à la période spirituelle actuelle.
               </p>
-              <p>
+              <p className="break-words">
                 <strong>Validez votre progression :</strong> Chaque jour, validez votre participation pour suivre votre croissance spirituelle.
               </p>
-              <p>
+              <p className="break-words">
                 <strong>Partagez vos réussites :</strong> Inspirez les autres en partageant vos défis et votre progression.
               </p>
             </div>

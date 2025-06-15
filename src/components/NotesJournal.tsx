@@ -272,24 +272,25 @@ const NotesJournal = () => {
   const allTags = Array.from(new Set(notes.flatMap(note => note.tags)));
 
   return (
-    <div className="space-y-6 p-4 max-w-2xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 max-w-4xl mx-auto">
       {/* En-tête */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center">
-                <PenTool className="h-6 w-6 text-white" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                <PenTool className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div>
-                <CardTitle>Journal spirituel</CardTitle>
-                <p className="text-sm text-gray-600">Organisez vos pensées et réflexions</p>
+              <div className="min-w-0">
+                <CardTitle className="text-lg sm:text-xl break-words">Journal spirituel</CardTitle>
+                <p className="text-xs sm:text-sm text-gray-600 break-words">Organisez vos pensées et réflexions</p>
               </div>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
+                  className="w-full sm:w-auto flex-shrink-0"
                   onClick={() => {
                     setEditingNote(null);
                     setFormData({ title: '', content: '', tags: '', isPublic: false });
@@ -300,11 +301,11 @@ const NotesJournal = () => {
                   }}
                 >
                   <Plus size={16} className="mr-2" />
-                  Ajouter une note
+                  <span className="whitespace-nowrap">Ajouter une note</span>
                 </Button>
               </DialogTrigger>
               
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-3 sm:mx-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingNote ? 'Modifier la note' : 'Créer une nouvelle note'}
@@ -318,6 +319,7 @@ const NotesJournal = () => {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Titre de votre note"
+                      className="text-sm"
                     />
                   </div>
                   
@@ -327,7 +329,7 @@ const NotesJournal = () => {
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       placeholder="Écrivez vos pensées..."
-                      className="min-h-[120px]"
+                      className="min-h-[120px] text-sm"
                       rows={6}
                     />
                   </div>
@@ -345,10 +347,10 @@ const NotesJournal = () => {
                           id="image-upload"
                         />
                         <Label htmlFor="image-upload" className="cursor-pointer">
-                          <Button type="button" variant="outline" className="gap-2" asChild>
+                          <Button type="button" variant="outline" className="gap-2 w-full sm:w-auto" asChild>
                             <span>
                               <Image className="h-4 w-4" />
-                              Ajouter une image
+                              <span className="whitespace-nowrap">Ajouter une image</span>
                             </span>
                           </Button>
                         </Label>
@@ -388,10 +390,10 @@ const NotesJournal = () => {
                           id="audio-upload"
                         />
                         <Label htmlFor="audio-upload" className="cursor-pointer">
-                          <Button type="button" variant="outline" className="gap-2" asChild>
+                          <Button type="button" variant="outline" className="gap-2 w-full sm:w-auto" asChild>
                             <span>
                               <Mic className="h-4 w-4" />
-                              Ajouter un audio
+                              <span className="whitespace-nowrap">Ajouter un audio</span>
                             </span>
                           </Button>
                         </Label>
@@ -407,7 +409,7 @@ const NotesJournal = () => {
                           >
                             {isPlayingAudio ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                           </Button>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-gray-600 flex-1 min-w-0 break-words">
                             {selectedAudio?.name || 'Fichier audio'}
                           </span>
                           <Button
@@ -415,7 +417,7 @@ const NotesJournal = () => {
                             variant="destructive"
                             size="sm"
                             onClick={removeAudio}
-                            className="ml-auto"
+                            className="ml-auto flex-shrink-0"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -430,32 +432,33 @@ const NotesJournal = () => {
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                       placeholder="prière, réflexion, gratitude..."
+                      className="text-sm"
                     />
                     <p className="text-xs text-gray-500 mt-1">Séparez les tags par des virgules</p>
                   </div>
 
                   {/* Switch de partage communautaire */}
-                  <div className="flex items-center space-x-2 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-2 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
                     <Switch
                       id="share-note"
                       checked={formData.isPublic}
                       onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })}
                     />
-                    <div className="flex-1">
-                      <Label htmlFor="share-note" className="text-sm font-medium cursor-pointer flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor="share-note" className="text-sm font-medium cursor-pointer flex items-center gap-2 break-words">
                         {formData.isPublic ? (
                           <>
-                            <Globe className="h-4 w-4 text-green-600" />
+                            <Globe className="h-4 w-4 text-green-600 flex-shrink-0" />
                             <span className="text-green-700">Partager avec la communauté</span>
                           </>
                         ) : (
                           <>
-                            <Lock className="h-4 w-4 text-gray-500" />
+                            <Lock className="h-4 w-4 text-gray-500 flex-shrink-0" />
                             <span className="text-gray-700">Garder privé</span>
                           </>
                         )}
                       </Label>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-gray-600 mt-1 break-words">
                         {formData.isPublic 
                           ? "Cette note sera visible par tous les membres de la communauté"
                           : "Cette note restera privée et ne sera visible que par vous"
@@ -464,7 +467,7 @@ const NotesJournal = () => {
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button type="submit" className="flex-1">
                       {editingNote ? 'Modifier' : 'Créer'}
                     </Button>
@@ -486,7 +489,7 @@ const NotesJournal = () => {
 
       {/* Barre de recherche et filtres */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           <div className="space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -494,7 +497,7 @@ const NotesJournal = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher dans vos notes..."
-                className="pl-10"
+                className="pl-10 text-sm"
               />
             </div>
             
@@ -504,7 +507,7 @@ const NotesJournal = () => {
                   variant={selectedTag === '' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedTag('')}
-                  className="text-xs"
+                  className="text-xs h-7"
                 >
                   Tous
                 </Button>
@@ -514,10 +517,10 @@ const NotesJournal = () => {
                     variant={selectedTag === tag ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedTag(selectedTag === tag ? '' : tag)}
-                    className="text-xs"
+                    className="text-xs h-7"
                   >
                     <Tag className="h-3 w-3 mr-1" />
-                    {tag}
+                    <span className="break-words">{tag}</span>
                   </Button>
                 ))}
               </div>
@@ -530,12 +533,12 @@ const NotesJournal = () => {
       <div className="space-y-4">
         {filteredNotes.length === 0 ? (
           <Card>
-            <CardContent className="p-8 text-center">
+            <CardContent className="p-6 sm:p-8 text-center">
               <PenTool className="mx-auto mb-4 text-gray-400" size={48} />
               <p className="text-gray-600 mb-2">
                 {searchQuery || selectedTag ? 'Aucune note trouvée' : 'Aucune note pour le moment'}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 px-4">
                 {searchQuery || selectedTag ? 'Essayez avec d\'autres critères de recherche' : 'Commencez à écrire vos premières réflexions'}
               </p>
             </CardContent>
@@ -543,24 +546,28 @@ const NotesJournal = () => {
         ) : (
           filteredNotes.map((note) => (
             <Card key={note.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="space-y-3">
                   {/* En-tête de la note */}
-                  <div className="flex justify-between items-start gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-800 truncate">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-800 break-words text-sm sm:text-base">
                           {note.title}
                         </h3>
-                        {note.isPublic ? (
-                          <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                        ) : (
-                          <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        )}
+                        <div className="flex items-center gap-2">
+                          {note.isPublic ? (
+                            <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                          ) : (
+                            <Lock className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Calendar className="h-3 w-3" />
-                        <span>{new Date(note.createdAt).toLocaleDateString('fr-FR')}</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3 flex-shrink-0" />
+                          <span>{new Date(note.createdAt).toLocaleDateString('fr-FR')}</span>
+                        </div>
                         {note.updatedAt !== note.createdAt && (
                           <span className="text-gray-400">• Modifié</span>
                         )}
@@ -568,14 +575,14 @@ const NotesJournal = () => {
                     </div>
                     
                     <div className="flex gap-1 flex-shrink-0">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(note)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(note)} className="p-2">
                         <Edit size={14} />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handleDelete(note.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 p-2"
                       >
                         <Trash size={14} />
                       </Button>
@@ -584,7 +591,7 @@ const NotesJournal = () => {
                   
                   {/* Contenu de la note */}
                   {note.content && (
-                    <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 break-words">
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed line-clamp-3 break-words">
                       {note.content}
                     </p>
                   )}
@@ -597,13 +604,13 @@ const NotesJournal = () => {
                           <img 
                             src={note.imageUrl} 
                             alt="Image de la note" 
-                            className="w-full max-w-xs h-24 object-cover rounded border"
+                            className="w-full max-w-xs h-20 sm:h-24 object-cover rounded border"
                           />
                         </div>
                       )}
                       {note.audioUrl && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <Mic className="h-4 w-4" />
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                          <Mic className="h-4 w-4 flex-shrink-0" />
                           <span>Fichier audio joint</span>
                         </div>
                       )}

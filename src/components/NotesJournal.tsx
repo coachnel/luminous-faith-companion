@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { PenTool, Plus, Edit, Trash, Calendar, Tag, Search, Globe, Lock, Image, Mic, Upload, X } from 'lucide-react';
+import { PenTool, Plus, Edit, Trash, Calendar, Tag, Search, Globe, Lock, Image, Mic, Upload, X, Play, Pause } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useCommunityContent } from '@/hooks/useCommunityContent';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +35,10 @@ const NotesJournal = () => {
   const [selectedTag, setSelectedTag] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedAudio, setSelectedAudio] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [audioPreview, setAudioPreview] = useState<string>('');
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -65,6 +69,13 @@ const NotesJournal = () => {
         return;
       }
       setSelectedImage(file);
+      
+      // Créer un aperçu de l'image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -79,6 +90,48 @@ const NotesJournal = () => {
         return;
       }
       setSelectedAudio(file);
+      
+      // Créer un aperçu de l'audio
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAudioPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview('');
+  };
+
+  const removeAudio = () => {
+    setSelectedAudio(null);
+    setAudioPreview('');
+    if (audioElement) {
+      audioElement.pause();
+      setAudioElement(null);
+    }
+    setIsPlayingAudio(false);
+  };
+
+  const toggleAudioPlayback = () => {
+    if (!audioPreview) return;
+    
+    if (audioElement) {
+      if (isPlayingAudio) {
+        audioElement.pause();
+        setIsPlayingAudio(false);
+      } else {
+        audioElement.play();
+        setIsPlayingAudio(true);
+      }
+    } else {
+      const audio = new Audio(audioPreview);
+      audio.onended = () => setIsPlayingAudio(false);
+      audio.play();
+      setAudioElement(audio);
+      setIsPlayingAudio(true);
     }
   };
 
@@ -103,12 +156,10 @@ const NotesJournal = () => {
     let audioUrl = '';
     
     if (selectedImage) {
-      // Simulation d'upload - en réalité, utiliser un service comme Supabase Storage
       imageUrl = URL.createObjectURL(selectedImage);
     }
     
     if (selectedAudio) {
-      // Simulation d'upload - en réalité, utiliser un service comme Supabase Storage
       audioUrl = URL.createObjectURL(selectedAudio);
     }
 
@@ -177,6 +228,8 @@ const NotesJournal = () => {
     setFormData({ title: '', content: '', tags: '', isPublic: false });
     setSelectedImage(null);
     setSelectedAudio(null);
+    setImagePreview('');
+    setAudioPreview('');
     setEditingNote(null);
     setIsDialogOpen(false);
   };
@@ -189,6 +242,15 @@ const NotesJournal = () => {
       tags: note.tags.join(', '),
       isPublic: note.isPublic
     });
+    
+    // Précharger les médias si ils existent
+    if (note.imageUrl) {
+      setImagePreview(note.imageUrl);
+    }
+    if (note.audioUrl) {
+      setAudioPreview(note.audioUrl);
+    }
+    
     setIsDialogOpen(true);
   };
 
@@ -233,6 +295,8 @@ const NotesJournal = () => {
                     setFormData({ title: '', content: '', tags: '', isPublic: false });
                     setSelectedImage(null);
                     setSelectedAudio(null);
+                    setImagePreview('');
+                    setAudioPreview('');
                   }}
                 >
                   <Plus size={16} className="mr-2" />
@@ -271,30 +335,38 @@ const NotesJournal = () => {
                   {/* Upload d'image */}
                   <div>
                     <Label>Image (optionnel)</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <Label htmlFor="image-upload" className="cursor-pointer">
-                        <Button type="button" variant="outline" className="gap-2" asChild>
-                          <span>
-                            <Image className="h-4 w-4" />
-                            Ajouter une image
-                          </span>
-                        </Button>
-                      </Label>
-                      {selectedImage && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-green-600">{selectedImage.name}</span>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          id="image-upload"
+                        />
+                        <Label htmlFor="image-upload" className="cursor-pointer">
+                          <Button type="button" variant="outline" className="gap-2" asChild>
+                            <span>
+                              <Image className="h-4 w-4" />
+                              Ajouter une image
+                            </span>
+                          </Button>
+                        </Label>
+                      </div>
+                      
+                      {imagePreview && (
+                        <div className="relative">
+                          <img 
+                            src={imagePreview} 
+                            alt="Aperçu" 
+                            className="w-full max-w-sm h-32 object-cover rounded-lg border"
+                          />
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="destructive"
                             size="sm"
-                            onClick={() => setSelectedImage(null)}
+                            onClick={removeImage}
+                            className="absolute top-2 right-2"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -306,30 +378,44 @@ const NotesJournal = () => {
                   {/* Upload d'audio */}
                   <div>
                     <Label>Audio (optionnel)</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="file"
-                        accept="audio/*"
-                        onChange={handleAudioUpload}
-                        className="hidden"
-                        id="audio-upload"
-                      />
-                      <Label htmlFor="audio-upload" className="cursor-pointer">
-                        <Button type="button" variant="outline" className="gap-2" asChild>
-                          <span>
-                            <Mic className="h-4 w-4" />
-                            Ajouter un audio
-                          </span>
-                        </Button>
-                      </Label>
-                      {selectedAudio && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-green-600">{selectedAudio.name}</span>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="file"
+                          accept="audio/*"
+                          onChange={handleAudioUpload}
+                          className="hidden"
+                          id="audio-upload"
+                        />
+                        <Label htmlFor="audio-upload" className="cursor-pointer">
+                          <Button type="button" variant="outline" className="gap-2" asChild>
+                            <span>
+                              <Mic className="h-4 w-4" />
+                              Ajouter un audio
+                            </span>
+                          </Button>
+                        </Label>
+                      </div>
+                      
+                      {audioPreview && (
+                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                           <Button
                             type="button"
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => setSelectedAudio(null)}
+                            onClick={toggleAudioPlayback}
+                          >
+                            {isPlayingAudio ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                          </Button>
+                          <span className="text-sm text-gray-600">
+                            {selectedAudio?.name || 'Fichier audio'}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={removeAudio}
+                            className="ml-auto"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -348,18 +434,32 @@ const NotesJournal = () => {
                     <p className="text-xs text-gray-500 mt-1">Séparez les tags par des virgules</p>
                   </div>
 
-                  <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
+                  {/* Switch de partage communautaire */}
+                  <div className="flex items-center space-x-2 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
                     <Switch
                       id="share-note"
                       checked={formData.isPublic}
                       onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })}
                     />
                     <div className="flex-1">
-                      <Label htmlFor="share-note" className="text-sm font-medium cursor-pointer">
-                        Partager avec la communauté
+                      <Label htmlFor="share-note" className="text-sm font-medium cursor-pointer flex items-center gap-2">
+                        {formData.isPublic ? (
+                          <>
+                            <Globe className="h-4 w-4 text-green-600" />
+                            <span className="text-green-700">Partager avec la communauté</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">Garder privé</span>
+                          </>
+                        )}
                       </Label>
                       <p className="text-xs text-gray-600 mt-1">
-                        Permettre aux autres de découvrir votre réflexion
+                        {formData.isPublic 
+                          ? "Cette note sera visible par tous les membres de la communauté"
+                          : "Cette note restera privée et ne sera visible que par vous"
+                        }
                       </p>
                     </div>
                   </div>
@@ -489,19 +589,22 @@ const NotesJournal = () => {
                     </p>
                   )}
 
-                  {/* Médias */}
+                  {/* Aperçu des médias */}
                   {(note.imageUrl || note.audioUrl) && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="space-y-2">
                       {note.imageUrl && (
-                        <div className="flex items-center gap-1">
-                          <Image className="h-4 w-4" />
-                          <span>Image</span>
+                        <div>
+                          <img 
+                            src={note.imageUrl} 
+                            alt="Image de la note" 
+                            className="w-full max-w-xs h-24 object-cover rounded border"
+                          />
                         </div>
                       )}
                       {note.audioUrl && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
                           <Mic className="h-4 w-4" />
-                          <span>Audio</span>
+                          <span>Fichier audio joint</span>
                         </div>
                       )}
                     </div>

@@ -21,6 +21,12 @@ export const useNotificationSystem = () => {
       return false;
     }
 
+    if (Notification.permission === 'granted') {
+      setHasPermission(true);
+      toast.success('Notifications déjà activées !');
+      return true;
+    }
+
     setIsLoading(true);
     
     try {
@@ -35,12 +41,25 @@ export const useNotificationSystem = () => {
         // Test de notification immédiat
         setTimeout(() => {
           try {
-            new Notification('🎉 Notifications activées !', {
-              body: 'Vos rappels sont maintenant opérationnels',
+            const notification = new Notification('🎉 Notifications activées !', {
+              body: 'Vous recevrez maintenant des rappels pour vos prières et défis',
               icon: '/icons/icon-192x192.png',
+              badge: '/icons/icon-192x192.png',
               tag: 'activation-test',
-              requireInteraction: false
+              requireInteraction: false,
+              silent: false
             });
+
+            // Auto fermeture après 5 secondes
+            setTimeout(() => {
+              notification.close();
+            }, 5000);
+
+            notification.onclick = () => {
+              window.focus();
+              notification.close();
+            };
+
           } catch (error) {
             console.warn('Erreur lors du test de notification:', error);
           }
@@ -49,8 +68,13 @@ export const useNotificationSystem = () => {
         // Enregistrer le service worker pour les notifications persistantes
         if ('serviceWorker' in navigator) {
           try {
-            await navigator.serviceWorker.register('/sw.js');
-            console.log('Service Worker enregistré pour les notifications');
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('Service Worker enregistré pour les notifications:', registration);
+            
+            // S'assurer que le SW est actif
+            if (registration.active) {
+              console.log('Service Worker actif et prêt pour les notifications');
+            }
           } catch (error) {
             console.warn('Service Worker non disponible:', error);
           }
@@ -76,12 +100,25 @@ export const useNotificationSystem = () => {
     }
 
     try {
-      new Notification('🔔 Test de notification', {
+      const notification = new Notification('🔔 Test de notification', {
         body: 'Votre système de notifications fonctionne parfaitement !',
         icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-192x192.png',
         tag: 'test-notification',
-        requireInteraction: false
+        requireInteraction: false,
+        vibrate: [200, 100, 200]
       });
+
+      // Auto fermeture
+      setTimeout(() => {
+        notification.close();
+      }, 8000);
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
       toast.success('Notification de test envoyée');
     } catch (error) {
       console.error('Erreur lors du test:', error);
@@ -96,11 +133,24 @@ export const useNotificationSystem = () => {
     }
 
     try {
-      new Notification(title, {
+      const notification = new Notification(title, {
         icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-192x192.png',
         requireInteraction: false,
         ...options
       });
+
+      // Auto fermeture après 10 secondes si pas d'interaction
+      setTimeout(() => {
+        notification.close();
+      }, 10000);
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
+      return notification;
     } catch (error) {
       console.error('Erreur lors de l\'envoi de notification:', error);
     }
@@ -112,10 +162,32 @@ export const useNotificationSystem = () => {
       return;
     }
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       sendNotification(title, { body });
     }, delay);
+
+    return timeoutId;
   }, [hasPermission, sendNotification]);
+
+  const scheduleDailyReminder = useCallback((hour: number, minute: number, title: string, body: string) => {
+    if (!hasPermission) {
+      console.warn('Notifications non autorisées');
+      return;
+    }
+
+    const now = new Date();
+    const scheduledTime = new Date();
+    scheduledTime.setHours(hour, minute, 0, 0);
+
+    // Si l'heure est déjà passée aujourd'hui, programmer pour demain
+    if (scheduledTime <= now) {
+      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    }
+
+    const delay = scheduledTime.getTime() - now.getTime();
+    
+    return scheduleNotification(title, body, delay);
+  }, [hasPermission, scheduleNotification]);
 
   return {
     hasPermission,
@@ -124,6 +196,7 @@ export const useNotificationSystem = () => {
     requestPermission,
     testNotification,
     sendNotification,
-    scheduleNotification
+    scheduleNotification,
+    scheduleDailyReminder
   };
 };

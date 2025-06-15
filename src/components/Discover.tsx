@@ -13,7 +13,7 @@ const Discover = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { content, loading } = useCommunityContent();
 
-  // Fixed categories - removed "Verses" as requested
+  // Categories without "Verses" filter
   const categories = [
     { id: 'all', label: 'Tout', icon: Sparkles },
     { id: 'prayer', label: 'Prières', icon: Heart },
@@ -57,11 +57,11 @@ const Discover = () => {
   return (
     <div className="p-3 sm:p-4 lg:p-6 max-w-4xl mx-auto min-h-screen bg-gray-50">
       <div className="space-y-4 sm:space-y-6">
-        {/* Header - improved responsive design */}
+        {/* Header with blue circular background and white icon */}
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center bg-blue-50 border border-blue-100 flex-shrink-0">
-              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words mb-1">Découvrir</h1>
@@ -70,7 +70,7 @@ const Discover = () => {
           </div>
         </div>
 
-        {/* Search + Categories - improved layout */}
+        {/* Search + Categories with consistent blue styling */}
         <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="relative mb-4 sm:mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -83,21 +83,23 @@ const Discover = () => {
             />
           </div>
           
-          {/* Improved filter grid layout with better spacing and alignment */}
+          {/* Filter grid with consistent blue pill styling */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
-                <ModernButton
+                <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  variant={selectedCategory === category.id ? "primary" : "outline"}
-                  size="sm"
-                  className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 min-w-0 text-xs sm:text-sm"
+                  className={`flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 rounded-full min-w-0 text-xs sm:text-sm font-medium transition-all ${
+                    selectedCategory === category.id 
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                  }`}
                 >
                   <Icon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="truncate">{category.label}</span>
-                </ModernButton>
+                </button>
               );
             })}
           </div>

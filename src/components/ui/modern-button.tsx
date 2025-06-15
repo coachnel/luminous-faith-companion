@@ -16,8 +16,8 @@ export const ModernButton = React.forwardRef<HTMLButtonElement, ModernButtonProp
     const Comp = asChild ? Slot : 'button';
     
     const variants = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-600',
-      secondary: 'bg-gray-600 text-white hover:bg-gray-700 border border-gray-600',
+      primary: 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 shadow-sm',
+      secondary: 'bg-gray-600 text-white hover:bg-gray-700 border border-gray-600 shadow-sm',
       ghost: 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300',
       outline: 'border-2 border-blue-600 bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700',
     };

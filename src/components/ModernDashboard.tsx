@@ -1,4 +1,3 @@
-
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -94,15 +93,12 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
 
   const loading = prayerData?.loading || notesData?.loading || plansData?.loading || challengesData?.loading;
 
-  // Quick actions with improved responsive design
+  // Quick actions with consistent blue circular backgrounds and white icons
   const quickActions = [
     {
       icon: Heart,
       title: "Nouvelle prière",
       description: "Ajouter une intention",
-      color: "bg-red-50",
-      iconColor: "text-red-600",
-      borderColor: "border-red-100",
       action: () => onNavigate('prayer'),
       category: 'Prières'
     },
@@ -110,9 +106,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Plus,
       title: "Créer une note",
       description: "Noter vos réflexions",
-      color: "bg-blue-50",
-      iconColor: "text-blue-600",
-      borderColor: "border-blue-100",
       action: () => onNavigate('notes'),
       category: 'Notes'
     },
@@ -120,9 +113,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Target,
       title: "Nouveau défi",
       description: "Se lancer un défi",
-      color: "bg-green-50",
-      iconColor: "text-green-600",
-      borderColor: "border-green-100",
       action: () => onNavigate('challenges'),
       category: 'Défis'
     },
@@ -130,9 +120,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Star,
       title: "Témoignage",
       description: "Partager votre expérience",
-      color: "bg-purple-50",
-      iconColor: "text-purple-600",
-      borderColor: "border-purple-100",
       action: () => onNavigate('testimony'),
       category: 'Témoignages'
     },
@@ -140,8 +127,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Compass,
       title: "Découvrir",
       description: "Explorer la communauté",
-      color: "bg-orange-50",
-      iconColor: "text-orange-600",
       action: () => onNavigate('discover'),
       category: 'Tout'
     },
@@ -149,23 +134,17 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Users,
       title: "Cercles",
       description: "Prier ensemble",
-      color: "bg-indigo-50",
-      iconColor: "text-indigo-600",
       action: () => onNavigate('prayer-circles'),
       category: 'Prières'
     }
   ];
 
-  // Main navigation cards with better responsive design
+  // Main navigation cards with blue circular backgrounds and white icons
   const navigationCards = [
     {
       icon: Heart,
       title: "Centre de Prière",
       description: `${stats.prayers} intention${stats.prayers > 1 ? 's' : ''}`,
-      color: "bg-white",
-      borderColor: "border-gray-200",
-      iconBg: "bg-red-50",
-      iconColor: "text-red-600",
       route: "prayer",
       category: 'Prières'
     },
@@ -173,10 +152,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: BookOpen,
       title: "Journal Spirituel",
       description: `${stats.notes} note${stats.notes > 1 ? 's' : ''}`,
-      color: "bg-white",
-      borderColor: "border-gray-200",
-      iconBg: "bg-blue-50",
-      iconColor: "text-blue-600",
       route: "notes",
       category: 'Notes'
     },
@@ -184,10 +159,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Target,
       title: "Défis Quotidiens",
       description: `${stats.activeChallenges} défi${stats.activeChallenges > 1 ? 's' : ''} actif${stats.activeChallenges > 1 ? 's' : ''}`,
-      color: "bg-white",
-      borderColor: "border-gray-200",
-      iconBg: "bg-green-50",
-      iconColor: "text-green-600",
       route: "challenges",
       category: 'Défis'
     },
@@ -195,10 +166,6 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
       icon: Calendar,
       title: "Plans de Lecture",
       description: `${stats.activePlans} plan${stats.activePlans > 1 ? 's' : ''} actif${stats.activePlans > 1 ? 's' : ''}`,
-      color: "bg-white",
-      borderColor: "border-gray-200",
-      iconBg: "bg-purple-50",
-      iconColor: "text-purple-600",
       route: "reading-plans",
       category: 'Tout'
     }
@@ -229,7 +196,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
 
   return (
     <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 max-w-6xl mx-auto min-h-screen bg-gray-50">
-      {/* Hero Card - improved responsive design with proper contrast */}
+      {/* Hero Card with blue background and white text */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 p-4 sm:p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-white/10 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
@@ -247,7 +214,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
             </div>
             <button 
               onClick={() => onNavigate('settings')}
-              className="p-2 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all flex-shrink-0 ml-3"
+              className="p-3 rounded-xl sm:rounded-2xl bg-blue-600 backdrop-blur-sm hover:bg-blue-700 transition-all flex-shrink-0 ml-3"
             >
               <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </button>
@@ -269,7 +236,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Modern Search Bar - improved responsive design */}
+      {/* Modern Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
         <Input
@@ -281,7 +248,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         />
       </div>
 
-      {/* Pill-style Filters - improved spacing and responsiveness */}
+      {/* Blue Pill-style Filters */}
       <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
         {filters.map((filter) => (
           <button
@@ -298,7 +265,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         ))}
       </div>
 
-      {/* Quick Actions - improved horizontal scroll with better spacing */}
+      {/* Quick Actions with blue circular backgrounds and white icons */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900">Actions rapides</h2>
@@ -316,8 +283,8 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
                   onClick={action.action}
                   className="w-full bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all text-left"
                 >
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl ${action.color} flex items-center justify-center mb-2 sm:mb-3`}>
-                    <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${action.iconColor}`} />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-600 flex items-center justify-center mb-2 sm:mb-3">
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <h3 className="font-semibold text-xs sm:text-sm text-gray-900 mb-1 break-words">{action.title}</h3>
                   <p className="text-xs text-gray-500 leading-relaxed break-words">{action.description}</p>
@@ -328,7 +295,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Statistics Cards - improved responsive grid */}
+      {/* Statistics Cards */}
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Votre activité</h3>
         
@@ -359,7 +326,7 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
         )}
       </div>
 
-      {/* Main Navigation Cards - improved spacing and responsive grid */}
+      {/* "Your Spaces" Navigation Cards with blue circular backgrounds and white icons */}
       <div className="space-y-3 sm:space-y-4">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900">Vos espaces</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
@@ -372,8 +339,8 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
                 onClick={() => onNavigate(card.route)}
               >
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center ${card.iconBg} flex-shrink-0`}>
-                    <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${card.iconColor}`} />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                    <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-1 break-words">{card.title}</h4>

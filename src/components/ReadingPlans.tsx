@@ -5,7 +5,7 @@ import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Calendar, CheckCircle, Clock, Star, Users, Trophy, Play } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle, Clock, Users, Trophy, Play } from 'lucide-react';
 import { useReadingPlanProgress, READING_PLANS } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
 
@@ -14,9 +14,7 @@ interface ReadingPlan {
   title: string;
   description: string;
   duration: number; // en jours
-  difficulty: 'facile' | 'moyen' | 'difficile';
   category: 'bible-complete' | 'nouveau-testament' | 'ancien-testament' | 'thematique';
-  popular: boolean;
 }
 
 const ReadingPlans = () => {
@@ -29,52 +27,42 @@ const ReadingPlans = () => {
       title: 'Bible en 1 an',
       description: 'Lisez toute la Bible en une année avec un plan structuré',
       duration: 365,
-      difficulty: 'moyen',
-      category: 'bible-complete',
-      popular: true
+      category: 'bible-complete'
     },
     {
       id: 'new-testament-90',
       title: 'Nouveau Testament en 90 jours',
       description: 'Parcourez le Nouveau Testament en 3 mois',
       duration: 90,
-      difficulty: 'facile',
-      category: 'nouveau-testament',
-      popular: true
+      category: 'nouveau-testament'
     },
     {
       id: 'psalms-proverbs',
       title: 'Psaumes et Proverbes',
       description: 'Sagesse quotidienne avec les Psaumes et Proverbes',
       duration: 60,
-      difficulty: 'facile',
-      category: 'thematique',
-      popular: false
+      category: 'thematique'
     },
     {
       id: 'gospels-30',
       title: 'Les 4 Évangiles en 30 jours',
       description: 'Découvrez la vie de Jésus à travers les quatre Évangiles',
       duration: 30,
-      difficulty: 'facile',
-      category: 'nouveau-testament',
-      popular: true
+      category: 'nouveau-testament'
     },
     {
       id: 'genesis-revelation',
       title: 'De la Genèse à l\'Apocalypse',
       description: 'Un parcours chronologique de toute la Bible',
       duration: 200,
-      difficulty: 'difficile',
-      category: 'bible-complete',
-      popular: false
+      category: 'bible-complete'
     }
   ];
 
   const categories = [
     { id: 'all', label: 'Tous', icon: BookOpen },
     { id: 'bible-complete', label: 'Bible complète', icon: BookOpen },
-    { id: 'nouveau-testament', label: 'Nouveau Testament', icon: Star },
+    { id: 'nouveau-testament', label: 'Nouveau Testament', icon: Calendar },
     { id: 'ancien-testament', label: 'Ancien Testament', icon: Calendar },
     { id: 'thematique', label: 'Thématiques', icon: Users }
   ];
@@ -91,15 +79,6 @@ const ReadingPlans = () => {
     if (planData) {
       startPlan(planId, planData.title);
       toast.success('🎉 Plan de lecture rejoint avec succès !');
-    }
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'facile': return 'bg-green-100 text-green-800 border-green-200';
-      case 'moyen': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'difficile': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -203,22 +182,10 @@ const ReadingPlans = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                     <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base break-words">{plan.title}</h3>
-                    {plan.popular && (
-                      <Badge className="bg-orange-100 text-orange-700 border-orange-200 self-start sm:self-auto">
-                        <Star className="h-3 w-3 mr-1" />
-                        <span className="text-xs">Populaire</span>
-                      </Badge>
-                    )}
                   </div>
                   <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-3 break-words leading-relaxed">{plan.description}</p>
                   
                   <div className="flex flex-wrap gap-2 mb-3">
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs ${getDifficultyColor(plan.difficulty)}`}
-                    >
-                      {plan.difficulty}
-                    </Badge>
                     <Badge variant="outline" className="text-xs">
                       <Calendar className="h-3 w-3 mr-1" />
                       {plan.duration} jours

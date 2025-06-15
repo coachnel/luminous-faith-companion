@@ -17,66 +17,47 @@ const Discover = () => {
     { id: 'prayer', label: 'Prières', icon: Heart },
     { id: 'verse', label: 'Versets', icon: BookOpen },
     { id: 'testimony', label: 'Témoignages', icon: Users },
-    { id: 'reflection', label: 'Réflexions', icon: Star }
+    { id: 'note', label: 'Réflexions', icon: Star }
   ];
 
-  const trendingTopics = [
-    { name: 'Foi et Espérance', count: 142 },
-    { name: 'Prière du matin', count: 89 },
-    { name: 'Psaume 23', count: 67 },
-    { name: 'Gratitude', count: 54 },
-    { name: 'Paix intérieure', count: 43 }
-  ];
-
-  const featuredContent = [
-    {
-      id: '1',
-      type: 'reflection',
-      title: 'La paix dans la tempête',
-      content: 'Quand les vents contraires soufflent, rappelons-nous que Jésus a calmé la tempête...',
-      author: 'Marie D.',
-      likes: 24,
-      comments: 8,
-      views: 156,
-      timestamp: '2h'
-    },
-    {
-      id: '2',
-      type: 'prayer',
-      title: 'Prière pour la sagesse',
-      content: 'Seigneur, accorde-moi la sagesse de discerner Ta volonté dans chaque décision...',
-      author: 'Pierre M.',
-      likes: 31,
-      comments: 12,
-      views: 203,
-      timestamp: '4h'
-    },
-    {
-      id: '3',
-      type: 'verse',
-      title: 'Matthieu 11:28',
-      content: 'Venez à moi, vous tous qui êtes fatigués et chargés, et je vous donnerai du repos.',
-      author: 'Sarah L.',
-      likes: 45,
-      comments: 15,
-      views: 298,
-      timestamp: '1j'
-    }
-  ];
-
-  const filteredContent = featuredContent.filter(item => {
+  // Filtrer le contenu basé sur la catégorie et la recherche
+  const filteredContent = content.filter(item => {
     const matchesCategory = selectedCategory === 'all' || item.type === selectedCategory;
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.content.toLowerCase().includes(searchQuery.toLowerCase());
+                         item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         item.author_name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Calculer les sujets tendance basés sur le contenu réel
+  const getTrendingTopics = () => {
+    const topicCounts = new Map();
+    
+    content.forEach(item => {
+      // Extraire des mots-clés du titre et du contenu
+      const words = [...item.title.toLowerCase().split(' '), ...item.content.toLowerCase().split(' ')]
+        .filter(word => word.length > 3)
+        .slice(0, 5); // Limiter pour éviter trop de mots
+      
+      words.forEach(word => {
+        topicCounts.set(word, (topicCounts.get(word) || 0) + 1);
+      });
+    });
+
+    return Array.from(topicCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([word, count]) => ({ name: word, count }));
+  };
+
+  const trendingTopics = getTrendingTopics();
 
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'prayer': return Heart;
       case 'verse': return BookOpen;
       case 'testimony': return Users;
-      case 'reflection': return Star;
+      case 'note': return Star;
       default: return Sparkles;
     }
   };
@@ -86,7 +67,7 @@ const Discover = () => {
       case 'prayer': return 'Prière';
       case 'verse': return 'Verset';
       case 'testimony': return 'Témoignage';
-      case 'reflection': return 'Réflexion';
+      case 'note': return 'Réflexion';
       default: return 'Contenu';
     }
   };
@@ -96,7 +77,7 @@ const Discover = () => {
       case 'prayer': return 'bg-red-100 text-red-700 border-red-200';
       case 'verse': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'testimony': return 'bg-green-100 text-green-700 border-green-200';
-      case 'reflection': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'note': return 'bg-purple-100 text-purple-700 border-purple-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
@@ -159,35 +140,37 @@ const Discover = () => {
         </div>
       </ModernCard>
 
-      {/* Sujets tendance */}
-      <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--accent-primary)]" />
-            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Tendances</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {trendingTopics.map((topic, index) => (
-              <div
-                key={index}
-                className="p-3 bg-[var(--bg-secondary)] rounded-lg hover:bg-[var(--border-default)] transition-colors cursor-pointer"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-[var(--text-primary)] break-words">{topic.name}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {topic.count}
-                  </Badge>
+      {/* Sujets tendance - seulement si on a du contenu */}
+      {trendingTopics.length > 0 && (
+        <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--accent-primary)]" />
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Tendances</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {trendingTopics.map((topic, index) => (
+                <div
+                  key={index}
+                  className="p-3 bg-[var(--bg-secondary)] rounded-lg hover:bg-[var(--border-default)] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-[var(--text-primary)] break-words capitalize">{topic.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {topic.count}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </ModernCard>
+        </ModernCard>
+      )}
 
       {/* Contenu mis en avant */}
       <ModernCard variant="elevated" className="bg-[var(--bg-card)] border-[var(--border-default)]">
         <div className="space-y-4">
-          <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Contenu mis en avant</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Contenu de la communauté</h3>
           
           {loading ? (
             <div className="space-y-4">
@@ -212,8 +195,8 @@ const Discover = () => {
                               <TypeIcon className="h-3 w-3 mr-1" />
                               {getTypeLabel(item.type)}
                             </Badge>
-                            <span className="text-xs text-[var(--text-secondary)]">par {item.author}</span>
-                            <span className="text-xs text-[var(--text-secondary)]">• {item.timestamp}</span>
+                            <span className="text-xs text-[var(--text-secondary)]">par {item.author_name}</span>
+                            <span className="text-xs text-[var(--text-secondary)]">• {new Date(item.created_at).toLocaleDateString('fr-FR')}</span>
                           </div>
                           <h4 className="font-semibold text-[var(--text-primary)] mb-1 text-sm sm:text-base break-words">{item.title}</h4>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2 break-words leading-relaxed">{item.content}</p>
@@ -223,15 +206,11 @@ const Discover = () => {
                       <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-[var(--border-default)] text-xs text-[var(--text-secondary)]">
                         <div className="flex items-center gap-1">
                           <Heart className="h-3 w-3" />
-                          <span>{item.likes}</span>
+                          <span>{item.likes_count}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MessageCircle className="h-3 w-3" />
-                          <span>{item.comments}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          <span>{item.views}</span>
+                          <span>{item.comments_count}</span>
                         </div>
                       </div>
                     </div>
@@ -245,7 +224,12 @@ const Discover = () => {
             <div className="text-center py-6 sm:py-8">
               <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 text-[var(--text-secondary)] mx-auto mb-4" />
               <h4 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2">Aucun contenu trouvé</h4>
-              <p className="text-[var(--text-secondary)] text-sm px-4">Essayez d'autres mots-clés ou changez de catégorie</p>
+              <p className="text-[var(--text-secondary)] text-sm px-4">
+                {content.length === 0 
+                  ? "Aucun contenu n'a encore été partagé par la communauté"
+                  : "Essayez d'autres mots-clés ou changez de catégorie"
+                }
+              </p>
             </div>
           )}
         </div>

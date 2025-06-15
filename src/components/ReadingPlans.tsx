@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ModernButton } from '@/components/ui/modern-button';
 import { ModernCard } from '@/components/ui/modern-card';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Calendar, CheckCircle, Clock, Star, Users, Trophy, Play } from 'lucide-react';
-import { useReadingProgress } from '@/hooks/useReadingProgress';
+import { useReadingPlanProgress } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
 
 interface ReadingPlan {
@@ -20,7 +19,7 @@ interface ReadingPlan {
 }
 
 const ReadingPlans = () => {
-  const { progress, markChapterRead, getCurrentPlan, joinPlan } = useReadingProgress();
+  const { plans, startPlan, getPlanStats } = useReadingPlanProgress();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const readingPlans: ReadingPlan[] = [
@@ -83,11 +82,15 @@ const ReadingPlans = () => {
     ? readingPlans 
     : readingPlans.filter(plan => plan.category === selectedCategory);
 
-  const currentPlan = getCurrentPlan();
+  const currentPlan = plans.find(plan => plan.is_active);
+  const progress = currentPlan ? getPlanStats(currentPlan) : { completedDays: 0 };
 
   const handleJoinPlan = (planId: string) => {
-    joinPlan(planId);
-    toast.success('🎉 Plan de lecture rejoint avec succès !');
+    const planData = readingPlans.find(p => p.id === planId);
+    if (planData) {
+      startPlan(planId, planData.title);
+      toast.success('🎉 Plan de lecture rejoint avec succès !');
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {

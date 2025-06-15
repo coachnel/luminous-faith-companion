@@ -2,8 +2,10 @@
 import React from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, BookOpen, Users, Star } from 'lucide-react';
-import { CommunityContent } from '@/hooks/useCommunityContent';
+import { Button } from '@/components/ui/button';
+import { Heart, MessageCircle, BookOpen, Users, Star, ThumbsUp, Calendar, User } from 'lucide-react';
+import { CommunityContent, useCommunityContent } from '@/hooks/useCommunityContent';
+import { useAuth } from '@/hooks/useAuth';
 import LinkPreview from '@/components/ui/LinkPreview';
 
 interface CommunityContentCardProps {
@@ -11,6 +13,9 @@ interface CommunityContentCardProps {
 }
 
 const CommunityContentCard: React.FC<CommunityContentCardProps> = ({ item }) => {
+  const { likeContent, unlikeContent } = useCommunityContent();
+  const { user } = useAuth();
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'prayer': return Heart;
@@ -53,6 +58,11 @@ const CommunityContentCard: React.FC<CommunityContentCardProps> = ({ item }) => 
     });
   };
 
+  const handleLike = () => {
+    if (!user) return;
+    likeContent(item.id);
+  };
+
   const TypeIcon = getTypeIcon(item.type);
 
   return (
@@ -65,8 +75,13 @@ const CommunityContentCard: React.FC<CommunityContentCardProps> = ({ item }) => 
                 <TypeIcon className="h-3 w-3 mr-1" />
                 {getTypeLabel(item.type)}
               </Badge>
-              <span className="text-xs text-[var(--text-secondary)]">par {item.author_name}</span>
-              <span className="text-xs text-[var(--text-secondary)]">• {new Date(item.created_at).toLocaleDateString('fr-FR')}</span>
+              <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+                <User className="h-3 w-3" />
+                <span>{item.author_name}</span>
+                <span>•</span>
+                <Calendar className="h-3 w-3" />
+                <span>{new Date(item.created_at).toLocaleDateString('fr-FR')}</span>
+              </div>
             </div>
             <h4 className="font-semibold text-[var(--text-primary)] mb-1 text-sm sm:text-base break-words">{item.title}</h4>
             <div className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-3 break-words leading-relaxed">
@@ -75,14 +90,38 @@ const CommunityContentCard: React.FC<CommunityContentCardProps> = ({ item }) => 
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-[var(--border-default)] text-xs text-[var(--text-secondary)]">
-          <div className="flex items-center gap-1">
-            <Heart className="h-3 w-3" />
-            <span>{item.likes_count}</span>
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-default)]">
+          <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+            <div className="flex items-center gap-1">
+              <ThumbsUp className="h-3 w-3" />
+              <span>{item.likes_count}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />
+              <span>{item.comments_count}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <MessageCircle className="h-3 w-3" />
-            <span>{item.comments_count}</span>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleLike}
+              disabled={!user}
+              size="sm"
+              variant="outline"
+              className="gap-1 h-7 px-2 text-xs"
+            >
+              <ThumbsUp className="h-3 w-3" />
+              J'aime
+            </Button>
+            <Button
+              disabled={!user}
+              size="sm"
+              variant="outline"
+              className="gap-1 h-7 px-2 text-xs"
+            >
+              <MessageCircle className="h-3 w-3" />
+              Commenter
+            </Button>
           </div>
         </div>
       </div>

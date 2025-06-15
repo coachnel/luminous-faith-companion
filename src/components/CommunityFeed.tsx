@@ -37,6 +37,12 @@ const CommunityFeed = () => {
     likeContent(contentId);
   };
 
+  const handleComment = (contentId: string) => {
+    if (!user) return;
+    // TODO: Implémenter les commentaires
+    console.log('Commenter:', contentId);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -134,6 +140,16 @@ const CommunityFeed = () => {
                     >
                       <ThumbsUp className="h-4 w-4" />
                       J'aime
+                    </Button>
+                    <Button
+                      onClick={() => handleComment(item.id)}
+                      disabled={!user}
+                      size="sm"
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Commenter
                     </Button>
                   </div>
                 </div>

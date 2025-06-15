@@ -1,10 +1,17 @@
 
-import React from 'react';
-import { Star, Share2, Copy } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, Share2, Copy, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Verse } from '@/types/bible';
 import { useNeonFavoriteVerses } from '@/hooks/useNeonData';
+import { useCommunityContent } from '@/hooks/useCommunityContent';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 interface VerseCardProps {
@@ -12,7 +19,15 @@ interface VerseCardProps {
 }
 
 const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareTitle, setShareTitle] = useState('');
+  const [shareReflection, setShareReflection] = useState('');
+  const [isPublic, setIsPublic] = useState(true);
+  const [loading, setLoading] = useState(false);
+  
   const { favoriteVerses, addFavoriteVerse, removeFavoriteVerse } = useNeonFavoriteVerses();
+  const { publishContent } = useCommunityContent();
+  const { user } = useAuth();
   
   const verseId = `${verse.book}-${verse.chapter}-${verse.verse}`;
   const isFavorite = favoriteVerses.some(fv => fv.verse_id === verseId);
@@ -78,6 +93,57 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
     }
   };
 
+  const handleShareWithCommunity = async () => {
+    if (!user) {
+      toast({
+        description: "Vous devez être connecté pour partager",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!shareTitle.trim()) {
+      toast({
+        description: "Veuillez entrer un titre",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const verseText = `"${verse.text}" - ${verse.book} ${verse.chapter}:${verse.verse}`;
+      const content = shareReflection.trim() 
+        ? `${verseText}\n\n${shareReflection.trim()}`
+        : verseText;
+
+      await publishContent({
+        type: 'verse',
+        title: shareTitle.trim(),
+        content: content,
+        is_public: isPublic
+      });
+
+      setShareDialogOpen(false);
+      setShareTitle('');
+      setShareReflection('');
+      setIsPublic(true);
+      
+      toast({
+        description: "✨ Verset partagé avec la communauté !",
+      });
+    } catch (error) {
+      console.error('Error sharing verse:', error);
+      toast({
+        description: "Erreur lors du partage",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Card className="glass border-white/30 bg-white/90 hover:shadow-lg transition-all">
       <CardContent className="p-4 sm:p-6">
@@ -125,6 +191,81 @@ const VerseCard: React.FC<VerseCardProps> = ({ verse }) => {
           >
             <Share2 size={16} />
           </Button>
+
+          <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-purple-500 hover:scale-110 transition-all"
+              >
+                <Users size={16} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Partager avec la communauté</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="p-3 bg-blue-50 rounded-lg border">
+                  <p className="text-sm font-medium text-blue-900 mb-1">
+                    {verse.book} {verse.chapter}:{verse.verse}
+                  </p>
+                  <p className="text-sm text-blue-700 italic">
+                    "{verse.text}"
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="share-title">Titre de votre partage</Label>
+                  <Input
+                    id="share-title"
+                    value={shareTitle}
+                    onChange={(e) => setShareTitle(e.target.value)}
+                    placeholder="Ex: Un verset qui m'encourage..."
+                    maxLength={100}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="share-reflection">Votre réflexion (optionnel)</Label>
+                  <Textarea
+                    id="share-reflection"
+                    value={shareReflection}
+                    onChange={(e) => setShareReflection(e.target.value)}
+                    placeholder="Partagez pourquoi ce verset vous parle..."
+                    rows={3}
+                    maxLength={500}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="share-public"
+                    checked={isPublic}
+                    onCheckedChange={setIsPublic}
+                  />
+                  <Label htmlFor="share-public" className="text-sm">
+                    Partager avec la communauté compagnon
+                  </Label>
+                </div>
+
+                <Button
+                  onClick={handleShareWithCommunity}
+                  disabled={loading || !shareTitle.trim() || !user}
+                  className="w-full"
+                >
+                  {loading ? 'Partage en cours...' : 'Partager'}
+                </Button>
+
+                {!user && (
+                  <p className="text-sm text-red-600 text-center">
+                    Vous devez être connecté pour partager
+                  </p>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardContent>
     </Card>

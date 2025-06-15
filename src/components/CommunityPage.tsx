@@ -12,52 +12,61 @@ const CommunityPage = () => {
   const { unreadCount } = useCommunityNotifications();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
-            <Users className="h-8 w-8 text-blue-600" />
-            Communauté Compagnon
-          </h1>
-          <p className="text-gray-600">
-            Partagez, découvrez et priez ensemble
-          </p>
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
+      {/* En-tête moderne unifié */}
+      <div className="bg-[var(--bg-card)] border-[var(--border-default)] rounded-xl sm:rounded-2xl p-4 sm:p-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div 
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'var(--accent-primary)' }}
+          >
+            <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[var(--text-primary)] break-words">
+              Communauté
+            </h1>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] break-words">
+              Partagez, découvrez et priez ensemble
+            </p>
+          </div>
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="feed" className="gap-2">
-              <Users className="h-4 w-4" />
-              Découvrir
-            </TabsTrigger>
-            <TabsTrigger value="publish" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Publier
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="h-4 w-4" />
-              Notifications
-              {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="feed" className="space-y-6 mt-6">
-            <CommunityFeed />
-          </TabsContent>
-
-          <TabsContent value="publish" className="space-y-6 mt-6">
-            <CommunityPublish />
-          </TabsContent>
-
-          <TabsContent value="notifications" className="space-y-6 mt-6">
-            <CommunityNotificationCenter />
-          </TabsContent>
-        </Tabs>
       </div>
+
+      {/* Onglets modernes */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-[var(--bg-card)] border-[var(--border-default)]">
+          <TabsTrigger value="feed" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xxs:inline">Découvrir</span>
+          </TabsTrigger>
+          <TabsTrigger value="publish" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xxs:inline">Publier</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xxs:inline">Notifications</span>
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-[8px] xxs:text-[10px] xs:text-xs rounded-full px-1 xxs:px-1.5 py-0.5 min-w-[1rem] xxs:min-w-[1.25rem] h-4 xxs:h-5 flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="feed" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          <CommunityFeed />
+        </TabsContent>
+
+        <TabsContent value="publish" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          <CommunityPublish />
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          <CommunityNotificationCenter />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

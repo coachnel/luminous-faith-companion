@@ -38,7 +38,7 @@ const ModernFinanceNavigation: React.FC<ModernFinanceNavigationProps> = ({ activ
   const mainNavItems: NavItem[] = [
     { id: 'dashboard', icon: Home, label: 'Accueil' },
     { id: 'prayer', icon: Heart, label: 'Prière' },
-    { id: 'notes', icon: FileText, label: 'Notes' },
+    { id: 'notes', icon: FileText, label: 'Journal' },
     { id: 'community', icon: Users, label: 'Communauté' },
   ];
 
@@ -173,7 +173,7 @@ const ModernFinanceNavigation: React.FC<ModernFinanceNavigationProps> = ({ activ
                 <Heart className="h-3 w-3 xl:h-5 xl:w-5 text-white" />
               </div>
               <span className="text-lg xl:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent break-words">
-                Compagnon Spirituel
+                Compagnon
               </span>
             </div>
           </div>

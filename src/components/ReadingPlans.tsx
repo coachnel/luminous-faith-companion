@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Calendar, CheckCircle, Clock, Star, Users, Trophy, Play } from 'lucide-react';
-import { useReadingPlanProgress } from '@/hooks/useReadingProgress';
+import { useReadingPlanProgress, READING_PLANS } from '@/hooks/useReadingProgress';
 import { toast } from 'sonner';
 
 interface ReadingPlan {
@@ -102,6 +102,13 @@ const ReadingPlans = () => {
     }
   };
 
+  // Helper function to get plan duration
+  const getPlanDuration = (planId: string) => {
+    const readingPlan = readingPlans.find(p => p.id === planId);
+    const hookPlan = READING_PLANS.find(p => p.id === planId);
+    return readingPlan?.duration || hookPlan?.duration || 365;
+  };
+
   return (
     <div className="p-3 sm:p-4 space-y-4 sm:space-y-6 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* En-tête */}
@@ -129,7 +136,7 @@ const ReadingPlans = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="min-w-0">
                 <h3 className="text-base sm:text-lg font-semibold text-blue-900 break-words">Plan actuel</h3>
-                <p className="text-sm text-blue-700 break-words">{currentPlan.title}</p>
+                <p className="text-sm text-blue-700 break-words">{currentPlan.plan_name}</p>
               </div>
               <Badge className="bg-blue-100 text-blue-800 border-blue-200 self-start sm:self-auto">
                 <Trophy className="h-3 w-3 mr-1" />
@@ -140,10 +147,10 @@ const ReadingPlans = () => {
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
                 <span className="text-blue-700">Progression</span>
-                <span className="text-blue-900 font-medium">{progress.completedDays}/{currentPlan.duration} jours</span>
+                <span className="text-blue-900 font-medium">{progress.completedDays}/{getPlanDuration(currentPlan.plan_id)} jours</span>
               </div>
               <Progress 
-                value={(progress.completedDays / currentPlan.duration) * 100} 
+                value={(progress.completedDays / getPlanDuration(currentPlan.plan_id)) * 100} 
                 className="h-2"
               />
             </div>
@@ -235,9 +242,9 @@ const ReadingPlans = () => {
                   onClick={() => handleJoinPlan(plan.id)}
                   size="sm"
                   className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-sm w-full sm:w-auto text-xs"
-                  disabled={currentPlan?.id === plan.id}
+                  disabled={currentPlan?.plan_id === plan.id}
                 >
-                  {currentPlan?.id === plan.id ? (
+                  {currentPlan?.plan_id === plan.id ? (
                     <>
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Actuel

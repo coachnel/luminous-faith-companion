@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import AuthPage from './AuthPage';
-import ModernDashboard from './ModernDashboard';
+import ResponsiveLayout from './ResponsiveLayout';
 
 const MobileApp = () => {
   const { user, loading } = useAuth();
@@ -24,12 +24,7 @@ const MobileApp = () => {
     return <AuthPage />;
   }
 
-  // Rétablir l'affichage du tableau de bord principal après la connexion
-  const handleNavigate = (path: string) => {
-    console.warn(`Navigation demandée vers : ${path}. Le routage doit être configuré.`);
-  };
-
-  return <ModernDashboard onNavigate={handleNavigate} />;
+  return <ResponsiveLayout />;
 };
 
 export default MobileApp;

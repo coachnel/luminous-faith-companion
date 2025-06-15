@@ -53,25 +53,24 @@ const Discover = () => {
   const trendingTopics = getTrendingTopics();
 
   return (
-    <div className="p-3 sm:p-4 max-w-4xl mx-auto min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-      {/* Main Discover Card wrapper, restored card bg and border */}
+    <div className="p-3 sm:p-4 max-w-4xl mx-auto min-h-screen bg-gray-50">
       <div className="space-y-4 sm:space-y-6">
         {/* En-tête */}
-        <div className="rounded-2xl shadow-lg border border-[var(--border-default)] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 p-4 sm:p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--accent-primary)]">
-              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-blue-50 border border-blue-100">
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-[var(--text-primary)] break-words mb-1">Découvrir</h1>
-              <p className="text-xs sm:text-base text-[var(--text-secondary)]">Explorez les témoignages et réflexions de la communauté</p>
+              <h1 className="text-2xl font-bold text-gray-900 break-words mb-1">Découvrir</h1>
+              <p className="text-xs sm:text-base text-gray-600">Explorez les témoignages et réflexions de la communauté</p>
             </div>
           </div>
         </div>
         {/* Search + Categories in cards */}
-        <div className="rounded-2xl border border-[var(--border-default)] bg-white/80 shadow p-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
           <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="text"
               placeholder="Rechercher des témoignages et réflexions..."
@@ -100,14 +99,14 @@ const Discover = () => {
         </div>
         {/* Trending Topics (card) */}
         {trendingTopics.length > 0 && (
-          <div className="rounded-2xl border border-[var(--border-default)] bg-gradient-to-br from-purple-50 via-blue-50 to-pink-100 shadow p-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-[var(--accent-primary)]" />
-              <h3 className="text-base font-semibold text-[var(--text-primary)]">Sujets tendance</h3>
+              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <h3 className="text-base font-semibold text-gray-900">Sujets tendance</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {trendingTopics.map((topic, idx) => (
-                <span key={idx} className="rounded-lg bg-[var(--bg-secondary)] px-3 py-1 text-[13px] text-gray-700 border border-[var(--border-default)]">
+                <span key={idx} className="rounded-lg bg-gray-50 px-3 py-1 text-sm text-gray-700 border border-gray-200">
                   {topic.name} <span className="ml-1 text-xs text-gray-400">({topic.count})</span>
                 </span>
               ))}
@@ -115,15 +114,15 @@ const Discover = () => {
           </div>
         )}
         {/* Community Content */}
-        <div className="rounded-2xl border border-[var(--border-default)] bg-white/80 shadow p-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-base font-semibold text-[var(--text-primary)]">Contenu de la communauté</h3>
+            <h3 className="text-base font-semibold text-gray-900">Contenu de la communauté</h3>
             <Badge variant="outline" className="text-xs">{filteredContent.length} publications</Badge>
           </div>
           {loading ? (
             <div>
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse mb-2"></div>
+                <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse mb-2"></div>
               ))}
             </div>
           ) : (
@@ -135,9 +134,9 @@ const Discover = () => {
           )}
           {filteredContent.length === 0 && !loading && (
             <div className="text-center py-6">
-              <Sparkles className="h-10 w-10 text-[var(--text-secondary)] mx-auto mb-2" />
-              <h4 className="text-base font-semibold text-[var(--text-primary)] mb-2">Aucun contenu trouvé</h4>
-              <p className="text-[var(--text-secondary)] text-sm px-4">
+              <Sparkles className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+              <h4 className="text-base font-semibold text-gray-900 mb-2">Aucun contenu trouvé</h4>
+              <p className="text-gray-600 text-sm px-4">
                 {content.length === 0 
                   ? "Soyez le premier à partager un témoignage ou une réflexion !"
                   : "Essayez d'autres mots-clés ou changez de catégorie"

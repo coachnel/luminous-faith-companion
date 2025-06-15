@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Book, Plus, Heart, Calendar, Bell, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,13 +11,14 @@ interface QuickActionsProps {
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
-  // Redesigned: visually distinctive rounded glass cards, colored gradients per action
+  // Design sobre avec cartes blanches et couleurs douces
   const actions = [
     {
       icon: Book,
       label: 'Lire la Bible',
-      color: 'from-blue-500 via-blue-300 to-blue-100',
-      textColor: 'text-blue-900',
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      borderColor: 'border-blue-100',
       action: () => {
         onNavigate('bible');
         localStorage.setItem('lastBibleRead', new Date().toDateString());
@@ -26,8 +28,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
     {
       icon: Plus,
       label: 'Nouvelle note',
-      color: 'from-green-500 via-green-300 to-green-100',
-      textColor: 'text-green-900',
+      bgColor: 'bg-green-50',
+      iconColor: 'text-green-600',
+      borderColor: 'border-green-100',
       action: () => {
         onNavigate('notes');
         toast({ title: "📝 Créer une note", description: "Partagez vos réflexions spirituelles" });
@@ -36,8 +39,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
     {
       icon: Heart,
       label: 'Mes favoris',
-      color: 'from-pink-500 via-pink-300 to-pink-100',
-      textColor: 'text-pink-900',
+      bgColor: 'bg-pink-50',
+      iconColor: 'text-pink-600',
+      borderColor: 'border-pink-100',
       action: () => {
         const favorites = JSON.parse(localStorage.getItem('bibleFavorites') || '[]');
         if (favorites.length === 0) {
@@ -50,8 +54,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
     {
       icon: Calendar,
       label: 'Plans lecture',
-      color: 'from-purple-500 via-indigo-300 to-purple-100',
-      textColor: 'text-purple-900',
+      bgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600',
+      borderColor: 'border-purple-100',
       action: () => {
         onNavigate('plans');
         toast({ title: "📅 Plans de lecture", description: "Organisez votre parcours spirituel" });
@@ -60,8 +65,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
     {
       icon: Bell,
       label: 'Notifications',
-      color: 'from-orange-500 via-orange-300 to-orange-100',
-      textColor: 'text-orange-900',
+      bgColor: 'bg-orange-50',
+      iconColor: 'text-orange-600',
+      borderColor: 'border-orange-100',
       action: () => {
         onNavigate('notifications');
         toast({ title: "🔔 Notifications", description: "Configurez vos rappels spirituels" });
@@ -70,8 +76,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
     {
       icon: Search,
       label: 'Verset aléatoire',
-      color: 'from-indigo-500 via-indigo-300 to-indigo-100',
-      textColor: 'text-indigo-900',
+      bgColor: 'bg-indigo-50',
+      iconColor: 'text-indigo-600',
+      borderColor: 'border-indigo-100',
       action: () => {
         const verse = getDailyVerse();
         toast({
@@ -88,14 +95,14 @@ const QuickActions: React.FC<QuickActionsProps> = ({ onNavigate }) => {
       {actions.map((action, i) => (
         <button
           key={i}
-          className={`rounded-2xl shadow-md glass ring-2 bg-gradient-to-br ${action.color} hover:scale-105 transition-all duration-200 px-0 pt-3 pb-2 min-h-[80px] flex flex-col items-center select-none`}
+          className={`rounded-lg shadow-sm border transition-all duration-200 hover:shadow-md ${action.bgColor} ${action.borderColor} p-3 min-h-[80px] flex flex-col items-center justify-center`}
           onClick={action.action}
           type="button"
         >
-          <div className="w-8 h-8 mb-1 rounded-xl bg-white/80 flex items-center justify-center shadow-sm">
-            <action.icon size={16} className={action.textColor} />
+          <div className={`w-8 h-8 mb-2 rounded-lg ${action.bgColor} flex items-center justify-center`}>
+            <action.icon size={16} className={action.iconColor} />
           </div>
-          <span className={`text-xs font-semibold ${action.textColor}`}>{action.label}</span>
+          <span className={`text-xs font-medium ${action.iconColor} text-center`}>{action.label}</span>
         </button>
       ))}
     </div>

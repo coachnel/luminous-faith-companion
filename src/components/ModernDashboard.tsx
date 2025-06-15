@@ -1,3 +1,4 @@
+
 import React, { memo, useMemo, useState, useEffect } from 'react';
 import { ModernCard } from '@/components/ui/modern-card';
 import { ModernButton } from '@/components/ui/modern-button';
@@ -92,114 +93,126 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
 
   const loading = prayerData?.loading || notesData?.loading || plansData?.loading || challengesData?.loading;
 
-  // Actions rapides
+  // Actions rapides - design sobre et clean
   const quickActions = [
     {
       icon: Heart,
       title: "Nouvelle prière",
       description: "Ajouter une intention",
-      color: "from-red-500 via-pink-400 to-pink-300",
-      ring: "ring-red-200",
+      color: "bg-red-50",
+      iconColor: "text-red-600",
+      borderColor: "border-red-100",
       action: () => onNavigate('prayer'),
     },
     {
       icon: Plus,
       title: "Créer une note",
       description: "Noter vos réflexions",
-      color: "from-blue-500 via-indigo-400 to-blue-200",
-      ring: "ring-blue-200",
+      color: "bg-blue-50",
+      iconColor: "text-blue-600",
+      borderColor: "border-blue-100",
       action: () => onNavigate('notes'),
     },
     {
       icon: Target,
       title: "Nouveau défi",
       description: "Se lancer un défi",
-      color: "from-green-500 via-emerald-400 to-green-200",
-      ring: "ring-green-200",
+      color: "bg-green-50",
+      iconColor: "text-green-600",
+      borderColor: "border-green-100",
       action: () => onNavigate('challenges'),
     },
     {
       icon: Star,
       title: "Témoignage",
       description: "Partager votre expérience",
-      color: "from-purple-500 via-amber-400 to-yellow-200",
-      ring: "ring-yellow-200",
+      color: "bg-purple-50",
+      iconColor: "text-purple-600",
+      borderColor: "border-purple-100",
       action: () => onNavigate('testimony'),
     }
   ];
 
-  // Cartes de navigation principales
+  // Cartes de navigation principales - design sobre
   const navigationCards = [
     {
       icon: Heart,
       title: "Centre de Prière",
       description: `${stats.prayers} intention${stats.prayers > 1 ? 's' : ''}`,
-      color: "from-red-50 to-pink-50",
-      borderColor: "border-red-200",
-      textColor: "text-red-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-red-50",
+      iconColor: "text-red-600",
       route: "prayer"
     },
     {
       icon: BookOpen,
       title: "Journal Spirituel",
       description: `${stats.notes} note${stats.notes > 1 ? 's' : ''}`,
-      color: "from-blue-50 to-indigo-50",
-      borderColor: "border-blue-200",
-      textColor: "text-blue-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-600",
       route: "notes"
     },
     {
       icon: Target,
       title: "Défis Quotidiens",
       description: `${stats.activeChallenges} défi${stats.activeChallenges > 1 ? 's' : ''} actif${stats.activeChallenges > 1 ? 's' : ''}`,
-      color: "from-green-50 to-emerald-50",
-      borderColor: "border-green-200",
-      textColor: "text-green-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-green-50",
+      iconColor: "text-green-600",
       route: "challenges"
     },
     {
       icon: Calendar,
       title: "Plans de Lecture",
       description: `${stats.activePlans} plan${stats.activePlans > 1 ? 's' : ''} actif${stats.activePlans > 1 ? 's' : ''}`,
-      color: "from-purple-50 to-violet-50",
-      borderColor: "border-purple-200",
-      textColor: "text-purple-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600",
       route: "reading-plans"
     },
     {
       icon: MessageSquare,
       title: "Communauté",
       description: "Partagez et découvrez ensemble",
-      color: "from-teal-50 to-cyan-50",
-      borderColor: "border-teal-200",
-      textColor: "text-teal-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-teal-50",
+      iconColor: "text-teal-600",
       route: "community"
     },
     {
       icon: Star,
       title: "Témoignages",
       description: "Histoires de foi inspirantes",
-      color: "from-yellow-50 to-orange-50",
-      borderColor: "border-yellow-200",
-      textColor: "text-yellow-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-yellow-50",
+      iconColor: "text-yellow-600",
       route: "testimony"
     },
     {
       icon: Compass,
       title: "Découvrir",
       description: "Contenu partagé par la communauté",
-      color: "from-orange-50 to-amber-50",
-      borderColor: "border-orange-200",
-      textColor: "text-orange-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-orange-50",
+      iconColor: "text-orange-600",
       route: "discover"
     },
     {
       icon: Users,
       title: "Cercles de Prière",
       description: "Prier ensemble en communauté",
-      color: "from-indigo-50 to-purple-50",
-      borderColor: "border-indigo-200",
-      textColor: "text-indigo-600",
+      color: "bg-white",
+      borderColor: "border-gray-200",
+      iconBg: "bg-indigo-50",
+      iconColor: "text-indigo-600",
       route: "prayer-circles"
     }
   ];
@@ -212,12 +225,12 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
   };
 
   return (
-    <div className="p-4 space-y-6 max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* En-tête */}
-      <ModernCard variant="elevated" className="bg-white/90 backdrop-blur-sm border-white/30">
+    <div className="p-4 space-y-6 max-w-6xl mx-auto min-h-screen bg-gray-50">
+      {/* En-tête sobre */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-            <Zap className="h-6 w-6 text-white" />
+          <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
+            <Zap className="h-6 w-6 text-blue-600" />
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-gray-900">
@@ -237,37 +250,30 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
             <span className="hidden sm:inline">Paramètres</span>
           </ModernButton>
         </div>
-      </ModernCard>
+      </div>
 
-      {/* Quick Actions - strong card visuals */}
+      {/* Quick Actions - design sobre */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {quickActions.map((action, index) => {
           const Icon = action.icon;
           return (
             <button
               key={index}
-              className={
-                `transition-all duration-200 rounded-2xl px-0 pt-4 pb-2 shadow-md
-                 bg-gradient-to-br ${action.color} ${action.ring} ring-2
-                 flex flex-col items-center hover:scale-105 focus-visible:ring-4 min-h-[104px] sm:min-h-[108px]`
-              }
+              className={`transition-all duration-200 rounded-lg p-4 ${action.color} ${action.borderColor} border hover:shadow-md flex flex-col items-center min-h-[100px]`}
               onClick={action.action}
-              style={{ minWidth: 0 }}
             >
-              <div className="w-12 h-12 mb-1 rounded-xl flex items-center justify-center bg-white/70 shadow">
-                <Icon className="h-6 w-6 text-gray-900" />
+              <div className={`w-10 h-10 mb-2 rounded-lg flex items-center justify-center ${action.color}`}>
+                <Icon className={`h-5 w-5 ${action.iconColor}`} />
               </div>
-              <div className="font-semibold text-xs sm:text-sm text-gray-900 text-center">{action.title}</div>
-              <div className="text-[10px] sm:text-xs text-gray-700 opacity-80 leading-tight text-center">
-                {action.description}
-              </div>
+              <div className="font-medium text-sm text-gray-900 text-center mb-1">{action.title}</div>
+              <div className="text-xs text-gray-600 text-center">{action.description}</div>
             </button>
           );
         })}
       </div>
 
       {/* Statistiques */}
-      <ModernCard variant="elevated" className="bg-white/90 backdrop-blur-sm border-white/30">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Votre activité</h2>
           <p className="text-sm text-gray-600">Aperçu de votre parcours spirituel</p>
@@ -298,31 +304,28 @@ const ModernDashboard: React.FC<DashboardProps> = memo(({ onNavigate }) => {
             </div>
           </div>
         )}
-      </ModernCard>
+      </div>
 
-      {/* Sections principales */}
+      {/* Sections principales - design sobre */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {navigationCards.map((card, index) => {
           const Icon = card.icon;
           return (
-            <ModernCard
+            <div
               key={index}
-              className={
-                `p-6 cursor-pointer transition-all duration-200 hover:scale-105
-                 bg-gradient-to-br ${card.color} ${card.borderColor} shadow-lg border-0`
-              }
+              className={`p-6 cursor-pointer transition-all duration-200 hover:shadow-md rounded-lg ${card.color} ${card.borderColor} border`}
               onClick={() => onNavigate(card.route)}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/80 shadow-sm">
-                  <Icon className={`h-6 w-6 ${card.textColor}`} />
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${card.iconBg} border border-gray-100`}>
+                  <Icon className={`h-6 w-6 ${card.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className={`font-semibold ${card.textColor} mb-1 truncate`}>{card.title}</h3>
-                  <p className={`text-sm ${card.textColor} opacity-80 truncate`}>{card.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-1 truncate">{card.title}</h3>
+                  <p className="text-sm text-gray-600 truncate">{card.description}</p>
                 </div>
               </div>
-            </ModernCard>
+            </div>
           );
         })}
       </div>

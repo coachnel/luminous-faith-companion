@@ -44,11 +44,11 @@ const EnhancedReadingPlans = () => {
 
   // Plans de lecture disponibles
   const availablePlans = [
-    { name: 'Évangiles - 30 jours', days: 30 },
-    { name: 'Psaumes - 60 jours', days: 60 },
-    { name: 'Bible complète - 365 jours', days: 365 },
-    { name: 'Nouveau Testament - 90 jours', days: 90 },
-    ...customPlans
+    { name: 'Évangiles - 30 jours', days: 30, type: 'default' },
+    { name: 'Psaumes - 60 jours', days: 60, type: 'default' },
+    { name: 'Bible complète - 365 jours', days: 365, type: 'default' },
+    { name: 'Nouveau Testament - 90 jours', days: 90, type: 'default' },
+    ...customPlans.map((p: any) => ({ ...p, type: 'custom' }))
   ];
 
   return (
@@ -117,13 +117,14 @@ const EnhancedReadingPlans = () => {
                   </div>
                   {isActive ? (
                     <button
-                      className="bg-blue-400 text-white rounded-md px-4 py-2 text-sm font-semibold cursor-not-allowed opacity-70"
+                      className="bg-blue-400 text-white rounded-md px-4 py-2 text-sm font-semibold cursor-not-allowed opacity-70 w-full md:w-auto"
                       disabled
                     >En cours</button>
                   ) : (
                     <button
-                      className="bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition-all"
+                      className="bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition-all w-full md:w-auto"
                       onClick={() => handleAddPlan(plan.name, plan.days)}
+                      type="button"
                     >Commencer</button>
                   )}
                 </div>

@@ -50,7 +50,7 @@ const EnhancedDiscoverPage = () => {
 
   const newContentCount = getNewContentCount();
 
-  // Filtres pour Découvrir
+  // Filtres pour Découvrir (sans Versets)
   const [activeFilter, setActiveFilter] = React.useState<'all'|'prayer'|'note'|'challenge'|'testimony'>('all');
   const filterLabels = [
     { key: 'all', label: 'Tout' },
@@ -119,11 +119,11 @@ const EnhancedDiscoverPage = () => {
       )}
 
       {/* Barre de filtres Découvrir */}
-      <div className="flex flex-wrap gap-3 justify-start mb-4">
+      <div className="flex flex-wrap gap-3 justify-start mb-4 w-full">
         {filterLabels.map(f => (
           <button
             key={f.key}
-            className={`bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md font-semibold text-sm transition-all ${activeFilter === f.key ? 'ring-2 ring-blue-300' : ''}`}
+            className={`bg-blue-600 text-white hover:bg-blue-700 rounded-md px-4 py-2 text-sm font-semibold w-full sm:w-auto transition-all ${activeFilter === f.key ? 'ring-2 ring-blue-300 font-bold' : ''}`}
             onClick={() => setActiveFilter(f.key as any)}
             type="button"
           >
@@ -132,7 +132,7 @@ const EnhancedDiscoverPage = () => {
         ))}
       </div>
 
-      {/* Contenu de la communauté filtré */}
+      {/* Contenu filtré */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-gray-800 px-1">Contenu récent</h2>
         {filteredContent.length === 0 ? (
